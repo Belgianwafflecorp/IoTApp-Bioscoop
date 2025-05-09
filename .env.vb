@@ -2,10 +2,11 @@
 # Copy this file to .env and fill in the values
 # for your environment
 
-DB_ROOT_PASSWORD=voorbeeld
-DB_DATABASE=voorbeeld
-DB_USER=voorbeeld
-DB_PASSWORD=voorbeeld
+DB_ROOT_PASSWORD=rootpassword
+DB_DATABASE=cinema
+DB_USER=webuser
+DB_PASSWORD=webuserPass
 API_HOST=voorbeeld
 VUE_HOST=voorbeeld
 JWT_SECRET=voorbeeld
+

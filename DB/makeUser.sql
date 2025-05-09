@@ -1,2 +1,0 @@
-GRANT ALL PRIVILEGES ON *.* TO 'webuser'@'127.%' IDENTIFIED BY 'webuserPass';
-FLUSH PRIVILEGES;

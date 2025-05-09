@@ -1,7 +1,13 @@
--- Create the database outside the transaction for compatibility
+-- Create the database outside any transaction for compatibility
 CREATE DATABASE IF NOT EXISTS cinema;
 USE cinema;
 
+-- Create user and grant access (outside transaction)
+CREATE USER IF NOT EXISTS 'webuser'@'%' IDENTIFIED BY 'webuserPass';
+GRANT ALL PRIVILEGES ON cinema.* TO 'webuser'@'%';
+FLUSH PRIVILEGES;
+
+-- Now start your transactional schema and data init
 START TRANSACTION;
 
 CREATE TABLE movies (
