@@ -1,0 +1,7 @@
+/.env
+
+/API/node_modules
+/API/package-lock.json
+
+/Frontend/node_modules
+/Frontend/package-lock.json
