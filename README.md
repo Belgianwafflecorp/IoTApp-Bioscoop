@@ -1,3 +1,1 @@
 # IoTApp-Bioscoop
-
-test
