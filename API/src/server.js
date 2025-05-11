@@ -30,10 +30,10 @@ app.get('/', (req, res) => {
 });
 
 // Generate Swagger documentation
-swaggerDocs(app, port);
+swaggerDocs(app, PORT);
 
-server.listen(port, () => {
-  console.log(`Backend draait op http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Backend draait op http://localhost:${PORT}`);
 });
 
 // Handle 404 errors

@@ -3,5 +3,7 @@
 /API/node_modules
 /API/package-lock.json
 
+/DB/data
+
 /Frontend/node_modules
 /Frontend/package-lock.json

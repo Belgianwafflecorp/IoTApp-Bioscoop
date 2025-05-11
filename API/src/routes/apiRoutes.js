@@ -165,3 +165,6 @@ router.get('/getUserBy/:param/:value', UserController.getUserBy);
  *         description: Internal server error
  */
 router.delete('/deleteUser/:user_id', UserController.deleteUser);
+
+
+export default router;

@@ -23,7 +23,7 @@ const options = {
 
 const swaggerSpec = swaggerJsDoc(options);
 
-function swaggerDocs(app, port) {
+function swaggerDocs(app, PORT) {
     // Swagger UI page
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -33,8 +33,8 @@ function swaggerDocs(app, port) {
         res.send(swaggerSpec);
     });
 
-    console.log(`Docs available at http://localhost:${port}/docs`);
-    console.log(`Docs in JSON format available at http://localhost:${port}/docs.json`);
+    console.log(`Docs available at http://localhost:${PORT}/docs`);
+    console.log(`Docs in JSON format available at http://localhost:${PORT}/docs.json`);
 }
 
 export default swaggerDocs;
