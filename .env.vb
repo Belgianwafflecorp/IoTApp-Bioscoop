@@ -7,5 +7,5 @@ DB_DATABASE=voorbeeld
 DB_USER=voorbeeld
 DB_PASSWORD=voorbeeld
 API_HOST=voorbeeld
-VUE_HOST=voorbeeld
+FRONT_HOST=voorbeeld
 JWT_SECRET=voorbeeld
