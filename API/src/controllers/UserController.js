@@ -1,7 +1,7 @@
 import db from '../db.js';
-import jwt from 'jsonwebtoken';
-import { registerSchema } from '../middleware/validation.js';
-import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'; // JWT token generation
+import { registerSchema } from '../middleware/validation.js'; // min/max length checker for name, email, password
+import bcrypt from 'bcrypt'; // password hashing
 
 const getAllUsers = async (req, res) => {
     try {
