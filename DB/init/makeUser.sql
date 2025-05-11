@@ -1,2 +1,3 @@
-GRANT ALL PRIVILEGES ON *.* TO 'webuser'@'127.%' IDENTIFIED BY 'webuserPass';
+CREATE USER 'webuser'@'%' IDENTIFIED BY 'webuserPass';
+GRANT ALL PRIVILEGES ON cinema.* TO 'webuser'@'%';
 FLUSH PRIVILEGES;
