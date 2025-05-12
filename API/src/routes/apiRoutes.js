@@ -2,7 +2,8 @@ import express from 'express';
 const router = express.Router();
 
 import * as UserController from '../controllers/UserController.js';
-
+import * as MovieController from '../controllers/MovieController.js';
+import * as ScreeningController from '../controllers/ScreeningController.js';
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// users /////////////////////////////
@@ -166,5 +167,87 @@ router.get('/getUserBy/:param/:value', UserController.getUserBy);
  */
 router.delete('/deleteUser/:user_id', UserController.deleteUser);
 
+/////////////////////////////////////////////////////////////////
+///////////////////////////// movies ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/movies:
+ *   get:
+ *     summary: Get all movies
+ *     tags:
+ *       - Movies
+ *     responses:
+ *       200:
+ *         description: List of movies
+ */
+router.get('/movies', MovieController.getAllMovies);
+
+/**
+ * @swagger
+ * /api/movies/{id}:
+ *   get:
+ *     summary: Get movie details by ID
+ *     tags:
+ *       - Movies
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Movie details
+ *       404:
+ *         description: Movie not found
+ */
+router.get('/movies/:id', MovieController.getMovieById);
+
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////// screenings //////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/screenings:
+ *   get:
+ *     summary: Get all screenings
+ *     tags:
+ *       - Screenings
+ */
+router.get('/screenings', ScreeningController.getAllScreenings);
+
+/**
+ * @swagger
+ * /api/screenings:
+ *   post:
+ *     summary: Create a new screening
+ *     tags:
+ *       - Screenings
+ */
+router.post('/screenings', ScreeningController.createScreenings);
+
+/**
+ * @swagger
+ * /api/screenings/{id}:
+ *   put:
+ *     summary: Update a screening by ID
+ *     tags:
+ *       - Screenings
+ */
+router.put('/screenings/:id', ScreeningController.updateScreenings);
+
+/**
+ * @swagger
+ * /api/screenings/{id}:
+ *   delete:
+ *     summary: Delete a screening by ID
+ *     tags:
+ *       - Screenings
+ */
+router.delete('/screenings/:id', ScreeningController.deleteScreenings);
 
 export default router;
