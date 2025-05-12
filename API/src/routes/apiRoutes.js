@@ -2,11 +2,15 @@ import express from 'express';
 const router = express.Router();
 
 import * as UserController from '../controllers/UserController.js';
+import * as MovieController from '../controllers/Movies.js';
 
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// users /////////////////////////////
 /////////////////////////////////////////////////////////////////
+
+router.get('/movies', MovieController.getMovies);
+router.get('/movies/:id', MovieController.getMovieDetails);
 
 /**
  * @swagger
