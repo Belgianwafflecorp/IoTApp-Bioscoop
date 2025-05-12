@@ -1,0 +1,170 @@
+
+
+/* ===========================
+   CSS Variables: Brand Design
+   =========================== */
+:root {
+  --color-black: #000000;
+  --color-dark-blue: #06327d;
+  --color-light-blue: #2b70e4;
+  --color-green: #209d5c;
+  --color-yellow: #ffd034;
+  --color-white: #ffffff;
+
+  --font-header: 'Archivo Black', sans-serif;
+  --font-body: 'Space Mono', monospace;
+}
+
+/* ===============
+   Base Styles
+   =============== */
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+/* ===============
+   Navbar
+   =============== */
+.navbar {
+  background-color: var(--color-black);
+  padding: 1em 2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.circle {
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-yellow);
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.brand {
+  font-family: var(--font-header);
+  font-size: 1.2em;
+  color: var(--color-white);
+}
+
+.nav-links a {
+  margin-right: 20px;
+  text-decoration: none;
+  color: var(--color-white);
+  font-family: var(--font-body);
+}
+
+.login-btn {
+  background-color: var(--color-yellow);
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+/* ===============
+   Hero Section
+   =============== */
+.hero {
+  background-color: var(--color-dark-blue);
+  padding: 2em;
+  text-align: left;
+}
+
+.hero h1 {
+  font-size: 2.5em;
+  font-family: var(--font-header);
+  margin-bottom: 0.5em;
+}
+
+.hero p {
+  margin-bottom: 1em;
+}
+
+.book-btn {
+  background-color: var(--color-light-blue);
+  color: var(--color-white);
+  border: none;
+  padding: 0.7em 1.5em;
+  font-size: 1em;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+/* ===============
+   Filter Bar
+   =============== */
+.filters {
+  background-color: var(--color-dark-blue);
+  padding: 1em 2em;
+  display: flex;
+  gap: 1em;
+}
+
+.filters select {
+  padding: 0.5em;
+  border-radius: 10px;
+  border: none;
+  font-size: 1em;
+  font-family: var(--font-body);
+  background-color: var(--color-light-blue);
+  color: var(--color-white);
+}
+
+/* ===============
+   Movie Grid
+   =============== */
+.movie-grid {
+  padding: 2em;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+/* ===============
+   Movie Card
+   =============== */
+.movie-card {
+  background-color: #111;
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  color: var(--color-white);
+}
+
+.movie-card img {
+  width: 100%;
+  display: block;
+  border-radius: 10px 10px 0 0;
+}
+
+.movie-card h3 {
+  background-color: var(--color-dark-blue);
+  padding: 0.5em;
+  font-size: 1em;
+  font-weight: bold;
+  color: var(--color-yellow);
+  font-family: var(--font-header);
+}
+
+.movie-card p {
+  font-size: 0.85em;
+  padding: 0.5em 1em;
+  font-family: var(--font-body);
+}
+
+.movie-card .stars {
+  padding: 0.5em;
+  color: var(--color-yellow);
+}

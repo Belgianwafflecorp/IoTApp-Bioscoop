@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bioscoopnaam</title>
+  <link rel="stylesheet" href="./src/css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="navbar">
+    <div class="logo">
+      <div class="circle"></div>
+      <span class="brand">BIOSCOOPNAAM</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#">Movies</a>
+      <a href="#">Screenings</a>
+      <button class="login-btn">Login</button>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Welcome at bioscoopnaam</h1>
+    <p>Lorem Ipsum et cetera en zo voort</p>
+    <button class="book-btn">
+      <i class="fas fa-calendar-alt"></i> Book now!
+    </button>
+  </section>
+
+  <!-- Filter Bar -->
+  <section class="filters">
+    <select><option>Alle films</option></select>
+    <select><option>Vandaag</option></select>
+    <select><option>Filter 3</option></select>
+  </section>
+
+  <!-- Movie List -->
+  <section id="movie-list" class="movie-grid"></section>
+
+  <script src="./src/js/scripts.js" type="module"></script>
+</body>
+</html>
