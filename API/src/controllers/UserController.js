@@ -39,16 +39,18 @@ const deleteUser = async (req, res) => {
     try {
         const { user_id } = req.params;
 
-        // Haal de oude gebruikersgegevens op (zonder SELECT *)
-        const [oldUser] = await db.execute('SELECT id, user_id, username, FROM users WHERE user_id = ?', [user_id]);
-        
-        // Controleer of de gebruiker bestaat
+        // Haal de oude gebruikersgegevens op
+        const [oldUser] = await db.execute(
+            'SELECT user_id, username, email FROM users WHERE user_id = ?', 
+            [user_id]
+        );
+
         if (oldUser.length === 0) {
             return res.status(404).json({ error: 'Gebruiker niet gevonden' });
         }
 
         // Verwijder de gebruiker
-        const [result] = await db.execute('DELETE FROM users WHERE user_id = ?', [user_id]);
+        await db.execute('DELETE FROM users WHERE user_id = ?', [user_id]);
 
         // Stuur de verwijderde gebruikersinformatie terug
         res.json({ message: 'Account verwijderd', oldUser: oldUser[0] });
@@ -111,7 +113,7 @@ const loginUser = async (req, res) => {
         }
 
         // Genereer JWT token
-        const token = jwt.sign({ userId: user[0].user_id }, process.env.SECRET_KEY, {
+        const token = jwt.sign({ userId: user[0].user_id }, process.env.JWT_SECRET_KEY, {
             expiresIn: '1h',
         });
         res.json({ message: 'Inloggen succesvol', token });

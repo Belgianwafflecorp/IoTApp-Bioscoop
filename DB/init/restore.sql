@@ -39,7 +39,8 @@ CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100),
-    password_hash VARCHAR(255) NOT NULL
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('user', 'manager') NOT NULL DEFAULT 'user'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE reservations (
@@ -84,9 +85,9 @@ INSERT INTO showings (movie_id, hall_id, start_time) VALUES
 (3, 2, '2025-05-06 20:00:00');
 
 -- Users
-INSERT INTO users (username, email, password_hash) VALUES
-('alice', 'alice@example.com', 'hashed_pw_1'),
-('bob', 'bob@example.com', 'hashed_pw_2');
+INSERT INTO users (username, email, password_hash, role) VALUES
+('alice', 'alice@example.com', '$2b$10$examplehashforalice...', 'user'),
+('bob', 'bob@example.com', '$2b$10$examplehashforbob...', 'manager');
 
 -- Reservations
 INSERT INTO reservations (user_id, showing_id, seat_id) VALUES
