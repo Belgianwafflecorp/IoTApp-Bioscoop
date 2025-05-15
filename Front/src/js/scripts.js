@@ -34,6 +34,40 @@ async function waitForApi() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const loginBtn = document.querySelector('.login-btn');
+
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const res = await fetch('http://localhost:3000/api/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        // Replace login button with user info + logout button
+        loginBtn.outerHTML = `
+          <span class="user-info">👤 ${data.username}</span>
+          <button id="logoutBtn" class="logout-btn">Logout</button>
+        `;
+
+        // Attach logout event
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+          localStorage.removeItem('token');
+          window.location.href = '/login.html'; // Redirect to login
+        });
+
+      } else {
+        // Invalid or expired token — clear it
+        localStorage.removeItem('token');
+      }
+    } catch (err) {
+      console.error('Failed to fetch user info', err);
+    }
+  }
   const movieList = document.getElementById('movie-list');
 
   try {
@@ -63,3 +97,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error(error);
   }
 });
+

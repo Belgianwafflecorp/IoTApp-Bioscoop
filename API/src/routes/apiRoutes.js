@@ -4,6 +4,8 @@ const router = express.Router();
 import * as UserController from '../controllers/UserController.js';
 import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
+import { authenticateToken } from '../middleware/validation.js';
+
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// users /////////////////////////////
@@ -166,6 +168,36 @@ router.get('/getUserBy/:param/:value', UserController.getUserBy);
  *         description: Internal server error
  */
 router.delete('/deleteUser/:user_id', UserController.deleteUser);
+
+router.get('/me', authenticateToken, UserController.getMe);
+/**
+ * @swagger
+ * /api/me:
+ *   get:
+ *     summary: Get the currently authenticated user's info
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized – missing or invalid token
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+
+
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// movies ////////////////////////////

@@ -20,16 +20,33 @@
 
   <main class="login-container">
     <form id="login-form">
-      <label>Username or Email:</label>
-      <input type="text" name="usernameOrEmail" required />
+      <h2 id="form-title">Login</h2>
 
-      <label>Password:</label>
+      <div id="register-fields" style="display: none;">
+        <label for="username">Username:</label>
+        <br>
+        <input type="text" name="username" />
+        <br>
+        <label for="email">Email:</label>
+        <br>
+        <input type="email" name="email" />
+      </div>
+
+      <div id="login-usernameOrEmail">
+        <label for="usernameOrEmail">Username or Email:</label>
+        <br>
+        <input type="text" name="usernameOrEmail" />
+      </div>
+
+      <label for="password">Password:</label>
       <input type="password" name="password" required />
 
-      <button type="submit">Login</button>
-      <button type="button" onclick="window.location.href='register.html'">Register</button>
+      <button type="submit" id="submit-btn">Login</button>
+      <button type="button" id="toggle-btn">Need an account? Register</button>
+
+      <p id="error-msg" style="color: red; text-align: center;"></p>
+      <p id="success-msg" style="color: green; text-align: center;"></p>
     </form>
-    <p id="error-msg" style="color: red; text-align: center;"></p>
   </main>
 
   <script src="./src/js/login.js"></script>
