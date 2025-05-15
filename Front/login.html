@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Bioscoopnaam</title>
+  <link rel="stylesheet" href="./src/css/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <div class="circle"></div>
+      <span class="brand">BIOSCOOPNAAM</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Movies</a>
+      <a href="index.html">Screenings</a>
+    </nav>
+  </header>
+
+  <main class="login-container">
+    <form id="login-form">
+      <label>Username or Email:</label>
+      <input type="text" name="usernameOrEmail" required />
+
+      <label>Password:</label>
+      <input type="password" name="password" required />
+
+      <button type="submit">Login</button>
+      <button type="button" onclick="window.location.href='register.html'">Register</button>
+    </form>
+    <p id="error-msg" style="color: red; text-align: center;"></p>
+  </main>
+
+  <script src="./src/js/login.js"></script>
+</body>
+</html>
