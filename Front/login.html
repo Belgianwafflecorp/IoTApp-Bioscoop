@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Bioscoopnaam</title>
+  <link rel="stylesheet" href="./src/css/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <div class="circle"></div>
+      <span class="brand">BIOSCOOPNAAM</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Movies</a>
+      <a href="index.html">Screenings</a>
+    </nav>
+  </header>
+
+  <main class="login-container">
+    <form id="login-form">
+      <h2 id="form-title">Login</h2>
+
+      <div id="register-fields" style="display: none;">
+        <label for="username">Username:</label>
+        <br>
+        <input type="text" name="username" />
+        <br>
+        <label for="email">Email:</label>
+        <br>
+        <input type="email" name="email" />
+      </div>
+
+      <div id="login-usernameOrEmail">
+        <label for="usernameOrEmail">Username or Email:</label>
+        <br>
+        <input type="text" name="usernameOrEmail" />
+      </div>
+
+      <label for="password">Password:</label>
+      <input type="password" name="password" required />
+
+      <button type="submit" id="submit-btn">Login</button>
+      <button type="button" id="toggle-btn">Need an account? Register</button>
+
+      <p id="error-msg" style="color: red; text-align: center;"></p>
+      <p id="success-msg" style="color: green; text-align: center;"></p>
+    </form>
+  </main>
+
+  <script src="./src/js/login.js"></script>
+</body>
+</html>
