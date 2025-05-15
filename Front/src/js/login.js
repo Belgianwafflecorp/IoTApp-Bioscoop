@@ -30,6 +30,15 @@ toggleBtn.addEventListener('click', () => {
   successMsg.textContent = '';
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const circle = document.querySelector('.circle');
+  circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
+
+  circle.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+});
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorMsg.textContent = '';
