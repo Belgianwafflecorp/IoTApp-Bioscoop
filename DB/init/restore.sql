@@ -26,7 +26,7 @@ CREATE TABLE seats (
     FOREIGN KEY (hall_id) REFERENCES halls(hall_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE showings (
+CREATE TABLE screenings (
     showing_id INT PRIMARY KEY AUTO_INCREMENT,
     movie_id INT NOT NULL,
     hall_id INT NOT NULL,
@@ -78,8 +78,8 @@ INSERT INTO seats (hall_id, seat_row, seat_number) VALUES
 INSERT INTO seats (hall_id, seat_row, seat_number) VALUES
 (2, 'A', 1), (2, 'A', 2), (2, 'A', 3), (2, 'A', 4);
 
--- Showings
-INSERT INTO showings (movie_id, hall_id, start_time) VALUES
+-- Screenings
+INSERT INTO screenings (movie_id, hall_id, start_time) VALUES
 (1, 1, '2025-05-05 18:00:00'),
 (2, 1, '2025-05-05 21:00:00'),
 (3, 2, '2025-05-06 20:00:00');
