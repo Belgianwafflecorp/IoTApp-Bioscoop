@@ -34,6 +34,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* keeps it above other content */
 }
 
 .logo {
@@ -247,3 +250,77 @@ body {
   font-weight: bold;
 }
 
+/* ===============
+   Screenings Grid
+   =============== */
+.screenings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2em;
+  padding: 2em;
+}
+
+/* ===============
+   Screening Card
+   =============== */
+.screening-card {
+  background-color: #111;
+  border-radius: 15px;
+  overflow: hidden;
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.screening-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 15px 15px 0 0;
+}
+
+.screening-info {
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.movie-title {
+  font-family: var(--font-header);
+  font-size: 1.4em;
+  color: var(--color-yellow);
+  margin: 0;
+}
+
+.badge {
+  background-color: var(--color-light-blue);
+  color: var(--color-white);
+  padding: 0.3em 0.7em;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-left: 0.5em;
+}
+
+.overview {
+  font-size: 0.9em;
+  color: #ccc;
+  font-style: italic;
+}
+
+.labels {
+  margin-top: 0.5em;
+}
+
+.label {
+  display: inline-block;
+  background-color: var(--color-green);
+  color: var(--color-white);
+  padding: 0.3em 0.6em;
+  border-radius: 10px;
+  font-size: 0.8em;
+  margin-right: 0.5em;
+  font-weight: bold;
+}

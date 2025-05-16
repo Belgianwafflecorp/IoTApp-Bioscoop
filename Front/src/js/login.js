@@ -30,6 +30,15 @@ toggleBtn.addEventListener('click', () => {
   successMsg.textContent = '';
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const circle = document.querySelector('.circle');
+  circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
+
+  circle.addEventListener('click', () => {
+    window.location.href = '../index.html'; // Redirect to home page
+  });
+});
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorMsg.textContent = '';
@@ -55,7 +64,7 @@ form.addEventListener('submit', async (e) => {
       }
 
       localStorage.setItem('token', data.token);
-      window.location.href = 'index.html';
+      window.location.href = '../index.html';
     } catch (err) {
       errorMsg.textContent = 'Server error. Try again later.';
       console.error(err);
@@ -90,7 +99,3 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-function logout() {
-  localStorage.removeItem('token');  // Clear the JWT
-  window.location.href = '/login.html'; // Or wherever your login page is
-}
