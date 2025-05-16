@@ -44,7 +44,7 @@ import * as MovieTMDB from '../controllers/Movies.js';
  *       500:
  *         description: Internal server error
  */
-router.get('/movies', MovieTMDB.getMovies);
+router.get('/movies/tmdb', MovieTMDB.getMovies);
 
 router.get('/movies/search', MovieTMDB.searchMovies);
 

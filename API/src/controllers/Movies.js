@@ -1,6 +1,6 @@
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
-const getMovies = async (req, res) => {
+export const getMovies = async (req, res) => {
   if (!TMDB_API_KEY) {
     return res.status(500).json({ 
       error: 'TMDB API key not configured on server' 
@@ -29,7 +29,7 @@ const getMovies = async (req, res) => {
   }
 };
 
-const searchMovies = async (req, res) => {
+export const searchMovies = async (req, res) => {
   const { title } = req.query;
 
   if (!TMDB_API_KEY) {
@@ -66,7 +66,7 @@ const searchMovies = async (req, res) => {
   }
 };
 
-const getMovieDetails = async (req, res) => {
+export const getMovieDetails = async (req, res) => {
   const { id } = req.params;
 
   if (!TMDB_API_KEY) {
@@ -97,8 +97,4 @@ const getMovieDetails = async (req, res) => {
   }
 };
 
-export default {
-  getMovies,
-  searchMovies,
-  getMovieDetails
-};
+
