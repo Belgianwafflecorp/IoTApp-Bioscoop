@@ -58,7 +58,7 @@ router.post('/register', UserController.registerUser);
  *             properties:
  *               usernameOrEmail:
  *                 type: string
- *                 example: JohnDoe or johndoe@hotmail.com
+ *                 example: JohnDoe
  *               password:
  *                 type: string
  *                 example: password123

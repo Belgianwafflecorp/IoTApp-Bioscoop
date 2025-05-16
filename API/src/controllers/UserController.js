@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'; // password hashing
 
 const getAllUsers = async (req, res) => {
     try {
-        const [result] = await db.execute('SELECT user_id, username, email FROM users');
+        const [result] = await db.execute('SELECT user_id, username, email, role FROM users');
         if (result.length === 0) {
             return res.status(404).json({ error: 'Geen gebruikers gevonden' });
         }
