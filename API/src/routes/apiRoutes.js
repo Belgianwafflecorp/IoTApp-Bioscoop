@@ -5,6 +5,7 @@ import * as UserController from '../controllers/UserController.js';
 import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
+import * as ManagerController from '../controllers/ManagerController.js';
 
 
 /////////////////////////////////////////////////////////////////
@@ -281,5 +282,33 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
  *       - Screenings
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
+
+
+/////////////////////////////////////////////////////////////////
+//////////////////////////// manager ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/changeUserRole:
+ *   post:
+ *     summary: Change a user's role
+ *     tags:
+ *       - Manager
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *                 example: 1
+ *               new_role:
+ *                 type: string
+ *                 example: manager
+ */
+router.post('/changeUserRole', ManagerController.changeUserRole);
 
 export default router;
