@@ -6,6 +6,8 @@ import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
+import * as MovieTMDB from '../controllers/Movies.js';
+
 
 
 /////////////////////////////////////////////////////////////////
