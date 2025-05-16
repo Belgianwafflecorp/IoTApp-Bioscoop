@@ -12,10 +12,84 @@ import { getMovies, searchMovies, getMovieDetails } from '../controllers/Movies.
 ///////////////////////////// users /////////////////////////////
 /////////////////////////////////////////////////////////////////
 
+/**
+ * @swagger
+ * /api/movies/tmdb:
+ *   get:
+ *     summary: Get a list of movies from TMDB
+ *     tags:
+ *       - TMDB Movies
+ *     responses:
+ *       200:
+ *         description: List of movies from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/movies/tmdb', getMovies);
 
+
+/**
+ * @swagger
+ * /api/movies/tmdb/search:
+ *   get:
+ *     summary: Search for movies in TMDB
+ *     tags:
+ *       - TMDB Movies
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The search query for the movie title
+ *     responses:
+ *       200:
+ *         description: Search results from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/movies/tmdb/search', searchMovies);
 
+/**
+ * @swagger
+ * /api/movies/tmdb/{id}:
+ *   get:
+ *     summary: Get movie details from TMDB by ID
+ *     tags:
+ *       - TMDB Movies
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The TMDB movie ID
+ *     responses:
+ *       200:
+ *         description: Movie details from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Movie not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/movies/tmdb/:id', getMovieDetails);
 
 /**
