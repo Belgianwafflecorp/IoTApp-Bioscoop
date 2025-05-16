@@ -55,10 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
 
         // Attach logout event
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-          localStorage.removeItem('token');
-          window.location.href = '/login.html'; // Redirect to login
-        });
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+     
 
       } else {
         // Invalid or expired token — clear it
@@ -98,3 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+function logout() {
+  localStorage.removeItem('token');  // Clear the JWT
+  window.location.href = './pages/login.html'; // Or wherever your login page is
+}
