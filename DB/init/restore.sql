@@ -27,7 +27,7 @@ CREATE TABLE seats (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE screenings (
-    showing_id INT PRIMARY KEY AUTO_INCREMENT,
+    screening_id INT PRIMARY KEY AUTO_INCREMENT,
     movie_id INT NOT NULL,
     hall_id INT NOT NULL,
     start_time DATETIME NOT NULL,
@@ -46,13 +46,13 @@ CREATE TABLE users (
 CREATE TABLE reservations (
     reservation_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    showing_id INT NOT NULL,
+    screening_id INT NOT NULL,
     seat_id INT NOT NULL,
     reservation_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (showing_id) REFERENCES showings(showing_id) ON DELETE CASCADE,
+    FOREIGN KEY (screening_id) REFERENCES screenings(screening_id) ON DELETE CASCADE,
     FOREIGN KEY (seat_id) REFERENCES seats(seat_id) ON DELETE CASCADE,
-    UNIQUE (showing_id, seat_id)
+    UNIQUE (screening_id, seat_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Dummy Data
@@ -90,7 +90,7 @@ INSERT INTO users (username, email, password_hash, role) VALUES
 ('bob', 'bob@example.com', '$2b$10$examplehashforbob...', 'manager');
 
 -- Reservations
-INSERT INTO reservations (user_id, showing_id, seat_id) VALUES
+INSERT INTO reservations (user_id, screening_id, seat_id) VALUES
 (1, 1, 1),  -- Alice books seat A1 for Inception
 (2, 1, 2),  -- Bob books seat A2 for Inception
 (1, 3, 16); -- Alice books seat A4 in VIP for Interstellar
