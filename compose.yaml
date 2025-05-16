@@ -25,7 +25,7 @@ services:
     environment:
       - DB_HOST=db
       - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_DATABASE=${DB_DATABASE}
       - DB_PORT=3306
       - FRONT_HOST=${FRONT_HOST}
