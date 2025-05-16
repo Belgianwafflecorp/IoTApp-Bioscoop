@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
 
   circle.addEventListener('click', () => {
-    window.location.href = '../index.html'; // Redirect to home page
+    window.location.href = '/index.html';
   });
 });
 
@@ -64,7 +64,7 @@ form.addEventListener('submit', async (e) => {
       }
 
       localStorage.setItem('token', data.token);
-      window.location.href = '../index.html';
+      window.location.href = '/index.html';
     } catch (err) {
       errorMsg.textContent = 'Server error. Try again later.';
       console.error(err);
