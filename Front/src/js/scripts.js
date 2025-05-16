@@ -33,6 +33,8 @@ async function waitForApi() {
   throw new Error('API is not available after multiple attempts');
 }
 
+
+
 document.addEventListener('DOMContentLoaded', async () => {
   const loginBtn = document.querySelector('.login-btn');
 

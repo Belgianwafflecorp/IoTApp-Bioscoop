@@ -38,7 +38,13 @@ const getUserBy = async (req, res) => {
 const getMe = async (req, res) => {
   const [rows] = await db.query('SELECT username FROM users WHERE user_id = ?', [req.user.userId]);
   if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
-  res.json({ username: rows[0].username });
+  res.json(
+    {   username: rows[0].username,
+        role: req.user.role,
+        userId: req.user.userId,
+        email: rows[0].email,
+     }
+);
 };
 
 const deleteUser = async (req, res) => {
