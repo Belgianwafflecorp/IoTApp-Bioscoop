@@ -1,14 +1,14 @@
 import { showLoginStatus } from './scripts.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await showLoginStatus();
-
   const token = localStorage.getItem('token');
   if (!token) {
     alert('You must be logged in to book tickets.');
     window.location.href = '/pages/login.html';
     return;
   }
+
+  await showLoginStatus();
 
   const urlParams = new URLSearchParams(window.location.search);
   const screeningId = urlParams.get('screeningId');
@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Fetch screening info
   try {
     const [screeningRes, seatsRes] = await Promise.all([
-      fetch(`/api/screenings/${screeningId}`),
-      fetch(`/api/screenings/${screeningId}/tickets`)
+      fetch(`http://localhost:3000/api/screenings/${screeningId}`),
+      fetch(`http://localhost:3000/api/screenings/${screeningId}/tickets`)
     ]);
 
     if (!screeningRes.ok || !seatsRes.ok) throw new Error('Failed to load data');
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const seatIds = selectedSeats.map(seat => seat.seat_id);
 
     try {
-      const res = await fetch('/api/reserve', {
+      const res = await fetch('http://localhost:3000/api/reserve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

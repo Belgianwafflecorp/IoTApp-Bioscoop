@@ -34,9 +34,13 @@ async function waitForApi() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  showLoginStatus();
+  await showLoginStatus();
 
   const movieList = document.getElementById('movie-list');
+  if (!movieList) {
+    console.warn('No #movie-list element found; skipping movie rendering');
+    return;
+  }
 
   try {
     // Wait for API to be ready
@@ -68,11 +72,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function logout() {
   localStorage.removeItem('token');  // Clear the JWT
-window.location.href = '/pages/login.html';}
+  window.location.href = '/pages/login.html';
+}
 
 export async function showLoginStatus() {
   const loginBtn = document.querySelector('.login-btn');
-  if (!loginBtn) return;
+  if (!loginBtn) {
+    // No login button on this page — safe to skip
+    return;
+  }
 
   const token = localStorage.getItem('token');
   if (token) {
@@ -86,12 +94,17 @@ export async function showLoginStatus() {
       if (res.ok) {
         const data = await res.json();
 
-        loginBtn.outerHTML = `
+        // Instead of outerHTML, update content inside the loginBtn element safely:
+        loginBtn.innerHTML = `
           <span class="user-info">👤 ${data.username}</span>
           <button id="logoutBtn" class="logout-btn">Logout</button>
         `;
 
-        document.getElementById('logoutBtn').addEventListener('click', logout);
+        // Attach logout event listener
+        const logoutBtn = loginBtn.querySelector('#logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', logout);
+        }
       } else {
         localStorage.removeItem('token');
       }

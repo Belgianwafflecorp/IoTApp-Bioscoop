@@ -334,6 +334,16 @@ router.get('/movies/:id', MovieController.getMovieById);
  */
 router.get('/screenings', ScreeningController.getAllScreenings);
 
+router.get('/screenings/:id', ScreeningController.getScreeningById);
+/**
+ * @swagger
+ * /api/screenings/{id}:
+ *   get:
+ *     summary: Get screening details by ID
+ *     tags:
+ *       - Screenings
+ */
+
 /**
  * @swagger
  * /api/screenings:
