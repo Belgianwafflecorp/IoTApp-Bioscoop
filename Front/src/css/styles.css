@@ -324,3 +324,139 @@ body {
   margin-right: 0.5em;
   font-weight: bold;
 }
+
+
+/* ===============
+   Booking Page
+   =============== */
+.booking-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+  padding: 2em;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.movie-section {
+  flex: 1 1 300px;
+  background-color: #111;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5em;
+}
+
+.movie-section img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  border-radius: 15px;
+  margin-bottom: 1em;
+}
+
+.movie-info {
+  color: var(--color-white);
+  font-family: var(--font-body);
+  text-align: left;
+  width: 100%;
+}
+
+.movie-info h3 {
+  font-family: var(--font-header);
+  font-size: 1.8em;
+  color: var(--color-yellow);
+  margin-bottom: 0.5em;
+}
+
+.movie-meta {
+  margin: 0.3em 0;
+  font-size: 0.95em;
+  color: #ccc;
+}
+
+.screening-time {
+  display: inline-block;
+  background-color: var(--color-light-blue);
+  padding: 0.3em 0.7em;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--color-white);
+  margin-bottom: 1em;
+}
+
+/* Booking Panel */
+.booking-panel {
+  flex: 2 1 400px;
+  background-color: #111;
+  padding: 2em;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  color: var(--color-white);
+}
+
+.booking-panel h4 {
+  font-family: var(--font-header);
+  font-size: 1.3em;
+  margin-bottom: 1em;
+  color: var(--color-yellow);
+}
+
+.ticket-selection label,
+.seats-left p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1em;
+  margin: 0.5em 0;
+}
+
+.ticket-selection input {
+  width: 60px;
+  padding: 0.4em;
+  border-radius: 8px;
+  border: none;
+  font-size: 1em;
+  margin-left: 1em;
+  background-color: var(--color-white);
+  color: var(--color-black);
+  font-family: var(--font-body);
+}
+
+.booking-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.booking-footer input[type="text"] {
+  padding: 0.7em;
+  font-size: 1em;
+  border-radius: 10px;
+  border: none;
+  background-color: var(--color-dark-blue);
+  color: var(--color-white);
+  font-style: italic;
+}
+
+#confirm-btn {
+  background-color: var(--color-green);
+  color: var(--color-white);
+  padding: 0.8em;
+  font-size: 1em;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#confirm-btn:hover {
+  background-color: #1a7f4b;
+}

@@ -7,6 +7,8 @@ import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
 import * as MovieTMDB from '../controllers/Movies.js';
+import * as ReservationController from '../controllers/ReservationController.js';
+
 
 
 
@@ -361,6 +363,67 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
  *       - Screenings
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
+
+/////////////////////////////////////////////////////////////////
+/////////////////////// reservations ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+// GET available tickets for a screening
+router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreening);
+
+/**
+ * @swagger
+ * /api/screenings/{id}/tickets:
+ *   get:
+ *     summary: Get seat availability for a screening
+ *     tags:
+ *       - Reservations
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Screening ID
+ *     responses:
+ *       200:
+ *         description: List of all seats and their availability
+ */
+
+
+// POST reserve seats
+router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
+
+/**
+ * @swagger
+ * /api/reserve:
+ *   post:
+ *     summary: Reserve tickets for a screening
+ *     tags:
+ *       - Reservations
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *               screening_id:
+ *                 type: integer
+ *               seat_ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       201:
+ *         description: Tickets reserved successfully
+ *       409:
+ *         description: One or more seats already reserved
+ */
 
 
 /////////////////////////////////////////////////////////////////
