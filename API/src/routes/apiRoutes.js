@@ -404,6 +404,22 @@ router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreeni
 // POST reserve seats
 router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
 
+
+router.get('/my-reservations', authenticateToken, ReservationController.getMyReservations);
+/**
+ * @swagger
+ * /api/my-reservations:
+ *   get:
+ *     summary: Get all reservations for the logged-in user
+ *     tags:
+ *       - Reservations
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of reservations
+ */
+
 /**
  * @swagger
  * /api/reserve:

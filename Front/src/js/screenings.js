@@ -72,6 +72,7 @@ function renderScreenings(screenings) {
       </div>
     `;
     container.innerHTML += card;
+    container.querySelectorAll('.badge').forEach(badge => {badge.style.cursor = 'pointer';});
   }
 }
 

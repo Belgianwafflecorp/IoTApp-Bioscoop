@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fill in screening info
     document.getElementById('movie-title').textContent = screeningData.movie.title;
-    document.getElementById('start-time').textContent = screeningData.start_time;
+    document.getElementById('start-time').textContent = formatTime(screeningData.start_time);
     document.getElementById('genre').textContent = screeningData.movie.genre;
     document.getElementById('duration').textContent = screeningData.movie.duration;
     document.getElementById('release').textContent = screeningData.movie.release_date;
@@ -83,7 +83,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (res.ok) {
         alert('Reservation successful!');
-        window.location.href = '/index.html';
+        fetch('http://localhost:3000/api/my-reservations', {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+            })
+            .then(res => res.json())
+            .then(data => console.log('My Reservations:', data))
+            .catch(err => console.error(err));
+        //window.location.href = '/index.html';
       } else {
         const data = await res.json();
         alert(`Reservation failed: ${data.error}`);
@@ -103,3 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = '/index.html';
   });
 });
+
+function formatTime(dateTime) {
+  const date = new Date(dateTime);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
