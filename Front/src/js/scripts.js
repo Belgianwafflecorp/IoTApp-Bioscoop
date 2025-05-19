@@ -90,9 +90,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.log('Simple forEach movie:', movie.title);
     });
 
-    // Add a log before the for...of loop
-    console.log('Starting for...of TMDB fetch loop');
-
     for (const movie of data) {
       try {
         console.log('Movie object:', movie);
