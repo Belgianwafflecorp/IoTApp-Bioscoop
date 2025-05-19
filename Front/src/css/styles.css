@@ -9,6 +9,9 @@
   --color-light-blue: #2b70e4;
   --color-green: #209d5c;
   --color-yellow: #ffd034;
+  --color-light-yellow: #ffec80;
+  --color-red: #ff0000;
+  --color-light-red: #ff4d4d;
   --color-white: #ffffff;
 
   --font-header: 'Archivo Black', sans-serif;
@@ -76,13 +79,33 @@ body {
 }
 
 .logout-btn {
-  background-color: var(--color-yellow);
+  background: var(--color-yellow);
   border: none;
   padding: 0.5em 1em;
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
   font-family: var(--font-body);
+  transition: background 0.2s;
+}
+.login-btn:hover{
+  background: var(--color-light-yellow);
+}
+.logout-btn:hover{
+  background: var(--color-light-yellow);
+}
+
+.manager-tab {
+  background: var(--color-red);
+  color: white;
+  padding: 0.5em 1em;
+  border-radius: 10px;
+  font-weight: bold;
+  font-family: var(--font-body);;
+  transition: background 0.2s;
+}
+.manager-tab:hover {
+  background: var(--color-light-red);
 }
 
 /* ===============

@@ -1,31 +1,39 @@
 // Check for manager role
-document.addEventListener('DOMContentLoaded', async () => {
-  const managerLink = document.getElementById('manager-link');
-  console.log('managerLink:', managerLink);
-  if (managerLink) {
-    managerLink.style.display = 'none';
-    const token = localStorage.getItem('token');
-    console.log('token:', token);
-    if (token) {
-      try {
-        const res = await fetch('http://localhost:3000/api/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        console.log('res.ok:', res.ok);
-        if (res.ok) {
-          const data = await res.json();
-          console.log('user data:', data);
-          if (data.role === 'manager') {
-            managerLink.style.display = '';
-            console.log('Manager link shown');
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching user info:', err);
+export async function updateNavbarForRole() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.log('No token found');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:3000/api/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      console.log('Failed to fetch user info');
+      return;
+    }
+
+    const user = await res.json();
+    console.log('User info:', user); // <--- Add this line
+    if (user.role === 'manager') {
+      // Show the manager tab
+      const navLinks = document.querySelector('.nav-links');
+      if (navLinks && !document.getElementById('manager-tab')) {
+        const managerTab = document.createElement('a');
+        managerTab.href = '/pages/manager.html';
+        managerTab.textContent = 'Manager';
+        managerTab.id = 'manager-tab';
+        managerTab.className = 'manager-tab'; // class for styling
+        navLinks.appendChild(managerTab);
       }
     }
+  } catch (err) {
+    console.error('Failed to fetch user info', err);
   }
-});
+}
+
 
 // Redirect non-managers away from manager.html
 document.addEventListener('DOMContentLoaded', async () => {

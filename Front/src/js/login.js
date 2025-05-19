@@ -64,7 +64,9 @@ form.addEventListener('submit', async (e) => {
       }
 
       localStorage.setItem('token', data.token);
-      window.location.href = '../index.html';
+      setTimeout(() => {
+        window.location.href = '../index.html';
+      }, 100); // for manager checking
     } catch (err) {
       errorMsg.textContent = 'Server error. Try again later.';
       console.error(err);
