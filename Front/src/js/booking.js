@@ -1,5 +1,8 @@
 import { showLoginStatus } from './scripts.js';
 
+let socket;
+let screeningId;
+
 document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -11,12 +14,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   await showLoginStatus();
 
   const urlParams = new URLSearchParams(window.location.search);
-  const screeningId = urlParams.get('screeningId');
+  screeningId = urlParams.get('screeningId');
 
   if (!screeningId) {
     alert('No screening selected');
     return;
   }
+
+  // Connect WebSocket once
+  setupWebSocket(screeningId);
 
   // Fetch screening info
   try {
@@ -37,8 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('duration').textContent = screeningData.movie.duration;
     document.getElementById('release').textContent = screeningData.movie.release_date;
 
-    // Optionally store seats for later use
     window.availableSeats = seats.filter(seat => !seat.isTaken);
+    updateSeatsDisplay();
 
   } catch (err) {
     console.error(err);
@@ -64,7 +70,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const selectedSeats = availableSeats.slice(0, totalTickets);
+    const available = window.availableSeats;
+
+    const selectedSeats = [
+    ...available.filter(s => s.seat_type === 'reduced').slice(0, reduced),
+    ...available.filter(s => s.seat_type === 'normal').slice(0, normal),
+    ...available.filter(s => s.seat_type === 'premium').slice(0, premium)
+    ];
+
+    if (selectedSeats.length < totalTickets) {
+    alert('Not enough seats of requested types available.');
+    return;
+    }
+
     const seatIds = selectedSeats.map(seat => seat.seat_id);
 
     try {
@@ -83,15 +101,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (res.ok) {
         alert('Reservation successful!');
-        fetch('http://localhost:3000/api/my-reservations', {
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-            }
-            })
-            .then(res => res.json())
-            .then(data => console.log('My Reservations:', data))
-            .catch(err => console.error(err));
-        //window.location.href = '/index.html';
+        const data = await fetch('http://localhost:3000/api/my-reservations', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(res => res.json());
+        console.log('My Reservations:', data);
       } else {
         const data = await res.json();
         alert(`Reservation failed: ${data.error}`);
@@ -103,17 +116,53 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const circle = document.querySelector('.circle');
-  circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
+// WebSocket setup (placed *outside* of click handler)
+function setupWebSocket(screeningId) {
+  socket = new WebSocket('ws://localhost:3000');
 
-  circle.addEventListener('click', () => {
-    window.location.href = '/index.html';
+  socket.addEventListener('open', () => {
+    socket.send(JSON.stringify({ type: 'subscribe', screeningId }));
   });
-});
 
+  socket.addEventListener('message', (event) => {
+    const msg = JSON.parse(event.data);
+    if (msg.type === 'update' && Array.isArray(msg.data)) {
+      window.availableSeats = msg.data.filter(seat => !seat.isTaken);
+      updateSeatsDisplay();
+    }
+  });
+
+  socket.addEventListener('close', () => {
+    console.log('WebSocket closed.');
+  });
+
+  socket.addEventListener('error', (err) => {
+    console.error('WebSocket error:', err);
+  });
+}
+
+// Format screening time
 function formatTime(dateTime) {
   const date = new Date(dateTime);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+// Update seat display
+function updateSeatsDisplay() {
+    const reducedSeats = window.availableSeats.filter(s => s.seat_type === 'reduced').length;
+    const normalSeats = window.availableSeats.filter(s => s.seat_type === 'normal').length;
+    const premiumSeats = window.availableSeats.filter(s => s.seat_type === 'premium').length;
+
+    document.getElementById('seats-reduced').textContent = reducedSeats;
+    document.getElementById('seats-normal').textContent = normalSeats;
+    document.getElementById('seats-premium').textContent = premiumSeats;
+    }
+
+// Go home button
+document.addEventListener('DOMContentLoaded', () => {
+  const circle = document.querySelector('.circle');
+  circle.style.cursor = 'pointer';
+  circle.addEventListener('click', () => {
+    window.location.href = '/index.html';
+  });
+});

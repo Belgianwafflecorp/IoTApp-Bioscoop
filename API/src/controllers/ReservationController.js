@@ -1,9 +1,11 @@
 import db from '../db.js';
+import setupWebSocket from '../middleware/websocket.js';
+
 
 // POST /reserve - reserve seats
 const reserveTickets = async (req, res) => {
     try {
-        const user_id = req.user.userId; // Use the token-authenticated user
+        const user_id = req.user.userId;
         const { screening_id, seat_ids } = req.body;
 
         if (!user_id || !screening_id || !Array.isArray(seat_ids)) {
@@ -17,6 +19,27 @@ const reserveTickets = async (req, res) => {
         );
 
         res.status(201).json({ message: 'Tickets reserved successfully' });
+
+        const [allSeats] = await db.execute(`
+            SELECT s.seat_id, s.seat_row, s.seat_number, s.seat_type
+            FROM screenings sc
+            JOIN halls h ON sc.hall_id = h.hall_id
+            JOIN seats s ON h.hall_id = s.hall_id
+            WHERE sc.screening_id = ?
+        `, [screening_id]);
+
+        const [takenSeats] = await db.execute(`
+            SELECT seat_id FROM reservations WHERE screening_id = ?
+        `, [screening_id]);
+
+        const takenSeatIds = new Set(takenSeats.map(row => row.seat_id));
+        const updatedSeatData = allSeats.map(seat => ({
+            ...seat,
+            isTaken: takenSeatIds.has(seat.seat_id)
+        }));
+
+        setupWebSocket.broadcastUpdate(screening_id, updatedSeatData);
+
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({ error: 'One or more seats already reserved' });
@@ -24,6 +47,7 @@ const reserveTickets = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // GET /my-reservations - Get all reservations for the logged-in user
 const getMyReservations = async (req, res) => {
@@ -60,12 +84,13 @@ const getTicketsForScreening = async (req, res) => {
         const { id } = req.params;
 
         const [allSeats] = await db.execute(`
-            SELECT s.seat_id, s.seat_row, s.seat_number
+            SELECT s.seat_id, s.seat_row, s.seat_number, s.seat_type
             FROM screenings sc
             JOIN halls h ON sc.hall_id = h.hall_id
             JOIN seats s ON h.hall_id = s.hall_id
             WHERE sc.screening_id = ?
-        `, [id]);
+            `, [id]);
+
 
         const [takenSeats] = await db.execute(`
             SELECT seat_id
