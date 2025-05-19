@@ -1,3 +1,5 @@
+import { updateNavbarForRole } from './manager.js';
+
 const TMDB_API_KEY = 'YOUR_TMDB_API_KEY'; // Replace with your real API key
 
 // Function to check if the API is ready
@@ -33,6 +35,8 @@ async function waitForApi() {
   throw new Error('API is not available after multiple attempts');
 }
 
+
+
 document.addEventListener('DOMContentLoaded', async () => {
   const loginBtn = document.querySelector('.login-btn');
 
@@ -56,6 +60,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Attach logout event
         document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Check if the user is a manager
+        await updateNavbarForRole();
      
 
       } else {
@@ -98,5 +105,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function logout() {
   localStorage.removeItem('token');  // Clear the JWT
-  window.location.href = './pages/login.html'; // Or wherever your login page is
+  window.location.href = '/pages/login.html'; 
 }

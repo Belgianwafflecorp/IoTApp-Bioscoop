@@ -8,11 +8,11 @@
   <link rel="stylesheet" href="../src/css/styles.css" />
 </head>
 <body>
-  <!-- Navbar -->
+  <!-- Header -->
   <header class="navbar">
     <div class="logo">
       <div class="circle"></div>
-      <span class="brand">SCREENINGS</span>
+      <span class="brand">BIOSCOOPNAAM</span>
     </div>
     <nav class="nav-links">
       <a href="../index.html">Movies</a>
@@ -21,11 +21,20 @@
     </nav>
   </header>
 
-  <!-- Screenings Section -->
-  <section id="screenings-container" class="screenings-grid"></section>
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Welcome at the manager-page</h1>
+    <p>Only allowed for managers</p>
+  </section>
 
-  <script src="../src/js/screenings.js" type="module"></script>
-  <script src="../src/js/scripts.js" type="module"></script>
+  <!-- Filter Bar -->
+  <section class="filters">
+    <select><option>Alle films</option></select>
+    <select><option>Vandaag</option></select>
+    <select><option>Filter 3</option></select>
+  </section>
+
   <script src="../src/js/manager.js" type="module"></script>
+  <script src="../src/js/scripts.js" type="module"></script>
 </body>
 </html>

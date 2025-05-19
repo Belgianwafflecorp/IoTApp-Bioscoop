@@ -36,9 +36,17 @@ const getUserBy = async (req, res) => {
 };
 
 const getMe = async (req, res) => {
-  const [rows] = await db.query('SELECT username FROM users WHERE user_id = ?', [req.user.userId]);
+  const [rows] = await db.query(
+    'SELECT user_id, username, email, role FROM users WHERE user_id = ?',
+    [req.user.userId]
+  );
   if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
-  res.json({ username: rows[0].username });
+  res.json({
+    username: rows[0].username,
+    role: rows[0].role,
+    userId: rows[0].user_id,
+    email: rows[0].email,
+  });
 };
 
 const deleteUser = async (req, res) => {
