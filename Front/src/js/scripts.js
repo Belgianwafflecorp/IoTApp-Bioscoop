@@ -1,4 +1,5 @@
-const TMDB_API_KEY = 'YOUR_TMDB_API_KEY'; // Replace with your real API key
+console.log('scripts.js loaded');
+
 
 // Function to check if the API is ready
 async function checkApiStatus() {
@@ -34,6 +35,7 @@ async function waitForApi() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('DOMContentLoaded event fired');
   const loginBtn = document.querySelector('.login-btn');
 
   const token = localStorage.getItem('token');
@@ -78,23 +80,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await fetch(`http://localhost:3000/api/movies`);
     const data = await res.json();
 
+    console.log('Fetched data:', data);
+    console.log('Data length:', data.length);
+
     console.log(data);
 
+    console.log('Testing simple forEach');
     data.forEach(movie => {
-      const card = document.createElement('div');
-      card.classList.add('movie-card');
-
-      card.innerHTML = `
-        <h3>${movie.title.toUpperCase()}</h3>
-        <p>${movie.description.slice(0, 80)}... <a href="#">read more</a></p>
-        <div class="stars">⭐⭐⭐☆☆</div>
-      `;
-
-      movieList.appendChild(card);
+      console.log('Simple forEach movie:', movie.title);
     });
+
+    // Add a log before the for...of loop
+    console.log('Starting for...of TMDB fetch loop');
+
+    for (const movie of data) {
+      try {
+        console.log('Movie object:', movie);
+        if (!movie.title) {
+          console.warn('No title for movie:', movie);
+          continue;
+        }
+        const url = `http://localhost:3000/api/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`;
+        console.log('Fetching TMDB with URL:', url);
+
+        const tmdbRes = await fetch(url);
+        console.log('TMDB fetch status:', tmdbRes.status);
+        const tmdbData = await tmdbRes.json();
+
+        console.log(`TMDB data for "${movie.title}":`, tmdbData);
+
+        if (!Array.isArray(tmdbData) || !tmdbData[0]) {
+          console.warn(`No TMDB results for "${movie.title}"`);
+          continue;
+        }
+
+        const { title, overview, vote_average } = tmdbData[0];
+        const card = document.createElement('div');
+        card.classList.add('movie-card');
+        card.innerHTML = `
+          <h3>${title.toUpperCase()}</h3>
+          <p>${overview.slice(0, 80)}... <a href="#">read more</a></p>
+          <div class="rating">⭐ ${vote_average}</div>
+        `;
+        movieList.appendChild(card);
+      } catch (err) {
+        console.error(`Failed to fetch TMDB data for "${movie.title}"`, err);
+      }
+    }
   } catch (error) {
     movieList.innerHTML = `<p>Error loading movies. Please try again later.</p>`;
-    console.error(error);
+    console.error('Outer catch:', error);
   }
 });
 
