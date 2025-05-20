@@ -223,6 +223,41 @@ button:hover,
   font-size: 1em;
 }
 
+.submit-btn {
+  background-color: var(--color-green);
+  color: var(--color-black);
+  padding: 0.7em 1em;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #1a7f4b; /* Slightly darker green */
+  cursor: pointer;
+}
+
+/* Toggle button with brand yellow */
+.toggle-btn {
+  background-color: var(--color-yellow);
+  color: var(--color-black);
+  padding: 0.7em 1em;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5em;
+  display: inline-block;
+  text-align: center;
+}
+
+.toggle-btn:hover {
+  background-color: #e6c300; /* Slightly darker yellow */
+  cursor: pointer;
+}
 #error-msg {
   margin-top: 1em;
   color: var(--color-yellow);

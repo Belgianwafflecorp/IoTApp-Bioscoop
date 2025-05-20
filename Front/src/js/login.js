@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
 
   circle.addEventListener('click', () => {
-    window.location.href = '/index.html';
+    window.location.href = '../index.html'; // Redirect to home page
   });
 });
 
