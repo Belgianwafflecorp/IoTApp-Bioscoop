@@ -6,7 +6,7 @@ import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
-import { getMovies, searchMovies, getMovieDetails } from '../controllers/Movies.js';
+import * as movies from '../controllers/Movies.js';
 
 
 /////////////////////////////////////////////////////////////////
@@ -312,9 +312,9 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
 
-router.get('/movies/tmdb', getMovies)
-router.get('/movies/tmdb/search', searchMovies);
-router.get('/movies/tmdb/:id', getMovieDetails);
+router.get('/movies/tmdb', movies.getMovies)
+router.get('/movies/tmdb/search', movies.searchMovies);
+router.get('/movies/tmdb/:id', movies.getMovieDetails);
 
 
 export default router;

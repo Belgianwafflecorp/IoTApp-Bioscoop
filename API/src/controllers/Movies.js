@@ -31,7 +31,7 @@ export const getMovies = async (req, res) => {
   }
 };
 
-const searchMovies = async (req, res) => {
+export const searchMovies = async (req, res) => {
   const { title } = req.query;
 
   if (!TMDB_API_KEY) {
@@ -68,7 +68,7 @@ const searchMovies = async (req, res) => {
   }
 };
 
-const getMovieDetails = async (req, res) => {
+export const getMovieDetails = async (req, res) => {
   const { id } = req.params;
 
   if (!TMDB_API_KEY) {

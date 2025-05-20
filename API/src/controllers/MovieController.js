@@ -29,4 +29,5 @@ const getMovieById = async (req, res) => {
 export {
     getAllMovies,
     getMovieById,
+    
 };
