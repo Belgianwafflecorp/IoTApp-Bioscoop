@@ -53,16 +53,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(data);
 
     data.forEach(movie => {
-      const card = document.createElement('div');
-      card.classList.add('movie-card');
+      // Inside your existing data.forEach(movie => { ... }) block, replace with:
+        const card = document.createElement('div');
+        card.classList.add('screening-card'); // use same style as screening cards
 
-      card.innerHTML = `
-        <h3>${movie.title.toUpperCase()}</h3>
-        <p>${movie.description.slice(0, 80)}... <a href="#">read more</a></p>
-        <div class="stars">⭐⭐⭐☆☆</div>
-      `;
-
-      movieList.appendChild(card);
+        card.innerHTML = `
+          <img src="./src/resources/images/movie-placeholder.jpg" alt="${movie.title}" />
+          <div class="screening-info">
+            <h4 class="movie-title">${movie.title.toUpperCase()}</h4>
+            <p class="overview">${movie.description.slice(0, 120)}...</p>
+            <div class="labels">
+              <span class="label">4K HD</span>
+              <span class="label">4D</span>
+            </div>
+          </div>
+        `;
+        movieList.appendChild(card);
     });
   } catch (error) {
     movieList.innerHTML = `<p>Error loading movies. Please try again later.</p>`;
