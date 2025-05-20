@@ -6,90 +6,12 @@ import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
-import * as MovieTMDB from '../controllers/Movies.js';
-
+import { getMovies, searchMovies, getMovieDetails } from '../controllers/Movies.js';
 
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// users /////////////////////////////
 /////////////////////////////////////////////////////////////////
-
-/**
- * @swagger
- * /api/movies/tmdb:
- *   get:
- *     summary: Get movies from TMDB
- *     tags:
- *       - TMDB Movies
- *     responses:
- *       200:
- *         description: List of movies from TMDB
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 123
- *                   title:
- *                     type: string
- *                     example: Inception
- *                   overview:
- *                     type: string
- *                     example: A mind-bending thriller...
- *                   release_date:
- *                     type: string
- *                     example: 2010-07-16
- *       500:
- *         description: Internal server error
- */
-router.get('/movies/tmdb', MovieTMDB.getMovies);
-
-router.get('/movies/search', MovieTMDB.searchMovies);
-
-/**
- * @swagger
- * /api/movies/tmdb/{id}:
- *   get:
- *     summary: Get TMDB movie details by ID
- *     tags:
- *       - TMDB Movies
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: The TMDB movie ID
- *     responses:
- *       200:
- *         description: TMDB movie details
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 123
- *                 title:
- *                   type: string
- *                   example: Inception
- *                 overview:
- *                   type: string
- *                   example: A mind-bending thriller...
- *                 release_date:
- *                   type: string
- *                   example: 2010-07-16
- *       404:
- *         description: Movie not found
- *       500:
- *         description: Internal server error
- */
-router.get('/movies/:id', MovieTMDB.getMovieDetails);
 
 /**
  * @swagger
@@ -278,6 +200,34 @@ router.get('/me', authenticateToken, UserController.getMe);
  */
 
 
+/////////////////////////////////////////////////////////////////
+//////////////////////////// manager ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/changeUserRole:
+ *   post:
+ *     summary: Change a user's role
+ *     tags:
+ *       - Manager
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *                 example: 1
+ *               new_role:
+ *                 type: string
+ *                 example: manager
+ */
+router.post('/changeUserRole', ManagerController.changeUserRole);
+
+
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// movies ////////////////////////////
@@ -362,32 +312,9 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
 
+router.get('/movies/tmdb', getMovies)
+router.get('/movies/tmdb/search', searchMovies);
+router.get('/movies/tmdb/:id', getMovieDetails);
 
-/////////////////////////////////////////////////////////////////
-//////////////////////////// manager ////////////////////////////
-/////////////////////////////////////////////////////////////////
-
-/**
- * @swagger
- * /api/changeUserRole:
- *   post:
- *     summary: Change a user's role
- *     tags:
- *       - Manager
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: integer
- *                 example: 1
- *               new_role:
- *                 type: string
- *                 example: manager
- */
-router.post('/changeUserRole', ManagerController.changeUserRole);
 
 export default router;

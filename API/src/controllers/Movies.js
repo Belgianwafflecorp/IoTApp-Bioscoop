@@ -1,5 +1,7 @@
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
+
+// GET / get popular movies from TMDB
 export const getMovies = async (req, res) => {
   if (!TMDB_API_KEY) {
     return res.status(500).json({ 
@@ -29,7 +31,7 @@ export const getMovies = async (req, res) => {
   }
 };
 
-export const searchMovies = async (req, res) => {
+const searchMovies = async (req, res) => {
   const { title } = req.query;
 
   if (!TMDB_API_KEY) {
@@ -66,7 +68,7 @@ export const searchMovies = async (req, res) => {
   }
 };
 
-export const getMovieDetails = async (req, res) => {
+const getMovieDetails = async (req, res) => {
   const { id } = req.params;
 
   if (!TMDB_API_KEY) {
@@ -97,4 +99,8 @@ export const getMovieDetails = async (req, res) => {
   }
 };
 
-
+export default {
+  getMovies,
+  searchMovies,
+  getMovieDetails
+};
