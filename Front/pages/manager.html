@@ -27,11 +27,27 @@
     <p>Only allowed for managers</p>
   </section>
 
-  <!-- Filter Bar -->
-  <section class="filters">
-    <select><option>Alle films</option></select>
-    <select><option>Vandaag</option></select>
-    <select><option>Filter 3</option></select>
+  <section class="user-management">
+    <h2>User Management</h2>
+    <div class="user-search">
+      <input type="text" id="user-search-input" placeholder="Search by username, email, or ID..." />
+      <button id="user-search-btn">Search</button>
+      <button id="user-search-reset">Reset</button>
+      <button id="show-managers-btn">Show Managers</button>
+    </div>
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Change Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Users will be loaded here -->
+      </tbody>
+    </table>
   </section>
 
   <script src="../src/js/manager.js" type="module"></script>
