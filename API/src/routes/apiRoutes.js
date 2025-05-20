@@ -200,6 +200,34 @@ router.get('/me', authenticateToken, UserController.getMe);
  */
 
 
+/////////////////////////////////////////////////////////////////
+//////////////////////////// manager ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/changeUserRole:
+ *   post:
+ *     summary: Change a user's role
+ *     tags:
+ *       - Manager
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *                 example: 1
+ *               new_role:
+ *                 type: string
+ *                 example: manager
+ */
+router.post('/changeUserRole', ManagerController.changeUserRole);
+
+
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// movies ////////////////////////////
