@@ -1,8 +1,5 @@
 import { updateNavbarForRole } from './manager.js';
 
-console.log('scripts.js loaded');
-
-
 // Function to check if the API is ready
 async function checkApiStatus() {
   try {
@@ -65,7 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Check if the user is a manager
         await updateNavbarForRole();
-     
 
       } else {
         // Invalid or expired token — clear it
@@ -84,9 +80,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch movie data after the API is ready
     const res = await fetch(`http://localhost:3000/api/movies`);
     const data = await res.json();
-
-    console.log('Fetched data:', data);
-    console.log('Data length:', data.length);
 
     console.log(data);
 

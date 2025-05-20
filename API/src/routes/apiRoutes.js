@@ -284,4 +284,9 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
 
+router.get('/movies/tmdb', getMovies)
+router.get('/movies/tmdb/search', searchMovies);
+router.get('/movies/tmdb/:id', getMovieDetails);
+
+
 export default router;
