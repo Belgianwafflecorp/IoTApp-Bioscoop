@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendReservationEmail(toEmail, reservationDetails) {
+  const { movie, datetime, hall, seats, qrCodeDataUrl } = reservationDetails;
+
   const mailOptions = {
     from: '"Cinema Booking" <no-reply@cinema.com>',
     to: toEmail,
@@ -19,11 +21,13 @@ export async function sendReservationEmail(toEmail, reservationDetails) {
       <h2>Reservation Confirmed</h2>
       <p>Thank you for your reservation. Here are the details:</p>
       <ul>
-        <li><strong>Movie:</strong> ${reservationDetails.movie}</li>
-        <li><strong>Date & Time:</strong> ${reservationDetails.datetime}</li>
-        <li><strong>Hall:</strong> ${reservationDetails.hall}</li>
-        <li><strong>Seats:</strong> ${reservationDetails.seats.join(', ')}</li>
+        <li><strong>Movie:</strong> ${movie}</li>
+        <li><strong>Date & Time:</strong> ${datetime}</li>
+        <li><strong>Hall:</strong> ${hall}</li>
+        <li><strong>Seats:</strong> ${seats.join(', ')}</li>
       </ul>
+      <p>Please present this QR code at the entrance:</p>
+      <img src="${qrCodeDataUrl}" alt="QR Code" />
     `
   };
 
