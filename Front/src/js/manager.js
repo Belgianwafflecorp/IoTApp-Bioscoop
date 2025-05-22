@@ -171,3 +171,25 @@ async function changeUserRole(userId, newRole) {
 if (window.location.pathname.endsWith('manager.html')) {
   document.addEventListener('DOMContentLoaded', () => fetchAndRenderUsers());
 }
+
+// Tab switching logic
+document.addEventListener('DOMContentLoaded', () => {
+  const userTab = document.getElementById('user-management-tab');
+  const movieTab = document.getElementById('movie-management-tab');
+  const screeningsTab = document.getElementById('screenings-management-tab');
+
+  const userSection = document.getElementById('user-management-section');
+  const movieSection = document.getElementById('movie-management-section');
+  const screeningsSection = document.getElementById('screenings-management-section');
+
+  function showSection(section) {
+    userSection.style.display = 'none';
+    movieSection.style.display = 'none';
+    screeningsSection.style.display = 'none';
+    section.style.display = '';
+  }
+
+  if (userTab) userTab.addEventListener('click', () => showSection(userSection));
+  if (movieTab) movieTab.addEventListener('click', () => showSection(movieSection));
+  if (screeningsTab) screeningsTab.addEventListener('click', () => showSection(screeningsSection));
+});

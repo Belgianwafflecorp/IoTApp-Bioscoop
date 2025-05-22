@@ -391,3 +391,25 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
+
+.manager-controls {
+  margin: 2em 0 1em 0;
+  text-align: center;
+}
+.tab-btn {
+  background: var(--color-yellow);
+  border: none;
+  padding: 0.7em 1.5em;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0 0.5em;
+  font-family: var(--font-body);
+  transition: background 0.2s;
+}
+.tab-btn:hover {
+  background: var(--color-light-yellow);
+}
+.management-section {
+  margin-top: 2em;
+}
