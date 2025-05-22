@@ -6,7 +6,7 @@ import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
-import * as movies from '../controllers/Movies.js';
+import {getMovies, searchMovies, getMovieDetails} from '../controllers/Movies.js';
 
 
 /////////////////////////////////////////////////////////////////
