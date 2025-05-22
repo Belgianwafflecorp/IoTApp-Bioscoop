@@ -416,3 +416,22 @@ body {
 .management-section {
   margin-top: 2em;
 }
+
+.delete-user-btn {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3em 0.8em;
+  margin-left: 0.5em;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.delete-user-btn:disabled {
+  background: #888;
+  cursor: not-allowed;
+}
+.delete-user-btn:hover:not(:disabled) {
+  background: #b71c1c;
+}

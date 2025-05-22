@@ -103,6 +103,11 @@ function renderUsersTable(searchTerm = '', customList = null) {
           <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
           <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
         </select>
+        ${
+          user.username !== 'manager'
+            ? `<button class="delete-user-btn" data-user-id="${user.user_id}">Delete</button>`
+            : `<button class="delete-user-btn" disabled title="Cannot delete this user">Delete</button>`
+        }
       </td>
     `;
     tbody.appendChild(tr);
@@ -116,6 +121,19 @@ function renderUsersTable(searchTerm = '', customList = null) {
       await changeUserRole(userId, newRole);
       await fetchAndRenderUsers(document.getElementById('user-search-input').value);
     });
+  });
+
+  // Add event listeners for delete buttons
+  tbody.querySelectorAll('.delete-user-btn').forEach(btn => {
+    if (!btn.disabled) {
+      btn.addEventListener('click', async (e) => {
+        const userId = btn.getAttribute('data-user-id');
+        if (confirm('Are you sure you want to delete this user?')) {
+          await deleteUser(userId);
+          await fetchAndRenderUsers(document.getElementById('user-search-input').value);
+        }
+      });
+    }
   });
 }
 
@@ -163,6 +181,26 @@ async function changeUserRole(userId, newRole) {
     }
   } catch (err) {
     alert('Failed to change role');
+    console.error(err);
+  }
+}
+
+// Delete user function
+async function deleteUser(userId) {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`http://localhost:3000/api/deleteUser/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || 'Failed to delete user');
+    }
+  } catch (err) {
+    alert('Failed to delete user');
     console.error(err);
   }
 }
