@@ -99,14 +99,16 @@ function renderUsersTable(searchTerm = '', customList = null) {
       <td>${user.email}</td>
       <td>${user.role}</td>
       <td>
-        <select data-user-id="${user.user_id}">
-          <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
-          <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
-        </select>
         ${
           user.username !== 'manager'
-            ? `<button class="delete-user-btn" data-user-id="${user.user_id}">Delete</button>`
-            : `<button class="delete-user-btn" disabled title="Cannot delete this user">Delete</button>`
+            ? `
+              <select data-user-id="${user.user_id}">
+                <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
+                <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
+              </select>
+              <button class="delete-user-btn" data-user-id="${user.user_id}">Delete</button>
+            `
+            : ''
         }
       </td>
     `;
