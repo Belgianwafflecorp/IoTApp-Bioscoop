@@ -391,6 +391,9 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
+.user-search button:hover {
+  background: var(--color-light-yellow);
+}
 
 .manager-controls {
   margin: 2em 0 1em 0;
