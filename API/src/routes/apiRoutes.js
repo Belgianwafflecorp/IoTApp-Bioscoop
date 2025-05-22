@@ -15,6 +15,83 @@ import { getMovies, searchMovies, getMovieDetails } from '../controllers/Movies.
 
 /**
  * @swagger
+ * /api/movies/tmdb:
+ *   get:
+ *     summary: Get movies from TMDB
+ *     tags:
+ *       - TMDB Movies
+ *     responses:
+ *       200:
+ *         description: List of movies from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 123
+ *                   title:
+ *                     type: string
+ *                     example: Inception
+ *                   overview:
+ *                     type: string
+ *                     example: A mind-bending thriller...
+ *                   release_date:
+ *                     type: string
+ *                     example: 2010-07-16
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/movies/tmdb', MovieTMDB.getMovies);
+
+router.get('/movies/search', MovieTMDB.searchMovies);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/{id}:
+ *   get:
+ *     summary: Get TMDB movie details by ID
+ *     tags:
+ *       - TMDB Movies
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The TMDB movie ID
+ *     responses:
+ *       200:
+ *         description: TMDB movie details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 123
+ *                 title:
+ *                   type: string
+ *                   example: Inception
+ *                 overview:
+ *                   type: string
+ *                   example: A mind-bending thriller...
+ *                 release_date:
+ *                   type: string
+ *                   example: 2010-07-16
+ *       404:
+ *         description: Movie not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/movies/:id', MovieTMDB.getMovieDetails);
+
+/**
+ * @swagger
  * /api/register:
  *   post:
  *     summary: Register a new user
@@ -254,6 +331,16 @@ router.get('/movies/:id', MovieController.getMovieById);
  */
 router.get('/screenings', ScreeningController.getAllScreenings);
 
+router.get('/screenings/:id', ScreeningController.getScreeningById);
+/**
+ * @swagger
+ * /api/screenings/{id}:
+ *   get:
+ *     summary: Get screening details by ID
+ *     tags:
+ *       - Screenings
+ */
+
 /**
  * @swagger
  * /api/screenings:
@@ -283,5 +370,110 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
  *       - Screenings
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
+
+/////////////////////////////////////////////////////////////////
+/////////////////////// reservations ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+// GET available tickets for a screening
+router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreening);
+
+/**
+ * @swagger
+ * /api/screenings/{id}/tickets:
+ *   get:
+ *     summary: Get seat availability for a screening
+ *     tags:
+ *       - Reservations
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Screening ID
+ *     responses:
+ *       200:
+ *         description: List of all seats and their availability
+ */
+
+
+// POST reserve seats
+router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
+
+
+router.get('/my-reservations', authenticateToken, ReservationController.getMyReservations);
+/**
+ * @swagger
+ * /api/my-reservations:
+ *   get:
+ *     summary: Get all reservations for the logged-in user
+ *     tags:
+ *       - Reservations
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of reservations
+ */
+
+/**
+ * @swagger
+ * /api/reserve:
+ *   post:
+ *     summary: Reserve tickets for a screening
+ *     tags:
+ *       - Reservations
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *               screening_id:
+ *                 type: integer
+ *               seat_ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       201:
+ *         description: Tickets reserved successfully
+ *       409:
+ *         description: One or more seats already reserved
+ */
+
+
+/////////////////////////////////////////////////////////////////
+//////////////////////////// manager ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/changeUserRole:
+ *   post:
+ *     summary: Change a user's role
+ *     tags:
+ *       - Manager
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *                 example: 1
+ *               new_role:
+ *                 type: string
+ *                 example: manager
+ */
+router.post('/changeUserRole', ManagerController.changeUserRole);
 
 export default router;

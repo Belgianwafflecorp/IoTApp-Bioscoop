@@ -1,10 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
+import { showLoginStatus } from './scripts.js';
+
+
+addEventListener('DOMContentLoaded', async () => {
+  await showLoginStatus();
+
+
   const circle = document.querySelector('.circle');
   circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
 
   circle.addEventListener('click', () => {
     window.location.href = '../index.html'; // Redirect to home page
   });
+
 });
 
 async function fetchScreenings() {
@@ -43,7 +50,10 @@ function renderScreenings(screenings) {
     const showingsHTML = shows.map(show => `
       <div>
         <strong>${show.hall_name}</strong>:
-        <span class="badge">${formatTime(show.start_time)}</span>
+        <span class="badge" onclick="window.location.href='booking.html?screeningId=${show.screening_id}'">
+  ${formatTime(show.start_time)}
+</span>
+
       </div>
     `).join('');
 
@@ -62,6 +72,7 @@ function renderScreenings(screenings) {
       </div>
     `;
     container.innerHTML += card;
+    container.querySelectorAll('.badge').forEach(badge => {badge.style.cursor = 'pointer';});
   }
 }
 

@@ -21,6 +21,47 @@ const getAllScreenings = async (req, res) => {
     }
 };
 
+// GET /screenings/:id - get screening details by ID including movie info
+const getScreeningById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.execute(`
+      SELECT 
+        s.screening_id,
+        s.start_time,
+        m.movie_id,
+        m.title,
+        m.genre,
+        m.duration_minutes AS duration
+      FROM screenings s
+      JOIN movies m ON s.movie_id = m.movie_id
+      WHERE s.screening_id = ?
+    `, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Screening not found' });
+    }
+
+    // Format movie nested object to match frontend expectations
+    const screening = rows[0];
+    const screeningData = {
+      screening_id: screening.screening_id,
+      start_time: screening.start_time,
+      movie: {
+        movie_id: screening.movie_id,
+        title: screening.title,
+        genre: screening.genre,
+        duration: screening.duration,
+      }
+    };
+
+    res.json(screeningData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 // POST /screenings - nieuwe voorstelling aanmaken
 const createScreenings = async (req, res) => {
     try {
@@ -66,6 +107,7 @@ const deleteScreenings = async (req, res) => {
 
 export {
     getAllScreenings,
+    getScreeningById,
     createScreenings,
     updateScreenings,
     deleteScreenings

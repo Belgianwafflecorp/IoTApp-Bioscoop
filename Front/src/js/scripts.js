@@ -76,6 +76,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
   const movieList = document.getElementById('movie-list');
+  if (!movieList) {
+    console.warn('No #movie-list element found; skipping movie rendering');
+    return;
+  }
 
   try {
     // Wait for API to be ready
@@ -137,5 +141,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function logout() {
   localStorage.removeItem('token');  // Clear the JWT
-  window.location.href = '/pages/login.html'; 
+  window.location.href = '/pages/login.html';
+}
+
+export async function showLoginStatus() {
+  const loginBtn = document.querySelector('.login-btn');
+  if (!loginBtn) {
+    // No login button on this page — safe to skip
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const res = await fetch('http://localhost:3000/api/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        // Instead of outerHTML, update content inside the loginBtn element safely:
+        loginBtn.innerHTML = `
+          <span class="user-info">👤 ${data.username}</span>
+          <button id="logoutBtn" class="logout-btn">Logout</button>
+        `;
+
+        // Attach logout event listener
+        const logoutBtn = loginBtn.querySelector('#logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', logout);
+        }
+      } else {
+        localStorage.removeItem('token');
+      }
+    } catch (err) {
+      console.error('Failed to fetch user info', err);
+    }
+  }
 }
