@@ -240,6 +240,114 @@ router.get('/movies', MovieController.getAllMovies);
 router.get('/movies/:id', MovieController.getMovieById);
 
 
+/**
+ * @swagger
+ * /api/movies:
+ *   post:
+ *     summary: Add a new movie
+ *     tags:
+ *       - Movies
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Inception
+ *               description:
+ *                 type: string
+ *                 example: A mind-bending thriller
+ *               release_date:
+ *                 type: string
+ *                 format: date
+ *                 example: 2010-07-16
+ *               duration:
+ *                 type: integer
+ *                 example: 148
+ *               genre:
+ *                 type: string
+ *                 example: Sci-Fi
+ *     responses:
+ *       201:
+ *         description: Movie added successfully
+ *       400:
+ *         description: Bad request
+ */
+router.post('/movies', MovieController.addMovie);
+
+/**
+ * @swagger
+ * /api/movies/{id}:
+ *   put:
+ *     summary: Edit a movie by ID
+ *     tags:
+ *       - Movies
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the movie to edit
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Inception
+ *               description:
+ *                 type: string
+ *                 example: A mind-bending thriller
+ *               release_date:
+ *                 type: string
+ *                 format: date
+ *                 example: 2010-07-16
+ *               duration:
+ *                 type: integer
+ *                 example: 148
+ *               genre:
+ *                 type: string
+ *                 example: Sci-Fi
+ *     responses:
+ *       200:
+ *         description: Movie updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Movie not found
+ */
+router.put('/movies/:id', MovieController.editMovie);
+
+/**
+ * @swagger
+ * /api/movies/{id}:
+ *   delete:
+ *     summary: Delete a movie by ID
+ *     tags:
+ *       - Movies
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the movie to delete
+ *     responses:
+ *       200:
+ *         description: Movie deleted successfully
+ *       404:
+ *         description: Movie not found
+ */
+router.delete('/movies/:id', MovieController.deleteMovie);
+
+
 /////////////////////////////////////////////////////////////////
 /////////////////////////// screenings //////////////////////////
 /////////////////////////////////////////////////////////////////
@@ -283,5 +391,88 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
  *       - Screenings
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
+
+/////////////////////////////////////////////////////////////////
+///////////////////////////// tmdb //////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/movies/tmdb:
+ *   get:
+ *     summary: Get movies from TMDB
+ *     tags:
+ *       - TMDB
+ *     responses:
+ *       200:
+ *         description: List of movies from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Failed to fetch movies from TMDB
+ */
+router.get('/movies/tmdb', getMovies);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/search:
+ *   get:
+ *     summary: Search movies from TMDB
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The search query for the movie title
+ *     responses:
+ *       200:
+ *         description: Search results from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       400:
+ *         description: Missing or invalid query parameter
+ *       500:
+ *         description: Failed to search movies from TMDB
+ */
+router.get('/movies/tmdb/search', searchMovies);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/details/{id}:
+ *   get:
+ *     summary: Get movie details from TMDB by ID
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The TMDB movie ID
+ *     responses:
+ *       200:
+ *         description: Movie details from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Movie not found on TMDB
+ *       500:
+ *         description: Failed to fetch movie details from TMDB
+ */
+router.get('/movies/tmdb/details/:id', getMovieDetails);
 
 export default router;
