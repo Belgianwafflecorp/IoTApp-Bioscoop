@@ -1,9 +1,9 @@
 ## Doelstelling
 
 - [ ] Ontwerp en bouw een uitbreidbare hybride applicatie voor een bioscoop die:
-  - [ ] Filmdata ophaalt via **The Movie Database (TMDB)** API
-  - [ ] Voorstellingen beheert via een **Node.js backend**
-  - [ ] Tickets real-time bijwerkt met **WebSocket** (of MQTT als uitbreiding)
+  - [x] Filmdata ophaalt via **The Movie Database (TMDB)** API
+  - [x] Voorstellingen beheert via een **Node.js backend**
+  - [x] Tickets real-time bijwerkt met **WebSocket** (of MQTT als uitbreiding)
   - [x] Gebruikersbeheer bevat via **JWT-authenticatie** met sessiebehoud
   - [ ] Een **front-end gebruikersinterface en managerinterface** bevat
   - [ ] Een duidelijke, **gedocumenteerde Open API** aanbiedt (via Swagger)
@@ -15,28 +15,29 @@
 
 - [ ] Prototype van een bioscoopsysteem waarin gebruikers films kunnen bekijken en tickets reserveren
 - [ ] Managers kunnen via beveiligde login films inplannen en bewerken
-- [ ] **Beschikbaarheid wordt real-time gesynchroniseerd**
-- [ ] Gebruikers loggen in als **'user'** of **'manager'**
-- [ ] Applicatie gedraagt zich anders op basis van toegekende **rol**
-- [ ] JWT wordt gebruikt om sessie te onthouden
+- [x] **Beschikbaarheid wordt real-time gesynchroniseerd**
+- [x] Gebruikers loggen in als **'user'** of **'manager'**
+- [x] Applicatie gedraagt zich anders op basis van toegekende **rol**
+- [x] JWT wordt gebruikt om sessie te onthouden
 
 ---
 
 ## Beheerdersinterface (Manager)
 
 ### Vereisten
-- [ ] Toegankelijk na **inloggen via `/login`** als `manager`
-- [ ] JWT wordt lokaal opgeslagen (bv. `localStorage`) en bij elke request meegestuurd
-- [ ] **Beveiligd gebied binnen dezelfde webapp** (zelfde URL/adres, geen subsite)
-- [ ] Front-end detecteert via JWT payload of gebruiker een `manager` is
-- [ ] Alleen managers kunnen:
+- [x] Toegankelijk na **inloggen via `/login`** als `manager`
+- [x] JWT wordt lokaal opgeslagen (bv. `localStorage`) en bij elke request meegestuurd
+- [?] **Beveiligd gebied binnen dezelfde webapp** (zelfde URL/adres, geen subsite)
+- [x] Front-end detecteert via JWT payload of gebruiker een `manager` is
+- [x] Alleen managers kunnen:
   - [ ] Voorstellingen aanmaken, wijzigen, verwijderen
   - [ ] Filmgegevens aanvullen of corrigeren
   - [ ] Aantal tickets instellen voor een voorstelling
+  - [x] Rollen toekennen aan users
 
 ### UI-suggestie
-- [ ] Beheerdersknop zichtbaar na login
-- [ ] Toegang tot een "dashboard" met overzicht van voorstellingen
+- [x] Beheerdersknop zichtbaar na login
+- [x] Toegang tot een "dashboard" met overzicht van voorstellingen
 - [ ] Formulieren voor aanpassen/bewerken van films en planningen
 
 ---
@@ -45,13 +46,13 @@
 
 ### Gebruiker
 - [ ] Raadpleegt films + details
-- [ ] Ziet planning met ticketstatus
-- [ ] Reserveert tickets (JWT vereist)
-- [ ] Real-time updates via WebSocket
+- [x] Ziet planning met ticketstatus
+- [x] Reserveert tickets (JWT vereist)
+- [x] Real-time updates via WebSocket
 
 ### Manager
-- [ ] Logt in via `/login` (met `manager` credentials)
-- [ ] JWT bevat rol-informatie (`role: 'manager'`)
+- [x] Logt in via `/login` (met `manager` credentials)
+- [x] JWT bevat rol-informatie (`role: 'manager'`)
 - [ ] Kan filmvoorstellingen toevoegen of bewerken
 - [ ] Ziet wie wat heeft gereserveerd (optioneel)
 
@@ -60,18 +61,18 @@
 ## Technische Specificaties
 
 ### Backend
-- [ ] Node.js + Express
-- [ ] REST API
-- [ ] JSON Web Tokens (JWT) voor authenticatie en rolbeheer
-- [ ] WebSocket (via `ws`) of MQTT (optioneel)
-- [ ] Data in JSON-bestand of in-memory (MongoDB optioneel)
+- [x] Node.js + Express
+- [x] REST API
+- [x] JSON Web Tokens (JWT) voor authenticatie en rolbeheer
+- [x] WebSocket (via `ws`) of MQTT (optioneel)
+- [x] Data in mysql
 - [ ] Swagger-documentatie op `/api-docs`
 
 ### Front-end
-- [ ] HTML + CSS + vanilla JavaScript
-- [ ] Fetch-requests met JWT in headers
-- [ ] Login-UI + detectie op basis van `role`
-- [ ] Condities in UI afhankelijk van rol
+- [x] HTML + CSS + vanilla JavaScript
+- [x] Fetch-requests met JWT in headers
+- [x] Login-UI + detectie op basis van `role`
+- [x] Condities in UI afhankelijk van rol
 
 ---
 
@@ -96,36 +97,36 @@
 ## Aanpak in fasen
 
 ### Fase 1: TMDB API-integratie
-- [ ] TMDB-key aanvragen
-- [ ] Endpoint + fetch voor basis filmdata
-- [ ] UI-overzicht met filmkaarten of lijst
+- [x] TMDB-key aanvragen
+- [x] Endpoint + fetch voor basis filmdata
+- [x] UI-overzicht met filmkaarten of lijst
 
 ### Fase 2: Voorstellingen aanmaken/beheren
-- [ ] JSON-structuur voor voorstellingen
+- [x] JSON-structuur voor voorstellingen
 - [ ] CRUD-endpoints voor screenings (manager only)
 - [ ] Manager-dashboard op zelfde site (conditie op rol)
 
 ### Fase 3: Auth en sessiebeheer met JWT
-- [ ] Gebruikers & managers kunnen inloggen
-- [ ] JWT gebruiken als session token (in headers)
-- [ ] Rolgebaseerde toegang tot routes en UI
+- [x] Gebruikers & managers kunnen inloggen
+- [x] JWT gebruiken als session token (in headers)
+- [x] Rolgebaseerde toegang tot routes en UI
 
 ### Fase 4: Ticketreservering met validatie
 - [ ] POST `/reserve` met voorstelling-ID
-- [ ] Aantal tickets verminderen bij reservatie
-- [ ] JWT vereist → gebruikers kunnen enkel 1 ticket boeken
+- [x] Aantal tickets verminderen bij reservatie
+- [x] JWT vereist → gebruikers kunnen enkel 1 ticket boeken
 
 ### Fase 5: Real-time communicatie
-- [ ] WebSocket-server met `ws`
-- [ ] Klanten krijgen updates als tickets veranderen
-- [ ] UI toont resterende tickets live
+- [x] WebSocket-server met `ws`
+- [x] Klanten krijgen updates als tickets veranderen
+- [x] UI toont resterende tickets live
 
 ### Fase 6: Swagger-documentatie
 - [ ] Documenteer alle routes met `swagger-jsdoc`
 - [ ] Toegankelijk op `/api-docs`
 
 ### (Optioneel) Fase 7: Docker & hosting
-- [ ] Dockerfile voor Node-backend
+- [x] Dockerfile voor Node-backend
 - [ ] Hosting via gratis platform naar keuze (bv. Railway, Azure)
 
 ---
@@ -143,7 +144,7 @@
 ## Mogelijke uitbreidingen
 
 - [ ] Filters op filmgenre of datum
-- [ ] Meerdere zalen per bioscoop
+- [x] Meerdere zalen per bioscoop
 - [ ] Rolgebaseerde toegang met middleware
 - [ ] QR-code voor ticket
 - [ ] E-mail met bevestiging (bv. Mailtrap)
@@ -155,7 +156,7 @@
 
 ## Ondersteuning
 
-- [ ] Gebruik GitHub voor versiebeheer
+- [x] Gebruik GitHub voor versiebeheer
 - [ ] Overleg tijdig bij problemen
 
 **Veel succes met de ontwikkeling!**

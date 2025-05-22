@@ -21,6 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.14.1",
+    "nodemailer": "^7.0.3",
+    "qrcode": "^1.5.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "ws": "^8.18.2"
