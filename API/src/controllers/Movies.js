@@ -31,7 +31,6 @@ export const getMovies = async (req, res) => {
   }
 };
 
-// GET / search movies from TMDB using title
 export const searchMovies = async (req, res) => {
   const { title } = req.query;
 
@@ -69,7 +68,6 @@ export const searchMovies = async (req, res) => {
   }
 };
 
-// GET / get movie details from TMDB using tmdb movie id
 export const getMovieDetails = async (req, res) => {
   const { id } = req.params;
 
@@ -101,3 +99,8 @@ export const getMovieDetails = async (req, res) => {
   }
 };
 
+export default {
+  getMovies,
+  searchMovies,
+  getMovieDetails
+};

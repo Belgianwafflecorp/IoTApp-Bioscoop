@@ -27,11 +27,43 @@
     <p>Only allowed for managers</p>
   </section>
 
-  <!-- Filter Bar -->
-  <section class="filters">
-    <select><option>Alle films</option></select>
-    <select><option>Vandaag</option></select>
-    <select><option>Filter 3</option></select>
+  <section class="manager-controls">
+    <button class="tab-btn" id="user-management-tab">User Management</button>
+    <button class="tab-btn" id="movie-management-tab">Movie Management</button>
+    <button class="tab-btn" id="screenings-management-tab">Screenings Management</button>
+  </section>
+
+  <section id="user-management-section" class="management-section">
+    <h2>User Management</h2>
+    <div class="user-search">
+      <input type="text" id="user-search-input" placeholder="Search by username, email, or ID..." />
+      <button id="user-search-btn">Search</button>
+      <button id="user-search-reset">Reset</button>
+      <button id="show-managers-btn">Show Managers</button>
+    </div>
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Edit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Users will be loaded here -->
+      </tbody>
+    </table>
+  </section>
+
+  <section id="movie-management-section" class="management-section" style="display:none;">
+    <h2>Movie Management</h2>
+    <p>Movie management table coming soon...</p>
+  </section>
+
+  <section id="screenings-management-section" class="management-section" style="display:none;">
+    <h2>Screenings Management</h2>
+    <p>Screenings management table coming soon...</p>
   </section>
 
   <script src="../src/js/manager.js" type="module"></script>
