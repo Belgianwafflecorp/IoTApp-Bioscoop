@@ -49,7 +49,7 @@ export const searchMovies = async (req, res) => {
 
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&include_adult=true&language=en-US&page=1`
+      `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&include_adult=true&language=en-US&page=1`
     );
 
     if (!response.ok) {

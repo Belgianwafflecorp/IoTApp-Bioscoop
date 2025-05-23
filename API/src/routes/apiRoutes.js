@@ -230,6 +230,89 @@ router.get('/me', authenticateToken, UserController.getMe);
 router.post('/changeUserRole', ManagerController.changeUserRole);
 
 
+/////////////////////////////////////////////////////////////////
+///////////////////////////// tmdb //////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/movies/tmdb:
+ *   get:
+ *     summary: Get movies from TMDB
+ *     tags:
+ *       - TMDB
+ *     responses:
+ *       200:
+ *         description: List of movies from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Failed to fetch movies from TMDB
+ */
+router.get('/movies/tmdb', MovieTMDB.getMovies);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/search:
+ *   get:
+ *     summary: Search movies from TMDB
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: query
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The search query for the movie title
+ *     responses:
+ *       200:
+ *         description: Search results from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       400:
+ *         description: Missing or invalid query parameter
+ *       500:
+ *         description: Failed to search movies from TMDB
+ */
+router.get('/movies/tmdb/search', MovieTMDB.searchMovies);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/{id}:
+ *   get:
+ *     summary: Get movie details from TMDB by ID
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The TMDB movie ID
+ *     responses:
+ *       200:
+ *         description: Movie details from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Movie not found on TMDB
+ *       500:
+ *         description: Failed to fetch movie details from TMDB
+ */
+router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
+
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// movies ////////////////////////////
@@ -537,87 +620,6 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  */
 router.post('/changeUserRole', ManagerController.changeUserRole);
 
-/////////////////////////////////////////////////////////////////
-///////////////////////////// tmdb //////////////////////////////
-/////////////////////////////////////////////////////////////////
 
-/**
- * @swagger
- * /api/movies/tmdb:
- *   get:
- *     summary: Get movies from TMDB
- *     tags:
- *       - TMDB
- *     responses:
- *       200:
- *         description: List of movies from TMDB
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *       500:
- *         description: Failed to fetch movies from TMDB
- */
-router.get('/movies/tmdb', MovieTMDB.getMovies);
-
-/**
- * @swagger
- * /api/movies/tmdb/search:
- *   get:
- *     summary: Search movies from TMDB
- *     tags:
- *       - TMDB
- *     parameters:
- *       - in: query
- *         name: query
- *         required: true
- *         schema:
- *           type: string
- *         description: The search query for the movie title
- *     responses:
- *       200:
- *         description: Search results from TMDB
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *       400:
- *         description: Missing or invalid query parameter
- *       500:
- *         description: Failed to search movies from TMDB
- */
-router.get('/movies/tmdb/search', MovieTMDB.searchMovies);
-
-/**
- * @swagger
- * /api/movies/tmdb/{id}:
- *   get:
- *     summary: Get movie details from TMDB by ID
- *     tags:
- *       - TMDB
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: The TMDB movie ID
- *     responses:
- *       200:
- *         description: Movie details from TMDB
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *       404:
- *         description: Movie not found on TMDB
- *       500:
- *         description: Failed to fetch movie details from TMDB
- */
-router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
 
 export default router;
