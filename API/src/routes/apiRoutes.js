@@ -6,7 +6,8 @@ import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
-import { getMovies, searchMovies, getMovieDetails } from '../controllers/Movies.js';
+import * as MovieTMDB from '../controllers/Movies.js';
+import * as ReservationController from '../controllers/ReservationController.js';
 
 
 /////////////////////////////////////////////////////////////////
@@ -635,7 +636,7 @@ router.post('/changeUserRole', ManagerController.changeUserRole);
  *       500:
  *         description: Failed to fetch movies from TMDB
  */
-router.get('/movies/tmdb', getMovies);
+router.get('/movies/tmdb', MovieTMDB.getMovies);
 
 /**
  * @swagger
@@ -665,7 +666,7 @@ router.get('/movies/tmdb', getMovies);
  *       500:
  *         description: Failed to search movies from TMDB
  */
-router.get('/movies/tmdb/search', searchMovies);
+router.get('/movies/tmdb/search', MovieTMDB.searchMovies);
 
 /**
  * @swagger
@@ -693,6 +694,6 @@ router.get('/movies/tmdb/search', searchMovies);
  *       500:
  *         description: Failed to fetch movie details from TMDB
  */
-router.get('/movies/tmdb/:id', getMovieDetails);
+router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
 
 export default router;
