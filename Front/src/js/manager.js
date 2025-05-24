@@ -287,7 +287,7 @@ function renderTMDBResults(results) {
     return;
   }
   const ul = document.createElement('ul');
-  results.forEach(movie => {
+  results.forEach(async movie => {
     // Map genre_ids to names
     let genreNames = '';
     if (Array.isArray(movie.genre_ids) && tmdbGenres) {
@@ -296,32 +296,34 @@ function renderTMDBResults(results) {
         .filter(Boolean)
         .join(', ');
     }
+    // Fetch runtime
+    let duration = await fetchTMDBRuntime(movie.id);
+
     const li = document.createElement('li');
     li.innerHTML = `
       <strong>${movie.title}</strong> (${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'})<br>
       <em>${movie.overview || ''}</em><br>
       <span><b>Genres:</b> ${genreNames || 'Unknown'}</span><br>
+      <span><b>Release Date:</b> ${movie.release_date || 'Unknown'}</span><br>
+      <span><b>Duration:</b> ${duration ? duration + ' min' : 'Unknown'}</span><br>
       <button class="add-tmdb-movie"
         data-title="${encodeURIComponent(movie.title)}"
         data-description="${encodeURIComponent(movie.overview || '')}"
         data-release="${movie.release_date || ''}"
-        data-duration=""
+        data-duration="${duration || ''}"
         data-genre="${encodeURIComponent(genreNames)}"
       >Add to Database</button>
     `;
     ul.appendChild(li);
-  });
-  container.appendChild(ul);
 
-  // Add event listeners for add buttons
-  container.querySelectorAll('.add-tmdb-movie').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const movie = {
-        title: decodeURIComponent(btn.getAttribute('data-title')),
-        description: decodeURIComponent(btn.getAttribute('data-description')),
-        release_date: btn.getAttribute('data-release'),
-        duration_minutes: 120,
-        genre: decodeURIComponent(btn.getAttribute('data-genre')) || 'Unknown'
+    // Add event listener for the button
+    li.querySelector('.add-tmdb-movie').addEventListener('click', async () => {
+      const movieToAdd = {
+        title: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-title')),
+        description: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-description')),
+        release_date: li.querySelector('.add-tmdb-movie').getAttribute('data-release'),
+        duration_minutes: duration || 120,
+        genre: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-genre')) || 'Unknown'
       };
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/api/movies`, {
@@ -330,7 +332,7 @@ function renderTMDBResults(results) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(movie)
+        body: JSON.stringify(movieToAdd)
       });
       if (res.ok) {
         alert('Movie added!');
@@ -340,6 +342,7 @@ function renderTMDBResults(results) {
       }
     });
   });
+  container.appendChild(ul);
 }
 
 // Fetch and render movies from your DB
@@ -361,8 +364,7 @@ function renderMoviesTable(movies) {
     tr.innerHTML = `
       <td>${movie.title}</td>
       <td>${movie.description || ''}</td>
-      <td>${movie.release_date || ''}</td>
-      <td>${movie.duration || ''}</td>
+      <td>${movie.duration_minutes || ''}</td>
       <td>${movie.genre || ''}</td>
       <td><button class="delete-movie-btn" data-id="${movie.movie_id}">Delete</button></td>
     `;
@@ -403,4 +405,15 @@ if (tmdbClearBtn) {
     if (input) input.value = '';
     if (results) results.innerHTML = '';
   });
+}
+
+async function fetchTMDBRuntime(tmdbId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/movies/tmdb/${tmdbId}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.runtime || null;
+  } catch {
+    return null;
+  }
 }
