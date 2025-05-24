@@ -1,3 +1,5 @@
+import fetch from 'node-fetch'; // Add this at the top if not present
+
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 
@@ -98,6 +100,26 @@ export const getMovieDetails = async (req, res) => {
     res.status(error.status || 500).json({
       error: error.message || 'Failed to fetch movie details'
     });
+  }
+};
+
+export const getTMDBGenres = async (req, res) => {
+  if (!TMDB_API_KEY) {
+    return res.status(500).json({ error: 'TMDB API key not configured on server' });
+  }
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}&language=en-US`
+    );
+    if (!response.ok) {
+      const error = new Error(`TMDB API error: ${response.statusText}`);
+      error.status = response.status;
+      throw error;
+    }
+    const data = await response.json();
+    res.json(data.genres);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message || 'Failed to fetch genres from TMDB' });
   }
 };
 

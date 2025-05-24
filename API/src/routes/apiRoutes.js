@@ -287,6 +287,27 @@ router.get('/movies/tmdb/search', MovieTMDB.searchMovies);
 
 /**
  * @swagger
+ * /api/movies/tmdb/genres:
+ *   get:
+ *     summary: Get movie genres from TMDB
+ *     tags:
+ *       - TMDB
+ *     responses:
+ *       200:
+ *         description: List of movie genres from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Failed to fetch genres from TMDB
+ */
+router.get('/movies/tmdb/genres', MovieTMDB.getTMDBGenres);
+
+/**
+ * @swagger
  * /api/movies/tmdb/{id}:
  *   get:
  *     summary: Get movie details from TMDB by ID

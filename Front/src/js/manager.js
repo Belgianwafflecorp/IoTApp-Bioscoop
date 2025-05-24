@@ -1,4 +1,26 @@
 const API_BASE = 'http://localhost:3000';
+let tmdbGenres = {};
+
+async function fetchTMDBGenres() {
+  try {
+    const res = await fetch(`${API_BASE}/api/movies/tmdb/genres`);
+    if (!res.ok) return;
+    const genres = await res.json();
+    tmdbGenres = {};
+    genres.forEach(g => {
+      tmdbGenres[Number(g.id)] = g.name;
+    });
+  } catch (err) {
+    console.error('Failed to fetch TMDB genres:', err);
+  }
+}
+
+// Fetch genres on page load if the TMDB search form exists
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('tmdb-search-form')) {
+    fetchTMDBGenres();
+  }
+});
 
 // Check for manager role
 export async function updateNavbarForRole() {
@@ -246,6 +268,10 @@ if (tmdbForm) {
     e.preventDefault();
     const query = document.getElementById('tmdb-search-input').value.trim();
     if (!query) return;
+    // Ensure genres are loaded before searching
+    if (!Object.keys(tmdbGenres).length) {
+      await fetchTMDBGenres();
+    }
     const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
     const results = await res.json();
     renderTMDBResults(results);
@@ -254,6 +280,7 @@ if (tmdbForm) {
 
 function renderTMDBResults(results) {
   const container = document.getElementById('tmdb-results');
+  if (!container) return;
   container.innerHTML = '';
   if (!results.length) {
     container.textContent = 'No results found.';
@@ -261,16 +288,25 @@ function renderTMDBResults(results) {
   }
   const ul = document.createElement('ul');
   results.forEach(movie => {
+    // Map genre_ids to names
+    let genreNames = '';
+    if (Array.isArray(movie.genre_ids) && tmdbGenres) {
+      genreNames = movie.genre_ids
+        .map(id => tmdbGenres[Number(id)])
+        .filter(Boolean)
+        .join(', ');
+    }
     const li = document.createElement('li');
     li.innerHTML = `
       <strong>${movie.title}</strong> (${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'})<br>
       <em>${movie.overview || ''}</em><br>
+      <span><b>Genres:</b> ${genreNames || 'Unknown'}</span><br>
       <button class="add-tmdb-movie"
         data-title="${encodeURIComponent(movie.title)}"
         data-description="${encodeURIComponent(movie.overview || '')}"
         data-release="${movie.release_date || ''}"
         data-duration=""
-        data-genre=""
+        data-genre="${encodeURIComponent(genreNames)}"
       >Add to Database</button>
     `;
     ul.appendChild(li);
@@ -280,13 +316,12 @@ function renderTMDBResults(results) {
   // Add event listeners for add buttons
   container.querySelectorAll('.add-tmdb-movie').forEach(btn => {
     btn.addEventListener('click', async () => {
-      // You may want to fetch more details (like duration) from TMDB here if needed
       const movie = {
         title: decodeURIComponent(btn.getAttribute('data-title')),
         description: decodeURIComponent(btn.getAttribute('data-description')),
         release_date: btn.getAttribute('data-release'),
-        duration_minutes: 120, 
-        genre: btn.getAttribute('data-genre') || 'Unknown'
+        duration_minutes: 120,
+        genre: decodeURIComponent(btn.getAttribute('data-genre')) || 'Unknown'
       };
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/api/movies`, {
@@ -358,4 +393,14 @@ function renderMoviesTable(movies) {
 const movieTab = document.getElementById('movie-management-tab');
 if (movieTab) {
   movieTab.addEventListener('click', fetchAndRenderMovies);
+}
+
+const tmdbClearBtn = document.getElementById('tmdb-clear-btn');
+if (tmdbClearBtn) {
+  tmdbClearBtn.addEventListener('click', () => {
+    const input = document.getElementById('tmdb-search-input');
+    const results = document.getElementById('tmdb-results');
+    if (input) input.value = '';
+    if (results) results.innerHTML = '';
+  });
 }
