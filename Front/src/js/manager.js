@@ -225,10 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const screeningsSection = document.getElementById('screenings-management-section');
 
   function showSection(section) {
+    if (!userSection || !movieSection || !screeningsSection) return;
     userSection.style.display = 'none';
     movieSection.style.display = 'none';
     screeningsSection.style.display = 'none';
-    section.style.display = '';
+    if (section) section.style.display = '';
   }
 
   if (userTab) userTab.addEventListener('click', () => showSection(userSection));
@@ -239,14 +240,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- Movie Management Tab Logic ---
 
 // Search TMDB
-document.getElementById('tmdb-search-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const query = document.getElementById('tmdb-search-input').value.trim();
-  if (!query) return;
-  const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
-  const results = await res.json();
-  renderTMDBResults(results);
-});
+const tmdbForm = document.getElementById('tmdb-search-form');
+if (tmdbForm) {
+  tmdbForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = document.getElementById('tmdb-search-input').value.trim();
+    if (!query) return;
+    const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
+    const results = await res.json();
+    renderTMDBResults(results);
+  });
+}
 
 function renderTMDBResults(results) {
   const container = document.getElementById('tmdb-results');
@@ -315,6 +319,7 @@ async function fetchAndRenderMovies() {
 
 function renderMoviesTable(movies) {
   const tbody = document.querySelector('#movies-table tbody');
+  if (!tbody) return;
   tbody.innerHTML = '';
   movies.forEach(movie => {
     const tr = document.createElement('tr');
@@ -349,5 +354,8 @@ function renderMoviesTable(movies) {
   });
 }
 
-// Load movies when the tab is shown
-document.getElementById('movie-management-tab').addEventListener('click', fetchAndRenderMovies);
+
+const movieTab = document.getElementById('movie-management-tab');
+if (movieTab) {
+  movieTab.addEventListener('click', fetchAndRenderMovies);
+}
