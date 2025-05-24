@@ -58,7 +58,27 @@
 
   <section id="movie-management-section" class="management-section" style="display:none;">
     <h2>Movie Management</h2>
-    <p>Movie management table coming soon...</p>
+    <form id="tmdb-search-form" class="movie-form">
+      <input type="text" id="tmdb-search-input" placeholder="Search TMDB by title..." required />
+      <button type="submit">Search TMDB</button>
+    </form>
+    <div id="tmdb-results"></div>
+    <h3>Movies in Database</h3>
+    <table id="movies-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Release Date</th>
+          <th>Duration</th>
+          <th>Genre</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Movies will be loaded here -->
+      </tbody>
+    </table>
   </section>
 
   <section id="screenings-management-section" class="management-section" style="display:none;">

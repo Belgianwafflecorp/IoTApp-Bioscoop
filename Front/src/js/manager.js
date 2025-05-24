@@ -1,3 +1,5 @@
+const API_BASE = 'http://localhost:3000';
+
 // Check for manager role
 export async function updateNavbarForRole() {
   const token = localStorage.getItem('token');
@@ -7,7 +9,7 @@ export async function updateNavbarForRole() {
   }
 
   try {
-    const res = await fetch('http://localhost:3000/api/me', {
+    const res = await fetch(`${API_BASE}/api/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     try {
-      const res = await fetch('http://localhost:3000/api/me', {
+      const res = await fetch(`${API_BASE}/api/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -68,7 +70,7 @@ async function fetchAndRenderUsers(searchTerm = '') {
   if (!token) return;
 
   try {
-    const res = await fetch('http://localhost:3000/api/getAllUsers', {
+    const res = await fetch(`${API_BASE}/api/getAllUsers`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     allUsers = await res.json();
@@ -169,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function changeUserRole(userId, newRole) {
   const token = localStorage.getItem('token');
   try {
-    const res = await fetch('http://localhost:3000/api/changeUserRole', {
+    const res = await fetch(`${API_BASE}/api/changeUserRole`, {
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json',
@@ -191,7 +193,7 @@ async function changeUserRole(userId, newRole) {
 async function deleteUser(userId) {
   const token = localStorage.getItem('token');
   try {
-    const res = await fetch(`http://localhost:3000/api/deleteUser/${userId}`, {
+    const res = await fetch(`${API_BASE}/api/deleteUser/${userId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -233,3 +235,119 @@ document.addEventListener('DOMContentLoaded', () => {
   if (movieTab) movieTab.addEventListener('click', () => showSection(movieSection));
   if (screeningsTab) screeningsTab.addEventListener('click', () => showSection(screeningsSection));
 });
+
+// --- Movie Management Tab Logic ---
+
+// Search TMDB
+document.getElementById('tmdb-search-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const query = document.getElementById('tmdb-search-input').value.trim();
+  if (!query) return;
+  const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
+  const results = await res.json();
+  renderTMDBResults(results);
+});
+
+function renderTMDBResults(results) {
+  const container = document.getElementById('tmdb-results');
+  container.innerHTML = '';
+  if (!results.length) {
+    container.textContent = 'No results found.';
+    return;
+  }
+  const ul = document.createElement('ul');
+  results.forEach(movie => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <strong>${movie.title}</strong> (${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'})<br>
+      <em>${movie.overview || ''}</em><br>
+      <button class="add-tmdb-movie"
+        data-title="${encodeURIComponent(movie.title)}"
+        data-description="${encodeURIComponent(movie.overview || '')}"
+        data-release="${movie.release_date || ''}"
+        data-duration=""
+        data-genre=""
+      >Add to Database</button>
+    `;
+    ul.appendChild(li);
+  });
+  container.appendChild(ul);
+
+  // Add event listeners for add buttons
+  container.querySelectorAll('.add-tmdb-movie').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      // You may want to fetch more details (like duration) from TMDB here if needed
+      const movie = {
+        title: decodeURIComponent(btn.getAttribute('data-title')),
+        description: decodeURIComponent(btn.getAttribute('data-description')),
+        release_date: btn.getAttribute('data-release'),
+        duration_minutes: 120, 
+        genre: btn.getAttribute('data-genre') || 'Unknown'
+      };
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/movies`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(movie)
+      });
+      if (res.ok) {
+        alert('Movie added!');
+        fetchAndRenderMovies();
+      } else {
+        alert('Failed to add movie');
+      }
+    });
+  });
+}
+
+// Fetch and render movies from your DB
+async function fetchAndRenderMovies() {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/api/movies`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const movies = await res.json();
+  renderMoviesTable(movies);
+}
+
+function renderMoviesTable(movies) {
+  const tbody = document.querySelector('#movies-table tbody');
+  tbody.innerHTML = '';
+  movies.forEach(movie => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${movie.title}</td>
+      <td>${movie.description || ''}</td>
+      <td>${movie.release_date || ''}</td>
+      <td>${movie.duration || ''}</td>
+      <td>${movie.genre || ''}</td>
+      <td><button class="delete-movie-btn" data-id="${movie.movie_id}">Delete</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Delete logic
+  tbody.querySelectorAll('.delete-movie-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      if (confirm('Are you sure you want to delete this movie?')) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/api/movies/${id}`, { 
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          fetchAndRenderMovies();
+        } else {
+          alert('Failed to delete movie');
+        }
+      }
+    });
+  });
+}
+
+// Load movies when the tab is shown
+document.getElementById('movie-management-tab').addEventListener('click', fetchAndRenderMovies);

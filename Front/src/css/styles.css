@@ -640,3 +640,38 @@ button:hover,
 .delete-user-btn:hover:not(:disabled) {
   background: #b71c1c;
 }
+
+/* Movie Form Styles in management page*/
+.movie-form {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1em;
+  flex-wrap: wrap;
+}
+#tmdb-results ul {
+  list-style: none;
+  padding: 0;
+}
+#tmdb-results li {
+  margin-bottom: 1em;
+  background: #f6f6f6;
+  color: #222;
+  padding: 1em;
+  border-radius: 8px;
+}
+.add-tmdb-movie {
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3em 0.8em;
+  cursor: pointer;
+}
+.delete-movie-btn {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3em 0.8em;
+  cursor: pointer;
+}
