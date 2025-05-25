@@ -94,32 +94,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     for (const movie of data) {
       try {
-        console.log('Movie object:', movie);
         if (!movie.title) {
           console.warn('No title for movie:', movie);
           continue;
         }
+
         const url = `http://localhost:3000/api/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`;
-        console.log('Fetching TMDB with URL:', url);
-
         const tmdbRes = await fetch(url);
-        console.log('TMDB fetch status:', tmdbRes.status);
         const tmdbData = await tmdbRes.json();
-
-        console.log(`TMDB data for "${movie.title}":`, tmdbData);
 
         if (!Array.isArray(tmdbData) || !tmdbData[0]) {
           console.warn(`No TMDB results for "${movie.title}"`);
           continue;
         }
 
-        const { title, overview, vote_average } = tmdbData[0];
+        const tmdbMovie = tmdbData[0];
+        const { title, overview, vote_average, poster_path } = tmdbMovie;
+
         const card = document.createElement('div');
         card.classList.add('movie-card');
+
+        // Build image HTML safely
+        const posterUrl = poster_path
+          ? `https://image.tmdb.org/t/p/w500/${poster_path}`
+          : './src/assets/placeholder.png'; // Add a fallback image in your project
+
         card.innerHTML = `
-          <h3>${title.toUpperCase()}</h3>
-          <p>${overview.slice(0, 80)}... <a href="#">read more</a></p>
-          <div class="rating">⭐ ${vote_average}</div>
+          <img src="${posterUrl}" alt="${title}" class="movie-poster" />
+          <div class="movie-info">
+            <h3>${title.toUpperCase()}</h3>
+            <p>${overview ? overview.slice(0, 80) : 'No description available'}... <a href="#">read more</a></p>
+            <div class="rating">⭐ ${vote_average ?? 'N/A'}</div>
+          </div>
         `;
         movieList.appendChild(card);
       } catch (err) {

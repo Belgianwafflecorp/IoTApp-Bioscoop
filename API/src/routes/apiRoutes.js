@@ -334,6 +334,8 @@ router.get('/movies/tmdb/genres', MovieTMDB.getTMDBGenres);
  */
 router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
 
+router.get('/movies/details/:title', MovieTMDB.getMovieByTitle);
+
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// movies ////////////////////////////

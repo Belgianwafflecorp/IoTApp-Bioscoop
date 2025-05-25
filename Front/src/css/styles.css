@@ -191,44 +191,58 @@ button:hover,
   border: none;
 }
 
-/* ===============
+/* ===============  
    Movie Grid & Cards
    =============== */
 .movie-grid {
   padding: 2em;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2em;
 }
 
 .movie-card {
   background-color: #111;
-  border-radius: var(--border-radius);
+  border-radius: 15px;
   overflow: hidden;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--box-shadow);
 }
 
 .movie-card img {
   width: 100%;
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px 15px 0 0;
+}
+
+.movie-card-content {
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
 }
 
 .movie-card h3 {
-  background-color: var(--color-dark-blue);
-  padding: 0.5em;
-  font-size: 1em;
   font-family: var(--font-header);
+  font-size: 1.4em;
+  color: var(--color-yellow);
+  margin: 0;
 }
 
 .movie-card p {
-  padding: 0.5em 1em;
-  font-size: 0.85em;
+  font-size: 0.9em;
+  color: #ccc;
+  font-style: italic;
+  margin: 0;
 }
 
 .movie-card .stars {
-  padding: 0.5em;
   color: var(--color-yellow);
+  font-weight: bold;
 }
+
 
 /* ===============
    Login Page
@@ -329,7 +343,8 @@ button:hover,
 
 .screening-card img {
   width: 100%;
-  height: 200px;
+  height: 100%;
+  max-height: 500px;
   object-fit: cover;
   border-radius: 15px 15px 0 0;
 }
