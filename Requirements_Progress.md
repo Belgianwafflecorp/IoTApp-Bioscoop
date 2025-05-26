@@ -112,7 +112,7 @@
 - [x] Rolgebaseerde toegang tot routes en UI
 
 ### Fase 4: Ticketreservering met validatie
-- [ ] POST `/reserve` met voorstelling-ID
+- [x] POST `/reserve` met voorstelling-ID
 - [x] Aantal tickets verminderen bij reservatie
 - [x] JWT vereist → gebruikers kunnen enkel 1 ticket boeken
 
