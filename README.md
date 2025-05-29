@@ -5,7 +5,7 @@ Als je er momenteel mee bezig bent zet je je initiaal in dat doosje. bvb [D], [N
 
 ### Basisfunctionaliteit:
 
-1. [N] Klikken op filmposter of 'read more' vergroot het paneel van die film en geeft zoveel mogelijk info/details over de beklikte film. (zie canva mockup voor een mogelijke uitwerking)
+1. [N,O] Klikken op filmposter of 'read more' vergroot het paneel van die film en geeft zoveel mogelijk info/details over de beklikte film. (zie canva mockup voor een mogelijke uitwerking)
 
 2. [ ] Op screenings page filteren op "vandaag" of "deze week". Bij "deze week" ook tonen bij iedere screening over welke dag het gaat dan.
 
