@@ -78,13 +78,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    // Wait for API to be ready
     await waitForApi();
 
     // Fetch genre list from your API
     const genresRes = await fetch('http://localhost:3000/api/movies/tmdb/genres');
     const genresJson = await genresRes.json();
-    // genresJson is already an array!
     const genreMap = {};
     if (Array.isArray(genresJson)) {
       genresJson.forEach(g => {
@@ -96,89 +94,119 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await fetch(`http://localhost:3000/api/movies`);
     const data = await res.json();
 
-    console.log(data);
-
-    console.log('Testing simple forEach');
-    data.forEach(movie => {
-      console.log('Simple forEach movie:', movie.title);
-    });
-
     for (const movie of data) {
-      try {
-        if (!movie.title) {
-          console.warn('No title for movie:', movie);
-          continue;
-        }
+      if (!movie.title) continue;
 
-        const url = `http://localhost:3000/api/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`;
-        const tmdbRes = await fetch(url);
-        const tmdbData = await tmdbRes.json();
+      const tmdbRes = await fetch(`http://localhost:3000/api/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
+      const tmdbData = await tmdbRes.json();
 
-        if (!Array.isArray(tmdbData) || !tmdbData[0]) {
-          console.warn(`No TMDB results for "${movie.title}"`);
-          continue;
-        }
+      if (!Array.isArray(tmdbData) || !tmdbData[0]) continue;
 
-        const tmdbMovie = tmdbData[0];
-        const { title, overview, vote_average, poster_path, release_date, genre_ids } = tmdbMovie;
+      const tmdbMovie = tmdbData[0];
+      const { title, overview, vote_average, poster_path, release_date, genre_ids, id: tmdbId } = tmdbMovie;
 
-        // Use genre_ids from TMDB and map them to genre names using genreMap
-        let genreText = 'Unknown';
-        if (genre_ids && Array.isArray(genre_ids)) {
-          const genreNames = genre_ids
-            .map(id => genreMap[Number(id)]) // Ensure id is a number
-            .filter(Boolean); // Remove undefined
-          genreText = genreNames.length > 0 ? genreNames.join(', ') : 'Unknown';
-        }
-
-        const card = document.createElement('div');
-        card.classList.add('movie-card');
-
-        const posterUrl = poster_path
-          ? `https://image.tmdb.org/t/p/w500/${poster_path}`
-          : './src/assets/placeholder.png';
-
-        card.innerHTML = `
-          <img src="${posterUrl}" alt="${title}" class="movie-poster" />
-          <div class="movie-info">
-            <h3>${title.toUpperCase()}</h3>
-            <p class="movie-overview">${overview ? overview.slice(0, 80) : 'No description available'}... <a href="#" class="read-more">read more</a></p>
-            <div class="rating">⭐ ${vote_average ?? 'N/A'}</div>
-            <div class="extra-info" style="display:none;">
-              <p><strong>Overview:</strong> ${overview}</p>
-              <p><strong>Genres:</strong> ${genreText}</p>
-              <p><strong>Release date:</strong> ${release_date ?? 'Unknown'}</p>
-            </div>
-          </div>
-        `;
-        movieList.appendChild(card);
-
-        // Add event listener for "read more"
-        const readMoreLink = card.querySelector('.read-more');
-        readMoreLink.addEventListener('click', function (e) {
-          e.preventDefault();
-          card.classList.toggle('expanded');
-          const extraInfo = card.querySelector('.extra-info');
-          const overviewP = card.querySelector('.movie-overview');
-          if (card.classList.contains('expanded')) {
-            extraInfo.style.display = 'block';
-            overviewP.style.display = 'none';
-            card.style.maxWidth = '600px'; // or any size you want
-          } else {
-            extraInfo.style.display = 'none';
-            overviewP.style.display = 'block';
-            card.style.maxWidth = ''; // reset
-          }
-        });
-      } catch (err) {
-        console.error(`Failed to fetch TMDB data for "${movie.title}"`, err);
+      // Use genre_ids from TMDB and map them to genre names using genreMap
+      let genreText = 'Unknown';
+      if (genre_ids && Array.isArray(genre_ids)) {
+        const genreNames = genre_ids
+          .map(id => genreMap[Number(id)])
+          .filter(Boolean);
+        genreText = genreNames.length > 0 ? genreNames.join(', ') : 'Unknown';
       }
+
+      const card = document.createElement('div');
+      card.classList.add('movie-card');
+      card.dataset.tmdbId = tmdbId;
+      card.dataset.localTitle = movie.title;
+
+      const posterUrl = poster_path
+        ? `https://image.tmdb.org/t/p/w500/${poster_path}`
+        : './src/assets/placeholder.png';
+
+      card.innerHTML = `
+        <img src="${posterUrl}" alt="${title}" class="movie-poster" />
+        <div class="movie-info">
+          <h3>${title.toUpperCase()}</h3>
+          <p class="movie-overview">${overview ? overview.slice(0, 80) : 'No description available'}... 
+            <a href="#" class="read-more-link">read more</a>
+          </p>
+          <div class="rating">⭐ ${vote_average ?? 'N/A'}</div>
+        </div>
+      `;
+
+      card.querySelector('.read-more-link').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview);
+      });
+
+      movieList.appendChild(card);
     }
   } catch (error) {
     movieList.innerHTML = `<p>Error loading movies. Please try again later.</p>`;
     console.error('Outer catch:', error);
   }
 });
+
+// Expands the card to fullscreen with left/middle/right layout
+async function expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview) {
+  document.querySelectorAll('.movie-card').forEach(c => {
+    if (c !== card) c.style.display = 'none';
+  });
+  card.classList.add('expanded-fullscreen');
+
+  try {
+    // Fetch trailer
+    let trailerEmbedHTML = '';
+    try {
+      const trailerRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/videos`);
+      const trailers = await trailerRes.json();
+      const trailer = trailers.find(t => t.site === 'YouTube' && t.type === 'Trailer');
+      if (trailer) {
+        trailerEmbedHTML = `
+          <div class="trailer-container">
+            <iframe width="100%" height="315"
+              src="https://www.youtube.com/embed/${trailer.key}"
+              title="YouTube trailer" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+            </iframe>
+          </div>
+        `;
+      }
+    } catch (trailerErr) {
+      console.warn('Failed to load trailer:', trailerErr);
+    }
+
+    card.innerHTML = `
+      <div class="expanded-card-content">
+        <div class="expanded-left">
+          <img src="${posterUrl}" alt="${title}" class="movie-poster-large" />
+          <p><strong>Genres:</strong> ${genreText}</p>
+          <p><strong>Release date:</strong> ${release_date ?? 'Unknown'}</p>
+        </div>
+        <div class="expanded-middle">
+          <h2>${title}</h2>
+          <p>${overview || 'No description available.'}</p>
+        </div>
+        <div class="expanded-right">
+          ${trailerEmbedHTML || '<p>No trailer available.</p>'}
+        </div>
+      </div>
+      <button class="show-less-btn">Show less</button>
+    `;
+
+    card.querySelector('.show-less-btn').addEventListener('click', resetCards);
+  } catch (err) {
+    console.error('Failed to fetch expanded movie info:', err);
+    card.innerHTML += '<p>Error loading additional details.</p>';
+  }
+}
+
+function resetCards() {
+  const movieList = document.getElementById('movie-list');
+  movieList.innerHTML = '';
+  document.dispatchEvent(new Event('DOMContentLoaded'));
+}
 
 function logout() {
   localStorage.removeItem('token');  // Clear the JWT

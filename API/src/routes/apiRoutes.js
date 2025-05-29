@@ -308,6 +308,37 @@ router.get('/movies/tmdb/genres', MovieTMDB.getTMDBGenres);
 
 /**
  * @swagger
+ * /api/movies/tmdb/{id}/videos:
+ *   get:
+ *     summary: Get videos (trailers, teasers, etc.) for a movie from TMDB by ID
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The TMDB movie ID
+ *     responses:
+ *       200:
+ *         description: List of videos for the movie from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       404:
+ *         description: Movie or videos not found on TMDB
+ *       500:
+ *         description: Failed to fetch videos from TMDB
+ */
+router.get('/movies/:id/videos', MovieTMDB.getMovieVideos);
+
+
+/**
+ * @swagger
  * /api/movies/tmdb/{id}:
  *   get:
  *     summary: Get movie details from TMDB by ID
