@@ -175,3 +175,28 @@ export const getMovieByTitle = async (req, res) => {
   }
 };
 
+// GET /:id/videos - Fetch trailers for a movie
+export const getMovieVideos = async (req, res) => {
+  const { id } = req.params;
+
+  if (!TMDB_API_KEY) {
+    return res.status(500).json({ error: 'TMDB API key not configured on server' });
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${TMDB_API_KEY}`
+    );
+    const data = await response.json();
+
+    // Filter for official YouTube trailers
+    const trailers = data.results.filter(
+      v => v.type === 'Trailer' && v.site === 'YouTube'
+    );
+
+    res.json(trailers);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to fetch trailers' });
+  }
+};

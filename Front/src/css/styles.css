@@ -243,6 +243,38 @@ button:hover,
   font-weight: bold;
 }
 
+.movie-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+button.read-more-btn, button.show-less-btn {
+  margin-top: 1rem;
+  background: #444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+button.read-more-btn:hover, button.show-less-btn:hover {
+  background: #666;
+}
+
+.trailer-container {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: #111;
+  border-radius: 8px;
+}
+
+.trailer-container h4 {
+  margin-bottom: 0.5rem;
+  color: #f1c40f;
+}
 
 /* ===============
    Login Page
