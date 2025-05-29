@@ -146,12 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="rating">⭐ ${vote_average ?? 'N/A'}</div>
             <div class="extra-info" style="display:none;">
               <p><strong>Overview:</strong> ${overview}</p>
-              <p><strong></p>
-              <p><strong></p>
-
               <p><strong>Genres:</strong> ${genreText}</p>
-              <p><strong></p>
-              <p><strong></p>
               <p><strong>Release date:</strong> ${release_date ?? 'Unknown'}</p>
             </div>
           </div>
