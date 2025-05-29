@@ -1,9 +1,11 @@
 # IoTApp-Bioscoop
-Als je een feature gemaakt heb, zeg het dan hier of zet een 'X' in het doosje ervoor. 
+
+Als je een feature gemaakt heb, zeg het dan hier of zet een 'X' in het doosje ervoor.
 Als je er momenteel mee bezig bent zet je je initiaal in dat doosje. bvb [D], [N], [O]
+
 ### Basisfunctionaliteit:
 
-1. [ ] Klikken op filmposter of 'read more' vergroot het paneel van die film en geeft zoveel mogelijk info/details over de beklikte film. (zie canva mockup voor een mogelijke uitwerking)
+1. [N] Klikken op filmposter of 'read more' vergroot het paneel van die film en geeft zoveel mogelijk info/details over de beklikte film. (zie canva mockup voor een mogelijke uitwerking)
 
 2. [ ] Op screenings page filteren op "vandaag" of "deze week". Bij "deze week" ook tonen bij iedere screening over welke dag het gaat dan.
 
@@ -24,4 +26,3 @@ Als je er momenteel mee bezig bent zet je je initiaal in dat doosje. bvb [D], [N
 3. [ ] MQTT in plaats van WebSocket
 4. [ ] Grafiek met verkochte tickets (bv. via Chart.js)
 5. [ ] Hosting op Azure (gratis studentenpakket)
-
