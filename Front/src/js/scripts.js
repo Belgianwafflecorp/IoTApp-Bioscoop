@@ -81,6 +81,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Wait for API to be ready
     await waitForApi();
 
+    // Fetch genre list from your API
+    const genresRes = await fetch('http://localhost:3000/api/movies/tmdb/genres');
+    const genresJson = await genresRes.json();
+    // genresJson is already an array!
+    const genreMap = {};
+    if (Array.isArray(genresJson)) {
+      genresJson.forEach(g => {
+        genreMap[g.id] = g.name;
+      });
+    }
+
     // Fetch movie data after the API is ready
     const res = await fetch(`http://localhost:3000/api/movies`);
     const data = await res.json();
@@ -109,25 +120,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const tmdbMovie = tmdbData[0];
-        const { title, overview, vote_average, poster_path } = tmdbMovie;
+        const { title, overview, vote_average, poster_path, release_date, genre_ids } = tmdbMovie;
+
+        // Use genre_ids from TMDB and map them to genre names using genreMap
+        let genreText = 'Unknown';
+        if (genre_ids && Array.isArray(genre_ids)) {
+          const genreNames = genre_ids
+            .map(id => genreMap[Number(id)]) // Ensure id is a number
+            .filter(Boolean); // Remove undefined
+          genreText = genreNames.length > 0 ? genreNames.join(', ') : 'Unknown';
+        }
 
         const card = document.createElement('div');
         card.classList.add('movie-card');
 
-        // Build image HTML safely
         const posterUrl = poster_path
           ? `https://image.tmdb.org/t/p/w500/${poster_path}`
-          : './src/assets/placeholder.png'; // Add a fallback image in your project
+          : './src/assets/placeholder.png';
 
         card.innerHTML = `
           <img src="${posterUrl}" alt="${title}" class="movie-poster" />
           <div class="movie-info">
             <h3>${title.toUpperCase()}</h3>
-            <p>${overview ? overview.slice(0, 80) : 'No description available'}... <a href="#">read more</a></p>
+            <p class="movie-overview">${overview ? overview.slice(0, 80) : 'No description available'}... <a href="#" class="read-more">read more</a></p>
             <div class="rating">⭐ ${vote_average ?? 'N/A'}</div>
+            <div class="extra-info" style="display:none;">
+              <p><strong>Overview:</strong> ${overview}</p>
+              <p><strong></p>
+              <p><strong></p>
+
+              <p><strong>Genres:</strong> ${genreText}</p>
+              <p><strong></p>
+              <p><strong></p>
+              <p><strong>Release date:</strong> ${release_date ?? 'Unknown'}</p>
+            </div>
           </div>
         `;
         movieList.appendChild(card);
+
+        // Add event listener for "read more"
+        const readMoreLink = card.querySelector('.read-more');
+        readMoreLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          card.classList.toggle('expanded');
+          const extraInfo = card.querySelector('.extra-info');
+          const overviewP = card.querySelector('.movie-overview');
+          if (card.classList.contains('expanded')) {
+            extraInfo.style.display = 'block';
+            overviewP.style.display = 'none';
+            card.style.maxWidth = '600px'; // or any size you want
+          } else {
+            extraInfo.style.display = 'none';
+            overviewP.style.display = 'block';
+            card.style.maxWidth = ''; // reset
+          }
+        });
       } catch (err) {
         console.error(`Failed to fetch TMDB data for "${movie.title}"`, err);
       }
