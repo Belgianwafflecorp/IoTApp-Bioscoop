@@ -1,3 +1,27 @@
+const API_BASE = 'http://localhost:3000';
+let tmdbGenres = {};
+
+async function fetchTMDBGenres() {
+  try {
+    const res = await fetch(`${API_BASE}/api/movies/tmdb/genres`);
+    if (!res.ok) return;
+    const genres = await res.json();
+    tmdbGenres = {};
+    genres.forEach(g => {
+      tmdbGenres[Number(g.id)] = g.name;
+    });
+  } catch (err) {
+    console.error('Failed to fetch TMDB genres:', err);
+  }
+}
+
+// Fetch genres on page load if the TMDB search form exists
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('tmdb-search-form')) {
+    fetchTMDBGenres();
+  }
+});
+
 // Check for manager role
 export async function updateNavbarForRole() {
   const token = localStorage.getItem('token');
@@ -7,7 +31,7 @@ export async function updateNavbarForRole() {
   }
 
   try {
-    const res = await fetch('http://localhost:3000/api/me', {
+    const res = await fetch(`${API_BASE}/api/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
@@ -44,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     try {
-      const res = await fetch('http://localhost:3000/api/me', {
+      const res = await fetch(`${API_BASE}/api/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -68,7 +92,7 @@ async function fetchAndRenderUsers(searchTerm = '') {
   if (!token) return;
 
   try {
-    const res = await fetch('http://localhost:3000/api/getAllUsers', {
+    const res = await fetch(`${API_BASE}/api/getAllUsers`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     allUsers = await res.json();
@@ -169,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function changeUserRole(userId, newRole) {
   const token = localStorage.getItem('token');
   try {
-    const res = await fetch('http://localhost:3000/api/changeUserRole', {
+    const res = await fetch(`${API_BASE}/api/changeUserRole`, {
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json',
@@ -191,7 +215,7 @@ async function changeUserRole(userId, newRole) {
 async function deleteUser(userId) {
   const token = localStorage.getItem('token');
   try {
-    const res = await fetch(`http://localhost:3000/api/deleteUser/${userId}`, {
+    const res = await fetch(`${API_BASE}/api/deleteUser/${userId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -223,13 +247,173 @@ document.addEventListener('DOMContentLoaded', () => {
   const screeningsSection = document.getElementById('screenings-management-section');
 
   function showSection(section) {
+    if (!userSection || !movieSection || !screeningsSection) return;
     userSection.style.display = 'none';
     movieSection.style.display = 'none';
     screeningsSection.style.display = 'none';
-    section.style.display = '';
+    if (section) section.style.display = '';
   }
 
   if (userTab) userTab.addEventListener('click', () => showSection(userSection));
   if (movieTab) movieTab.addEventListener('click', () => showSection(movieSection));
   if (screeningsTab) screeningsTab.addEventListener('click', () => showSection(screeningsSection));
 });
+
+// --- Movie Management Tab Logic ---
+
+// Search TMDB
+const tmdbForm = document.getElementById('tmdb-search-form');
+if (tmdbForm) {
+  tmdbForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = document.getElementById('tmdb-search-input').value.trim();
+    if (!query) return;
+    // Ensure genres are loaded before searching
+    if (!Object.keys(tmdbGenres).length) {
+      await fetchTMDBGenres();
+    }
+    const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
+    const results = await res.json();
+    renderTMDBResults(results);
+  });
+}
+
+function renderTMDBResults(results) {
+  const container = document.getElementById('tmdb-results');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!results.length) {
+    container.textContent = 'No results found.';
+    return;
+  }
+  const ul = document.createElement('ul');
+  results.forEach(async movie => {
+    // Map genre_ids to names
+    let genreNames = '';
+    if (Array.isArray(movie.genre_ids) && tmdbGenres) {
+      genreNames = movie.genre_ids
+        .map(id => tmdbGenres[Number(id)])
+        .filter(Boolean)
+        .join(', ');
+    }
+    // Fetch runtime
+    let duration = await fetchTMDBRuntime(movie.id);
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <strong>${movie.title}</strong> (${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'})<br>
+      <em>${movie.overview || ''}</em><br>
+      <span><b>Genres:</b> ${genreNames || 'Unknown'}</span><br>
+      <span><b>Release Date:</b> ${movie.release_date || 'Unknown'}</span><br>
+      <span><b>Duration:</b> ${duration ? duration + ' min' : 'Unknown'}</span><br>
+      <button class="add-tmdb-movie"
+        data-title="${encodeURIComponent(movie.title)}"
+        data-description="${encodeURIComponent(movie.overview || '')}"
+        data-release="${movie.release_date || ''}"
+        data-duration="${duration || ''}"
+        data-genre="${encodeURIComponent(genreNames)}"
+      >Add to Database</button>
+    `;
+    ul.appendChild(li);
+
+    // Add event listener for the button
+    li.querySelector('.add-tmdb-movie').addEventListener('click', async () => {
+      const movieToAdd = {
+        title: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-title')),
+        description: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-description')),
+        release_date: li.querySelector('.add-tmdb-movie').getAttribute('data-release'),
+        duration_minutes: duration || 120,
+        genre: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-genre')) || 'Unknown'
+      };
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/movies`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(movieToAdd)
+      });
+      if (res.ok) {
+        alert('Movie added!');
+        fetchAndRenderMovies();
+      } else {
+        alert('Failed to add movie');
+      }
+    });
+  });
+  container.appendChild(ul);
+}
+
+// Fetch and render movies from your DB
+async function fetchAndRenderMovies() {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/api/movies`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const movies = await res.json();
+  renderMoviesTable(movies);
+}
+
+function renderMoviesTable(movies) {
+  const tbody = document.querySelector('#movies-table tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  movies.forEach(movie => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${movie.title}</td>
+      <td>${movie.description || ''}</td>
+      <td>${movie.duration_minutes || ''}</td>
+      <td>${movie.genre || ''}</td>
+      <td><button class="delete-movie-btn" data-id="${movie.movie_id}">Delete</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Delete logic
+  tbody.querySelectorAll('.delete-movie-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      if (confirm('Are you sure you want to delete this movie?')) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/api/movies/${id}`, { 
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          fetchAndRenderMovies();
+        } else {
+          alert('Failed to delete movie');
+        }
+      }
+    });
+  });
+}
+
+
+const movieTab = document.getElementById('movie-management-tab');
+if (movieTab) {
+  movieTab.addEventListener('click', fetchAndRenderMovies);
+}
+
+const tmdbClearBtn = document.getElementById('tmdb-clear-btn');
+if (tmdbClearBtn) {
+  tmdbClearBtn.addEventListener('click', () => {
+    const input = document.getElementById('tmdb-search-input');
+    const results = document.getElementById('tmdb-results');
+    if (input) input.value = '';
+    if (results) results.innerHTML = '';
+  });
+}
+
+async function fetchTMDBRuntime(tmdbId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/movies/tmdb/${tmdbId}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.runtime || null;
+  } catch {
+    return null;
+  }
+}

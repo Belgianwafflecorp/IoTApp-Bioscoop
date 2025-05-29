@@ -1,27 +1,32 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const circle = document.querySelector('.circle');
-  circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
+import { showLoginStatus } from './scripts.js';
 
+document.addEventListener('DOMContentLoaded', async () => {
+  await showLoginStatus();
+
+  const circle = document.querySelector('.circle');
+  circle.style.cursor = 'pointer';
   circle.addEventListener('click', () => {
-    window.location.href = '../index.html'; // Redirect to home page
+    window.location.href = '../index.html';
   });
+
+  await fetchAndRenderScreenings();
 });
 
-async function fetchScreenings() {
+async function fetchAndRenderScreenings() {
   try {
     const res = await fetch('http://localhost:3000/api/screenings');
-    const data = await res.json();
+    const screenings = await res.json();
 
-    if (!Array.isArray(data)) {
-      throw new Error(data.error || 'Invalid data received');
+    if (!Array.isArray(screenings)) {
+      throw new Error(screenings.error || 'Invalid screenings data');
     }
 
-    renderScreenings(data);
+    const grouped = groupByMovie(screenings);
+    await renderScreeningsWithTmdb(grouped);
   } catch (error) {
     console.error('Failed to fetch screenings:', error);
   }
 }
-
 
 function groupByMovie(screenings) {
   const grouped = {};
@@ -33,27 +38,53 @@ function groupByMovie(screenings) {
   return grouped;
 }
 
-function renderScreenings(screenings) {
+async function renderScreeningsWithTmdb(grouped) {
   const container = document.getElementById('screenings-container');
   container.innerHTML = '';
 
-  const grouped = groupByMovie(screenings);
-
   for (const [title, shows] of Object.entries(grouped)) {
+    let poster = '/resources/images/movie-placeholder.jpg'; // <- fixed fallback path
+    let overview = 'No description available.';
+    let movieTitle = title;
+
+    try {
+      const tmdbRes = await fetch(`http://localhost:3000/api/movies/details/${encodeURIComponent(title)}`);
+      const tmdbData = await tmdbRes.json();
+      console.log(`TMDB data for "${title}":`, tmdbData);
+
+      if (tmdbData && tmdbData.poster_url) {
+        poster = tmdbData.poster_url;
+      } else {
+        console.warn(`No poster found for movie "${title}"`);
+      }
+
+      if (tmdbData && tmdbData.overview && tmdbData.overview.trim().length > 0) {
+        overview = tmdbData.overview;
+      }
+
+      if (tmdbData && tmdbData.title && tmdbData.title.trim().toLowerCase() !== "undefined") {
+        movieTitle = tmdbData.title;
+      }
+    } catch (err) {
+      console.warn(`TMDB fetch failed for "${title}":`, err);
+    }
+
     const showingsHTML = shows.map(show => `
       <div>
         <strong>${show.hall_name}</strong>:
-        <span class="badge">${formatTime(show.start_time)}</span>
+        <span class="badge" onclick="window.location.href='booking.html?screeningId=${show.screening_id}'">
+          ${formatTime(show.start_time)}
+        </span>
       </div>
     `).join('');
 
     const card = `
       <div class="screening-card">
-        <img src=".\src\resources\images\movie-placeholder.jpg" alt="${title}" />
+        <img src="${poster}" alt="${movieTitle}" />
         <div class="screening-info">
-          <h4 class="movie-title">${title}</h4>
+          <h4 class="movie-title">${movieTitle}</h4>
           ${showingsHTML}
-          <p class="overview">Overview: simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+          <p class="overview">Overview: ${overview}</p>
           <div class="labels">
             <span class="label">4K HD</span>
             <span class="label">4D</span>
@@ -61,13 +92,16 @@ function renderScreenings(screenings) {
         </div>
       </div>
     `;
+
     container.innerHTML += card;
   }
+
+  container.querySelectorAll('.badge').forEach(badge => {
+    badge.style.cursor = 'pointer';
+  });
 }
 
 function formatTime(dateTime) {
   const date = new Date(dateTime);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
-
-document.addEventListener('DOMContentLoaded', fetchScreenings);

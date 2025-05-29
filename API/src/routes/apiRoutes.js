@@ -6,12 +6,14 @@ import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
-import {getMovies, searchMovies, getMovieDetails} from '../controllers/Movies.js';
+import * as MovieTMDB from '../controllers/Movies.js';
+import * as ReservationController from '../controllers/ReservationController.js';
 
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// users /////////////////////////////
 /////////////////////////////////////////////////////////////////
+
 
 /**
  * @swagger
@@ -228,6 +230,112 @@ router.get('/me', authenticateToken, UserController.getMe);
 router.post('/changeUserRole', ManagerController.changeUserRole);
 
 
+/////////////////////////////////////////////////////////////////
+///////////////////////////// tmdb //////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/movies/tmdb:
+ *   get:
+ *     summary: Get movies from TMDB
+ *     tags:
+ *       - TMDB
+ *     responses:
+ *       200:
+ *         description: List of movies from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Failed to fetch movies from TMDB
+ */
+router.get('/movies/tmdb', MovieTMDB.getMovies);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/search:
+ *   get:
+ *     summary: Search movies from TMDB
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: query
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The search query for the movie title
+ *     responses:
+ *       200:
+ *         description: Search results from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       400:
+ *         description: Missing or invalid query parameter
+ *       500:
+ *         description: Failed to search movies from TMDB
+ */
+router.get('/movies/tmdb/search', MovieTMDB.searchMovies);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/genres:
+ *   get:
+ *     summary: Get movie genres from TMDB
+ *     tags:
+ *       - TMDB
+ *     responses:
+ *       200:
+ *         description: List of movie genres from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Failed to fetch genres from TMDB
+ */
+router.get('/movies/tmdb/genres', MovieTMDB.getTMDBGenres);
+
+/**
+ * @swagger
+ * /api/movies/tmdb/{id}:
+ *   get:
+ *     summary: Get movie details from TMDB by ID
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The TMDB movie ID
+ *     responses:
+ *       200:
+ *         description: Movie details from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Movie not found on TMDB
+ *       500:
+ *         description: Failed to fetch movie details from TMDB
+ */
+router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
+
+router.get('/movies/details/:title', MovieTMDB.getMovieByTitle);
+
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// movies ////////////////////////////
@@ -390,6 +498,16 @@ router.delete('/movies/:id', MovieController.deleteMovie);
  */
 router.get('/screenings', ScreeningController.getAllScreenings);
 
+router.get('/screenings/:id', ScreeningController.getScreeningById);
+/**
+ * @swagger
+ * /api/screenings/{id}:
+ *   get:
+ *     summary: Get screening details by ID
+ *     tags:
+ *       - Screenings
+ */
+
 /**
  * @swagger
  * /api/screenings:
@@ -421,86 +539,110 @@ router.put('/screenings/:id', ScreeningController.updateScreenings);
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
 
 /////////////////////////////////////////////////////////////////
-///////////////////////////// tmdb //////////////////////////////
+/////////////////////// reservations ////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-/**
- * @swagger
- * /api/movies/tmdb:
- *   get:
- *     summary: Get movies from TMDB
- *     tags:
- *       - TMDB
- *     responses:
- *       200:
- *         description: List of movies from TMDB
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *       500:
- *         description: Failed to fetch movies from TMDB
- */
-router.get('/movies/tmdb', getMovies);
+// GET available tickets for a screening
+router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreening);
 
 /**
  * @swagger
- * /api/movies/tmdb/search:
+ * /api/screenings/{id}/tickets:
  *   get:
- *     summary: Search movies from TMDB
+ *     summary: Get seat availability for a screening
  *     tags:
- *       - TMDB
- *     parameters:
- *       - in: query
- *         name: query
- *         required: true
- *         schema:
- *           type: string
- *         description: The search query for the movie title
- *     responses:
- *       200:
- *         description: Search results from TMDB
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *       400:
- *         description: Missing or invalid query parameter
- *       500:
- *         description: Failed to search movies from TMDB
- */
-router.get('/movies/tmdb/search', searchMovies);
-
-/**
- * @swagger
- * /api/movies/tmdb/{id}:
- *   get:
- *     summary: Get movie details from TMDB by ID
- *     tags:
- *       - TMDB
+ *       - Reservations
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: The TMDB movie ID
+ *         description: Screening ID
  *     responses:
  *       200:
- *         description: Movie details from TMDB
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *       404:
- *         description: Movie not found on TMDB
- *       500:
- *         description: Failed to fetch movie details from TMDB
+ *         description: List of all seats and their availability
  */
-router.get('/movies/tmdb/:id', getMovieDetails);
+
+
+// POST reserve seats
+router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
+
+
+router.get('/my-reservations', authenticateToken, ReservationController.getMyReservations);
+/**
+ * @swagger
+ * /api/my-reservations:
+ *   get:
+ *     summary: Get all reservations for the logged-in user
+ *     tags:
+ *       - Reservations
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of reservations
+ */
+
+/**
+ * @swagger
+ * /api/reserve:
+ *   post:
+ *     summary: Reserve tickets for a screening
+ *     tags:
+ *       - Reservations
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *               screening_id:
+ *                 type: integer
+ *               seat_ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       201:
+ *         description: Tickets reserved successfully
+ *       409:
+ *         description: One or more seats already reserved
+ */
+
+
+/////////////////////////////////////////////////////////////////
+//////////////////////////// manager ////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * /api/changeUserRole:
+ *   post:
+ *     summary: Change a user's role
+ *     tags:
+ *       - Manager
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *                 example: 1
+ *               new_role:
+ *                 type: string
+ *                 example: manager
+ */
+router.post('/changeUserRole', ManagerController.changeUserRole);
+
+
 
 export default router;

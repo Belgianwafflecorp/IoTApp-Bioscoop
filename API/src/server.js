@@ -1,14 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http from 'http';
 import apiRoutes from './routes/apiRoutes.js';
 import swaggerDocs from './swagger/swagger.js';
+import setupWebSocket from './middleware/websocket.js';
 
 dotenv.config();
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
+
+// Create HTTP server to attach WebSocket to
+const server = http.createServer(app);
+
+// Setup WebSocket
+setupWebSocket(server); // 👈 Initialize WS here
 
 app.use(express.json());
 app.use(cors({
@@ -16,15 +23,15 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 
-// log incoming requests
-app.use((req, res, next) => { 
+// Log incoming requests
+app.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.url}`);
   next();
 });
 
 app.use('/api', apiRoutes);
 
-// connection test output
+// Connection test output
 app.get('/', (req, res) => {
   res.send('Hello World! from the backend');
 });
@@ -32,11 +39,12 @@ app.get('/', (req, res) => {
 // Generate Swagger documentation
 swaggerDocs(app, PORT);
 
-app.listen(PORT, () => {
-  console.log(`Backend draait op http://localhost:${PORT}`);
-});
-
 // Handle 404 errors
 app.use((req, res) => {
   res.status(404).send('Route niet gevonden');
+});
+
+// Start server (app is now attached to an HTTP server)
+server.listen(PORT, () => {
+  console.log(`Backend draait op http://localhost:${PORT}`);
 });

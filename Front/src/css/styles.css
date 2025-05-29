@@ -14,6 +14,9 @@
 
   --font-header: 'Archivo Black', sans-serif;
   --font-body: 'Space Mono', monospace;
+
+  --border-radius: 10px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* ===============
@@ -27,6 +30,55 @@ body {
 }
 
 /* ===============
+   Reusable Buttons
+   =============== */
+button,
+.login-btn,
+.logout-btn,
+.book-btn,
+#confirm-btn {
+  font-family: var(--font-body);
+  font-weight: bold;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+button:hover,
+.login-btn:hover,
+.logout-btn:hover,
+.book-btn:hover,
+#confirm-btn:hover {
+  opacity: 0.9;
+}
+
+.login-btn,
+.logout-btn {
+  background-color: var(--color-yellow);
+  padding: 0.5em 1em;
+}
+
+.book-btn {
+  background-color: var(--color-light-blue);
+  color: var(--color-white);
+  padding: 0.7em 1.5em;
+  font-size: 1em;
+}
+
+#confirm-btn {
+  background-color: var(--color-green);
+  color: var(--color-white);
+  padding: 0.8em;
+  font-size: 1em;
+  border-radius: 12px;
+}
+
+#confirm-btn:hover {
+  background-color: #1a7f4b;
+}
+
+/* ===============
    Navbar
    =============== */
 .navbar {
@@ -37,7 +89,7 @@ body {
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 1000; /* keeps it above other content */
+  z-index: 1000;
 }
 
 .logo {
@@ -56,7 +108,6 @@ body {
 .brand {
   font-family: var(--font-header);
   font-size: 1.2em;
-  color: var(--color-white);
 }
 
 .nav-links a {
@@ -121,21 +172,6 @@ body {
   margin-bottom: 0.5em;
 }
 
-.hero p {
-  margin-bottom: 1em;
-}
-
-.book-btn {
-  background-color: var(--color-light-blue);
-  color: var(--color-white);
-  border: none;
-  padding: 0.7em 1.5em;
-  font-size: 1em;
-  border-radius: 10px;
-  cursor: pointer;
-  font-family: var(--font-body);
-}
-
 /* ===============
    Filter Bar
    =============== */
@@ -148,75 +184,76 @@ body {
 
 .filters select {
   padding: 0.5em;
-  border-radius: 10px;
-  border: none;
+  border-radius: var(--border-radius);
   font-size: 1em;
-  font-family: var(--font-body);
   background-color: var(--color-light-blue);
   color: var(--color-white);
+  border: none;
 }
 
-/* ===============
-   Movie Grid
+/* ===============  
+   Movie Grid & Cards
    =============== */
 .movie-grid {
   padding: 2em;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2em;
 }
 
-/* ===============
-   Movie Card
-   =============== */
 .movie-card {
   background-color: #111;
-  border-radius: 10px;
+  border-radius: 15px;
   overflow: hidden;
-  text-align: center;
-  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--box-shadow);
 }
 
 .movie-card img {
   width: 100%;
-  display: block;
-  border-radius: 10px 10px 0 0;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px 15px 0 0;
+}
+
+.movie-card-content {
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
 }
 
 .movie-card h3 {
-  background-color: var(--color-dark-blue);
-  padding: 0.5em;
-  font-size: 1em;
-  font-weight: bold;
-  color: var(--color-white);
   font-family: var(--font-header);
+  font-size: 1.4em;
+  color: var(--color-yellow);
+  margin: 0;
 }
 
 .movie-card p {
-  font-size: 0.85em;
-  padding: 0.5em 1em;
-  font-family: var(--font-body);
+  font-size: 0.9em;
+  color: #ccc;
+  font-style: italic;
+  margin: 0;
 }
 
 .movie-card .stars {
-  padding: 0.5em;
   color: var(--color-yellow);
+  font-weight: bold;
 }
+
 
 /* ===============
    Login Page
    =============== */
-
-
-   
 .login-container {
   max-width: 400px;
   margin: 5em auto;
   padding: 2em;
   background-color: #111;
   border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  font-family: var(--font-body);
+  box-shadow: var(--box-shadow);
 }
 
 .login-container form {
@@ -227,44 +264,58 @@ body {
 .login-container label {
   margin: 0.5em 0 0.2em;
   font-weight: bold;
-  color: var(--color-white);
 }
 
 .login-container input {
   padding: 0.7em;
-  border-radius: 10px;
-  border: none;
   margin-bottom: 1em;
+  border-radius: var(--border-radius);
+  border: none;
   background-color: var(--color-white);
   color: var(--color-black);
-  font-size: 1em;
 }
 
 .login-container button {
   padding: 0.7em;
-  border-radius: 10px;
-  border: none;
   margin-top: 0.5em;
   font-size: 1em;
-  font-weight: bold;
-  cursor: pointer;
-  font-family: var(--font-body);
 }
 
-.login-container button[type="submit"] {
-  background-color: var(--color-light-blue);
-  color: var(--color-white);
-}
-
-.login-container button[type="button"] {
+.submit-btn {
   background-color: var(--color-green);
-  color: var(--color-white);
+  color: var(--color-black);
+  padding: 0.7em 1em;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.login-container button:hover {
-  opacity: 0.9;
+.submit-btn:hover {
+  background-color: #1a7f4b; /* Slightly darker green */
+  cursor: pointer;
 }
 
+/* Toggle button with brand yellow */
+.toggle-btn {
+  background-color: var(--color-yellow);
+  color: var(--color-black);
+  padding: 0.7em 1em;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5em;
+  display: inline-block;
+  text-align: center;
+}
+
+.toggle-btn:hover {
+  background-color: #e6c300; /* Slightly darker yellow */
+  cursor: pointer;
+}
 #error-msg {
   margin-top: 1em;
   color: var(--color-yellow);
@@ -272,7 +323,7 @@ body {
 }
 
 /* ===============
-   Screenings Grid
+   Screenings Grid & Cards
    =============== */
 .screenings-grid {
   display: grid;
@@ -281,22 +332,19 @@ body {
   padding: 2em;
 }
 
-/* ===============
-   Screening Card
-   =============== */
 .screening-card {
   background-color: #111;
   border-radius: 15px;
   overflow: hidden;
-  color: var(--color-white);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--box-shadow);
 }
 
 .screening-card img {
   width: 100%;
-  height: 200px;
+  height: 100%;
+  max-height: 500px;
   object-fit: cover;
   border-radius: 15px 15px 0 0;
 }
@@ -315,6 +363,12 @@ body {
   margin: 0;
 }
 
+.overview {
+  font-size: 0.9em;
+  color: #ccc;
+  font-style: italic;
+}
+
 .badge {
   background-color: var(--color-light-blue);
   color: var(--color-white);
@@ -323,12 +377,6 @@ body {
   font-size: 0.9em;
   font-weight: bold;
   margin-left: 0.5em;
-}
-
-.overview {
-  font-size: 0.9em;
-  color: #ccc;
-  font-style: italic;
 }
 
 .labels {
@@ -340,10 +388,182 @@ body {
   background-color: var(--color-green);
   color: var(--color-white);
   padding: 0.3em 0.6em;
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   font-size: 0.8em;
   margin-right: 0.5em;
   font-weight: bold;
+}
+
+/* ===============
+   Booking Page
+   =============== */
+.booking-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+  padding: 2em;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.movie-section {
+  flex: 1 1 300px;
+  background-color: #111;
+  border-radius: 15px;
+  box-shadow: var(--box-shadow);
+  padding: 1.5em;
+  text-align: center;
+}
+
+.movie-section img {
+  max-width: 300px;
+  width: 100%;
+  border-radius: 15px;
+  margin-bottom: 1em;
+}
+
+.movie-info {
+  text-align: left;
+}
+
+.movie-info h3 {
+  font-family: var(--font-header);
+  font-size: 1.8em;
+  color: var(--color-yellow);
+  margin-bottom: 0.5em;
+}
+
+.movie-meta {
+  margin: 0.3em 0;
+  font-size: 0.95em;
+  color: #ccc;
+}
+
+.screening-time {
+  display: inline-block;
+  background-color: var(--color-light-blue);
+  padding: 0.3em 0.7em;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--color-white);
+  margin-bottom: 1em;
+}
+
+.booking-panel {
+  flex: 2 1 400px;
+  background-color: #111;
+  padding: 2em;
+  border-radius: 15px;
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+}
+
+.booking-panel h4 {
+  font-family: var(--font-header);
+  font-size: 1.3em;
+  color: var(--color-yellow);
+  margin-bottom: 1em;
+}
+
+.ticket-selection label,
+.seats-left p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1em;
+  margin: 0.5em 0;
+}
+
+.ticket-selection input {
+  width: 60px;
+  padding: 0.4em;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.booking-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.booking-footer input[type="text"] {
+  padding: 0.7em;
+  border-radius: var(--border-radius);
+  background-color: var(--color-dark-blue);
+  color: var(--color-white);
+  font-style: italic;
+  border: none;
+}
+
+/* Seat Map */
+#seat-grid {
+  padding: 2em;
+}
+
+.seat-row-label {
+  font-family: var(--font-header);
+  font-size: 1.2em;
+  color: var(--color-yellow);
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.seat-row {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1em;
+  flex-wrap: wrap;
+  border-bottom: 1px dashed #444;
+  padding-bottom: 0.5em;
+}
+
+.seat {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9em;
+  user-select: none;
+  transition: transform 0.1s ease;
+  cursor: pointer;
+}
+
+.seat:hover {
+  filter: brightness(1.1);
+}
+
+/* Seat Types */
+.reduced {
+  background-color: var(--color-green);
+}
+
+.normal {
+  background-color: var(--color-light-blue);
+}
+
+.premium {
+  background-color: var(--color-yellow);
+  color: var(--color-black);
+}
+
+.seat.taken {
+  background-color: #555;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.seat.selected {
+  outline: 3px solid rgba(255, 255, 255, 0.9);
+  outline-offset: -2px;
+  background-color: #1749a8;
 }
 
 
@@ -434,4 +654,39 @@ body {
 }
 .delete-user-btn:hover:not(:disabled) {
   background: #b71c1c;
+}
+
+/* Movie Form Styles in management page*/
+.movie-form {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1em;
+  flex-wrap: wrap;
+}
+#tmdb-results ul {
+  list-style: none;
+  padding: 0;
+}
+#tmdb-results li {
+  margin-bottom: 1em;
+  background: #f6f6f6;
+  color: #222;
+  padding: 1em;
+  border-radius: 8px;
+}
+.add-tmdb-movie {
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3em 0.8em;
+  cursor: pointer;
+}
+.delete-movie-btn {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3em 0.8em;
+  cursor: pointer;
 }

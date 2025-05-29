@@ -30,12 +30,13 @@ toggleBtn.addEventListener('click', () => {
   successMsg.textContent = '';
 });
 
+// Redirect to home page when clicking the circle
 document.addEventListener('DOMContentLoaded', () => {
   const circle = document.querySelector('.circle');
   circle.style.cursor = 'pointer'; // Make it obvious it’s clickable
 
   circle.addEventListener('click', () => {
-    window.location.href = '/index.html';
+    window.location.href = '../index.html'; // Redirect to home page
   });
 });
 
