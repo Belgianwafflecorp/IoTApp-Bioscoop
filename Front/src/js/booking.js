@@ -33,6 +33,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!screeningRes.ok || !seatsRes.ok) throw new Error('Failed to load data');
 
     const screeningData = await screeningRes.json();
+    const movieTitle = screeningData.movie.title;
+
+    // Try to fetch poster from backend TMDB proxy
+    try {
+      const tmdbRes = await fetch(`http://localhost:3000/api/movies/details/${encodeURIComponent(movieTitle)}`);
+      const tmdbData = await tmdbRes.json();
+
+      if (tmdbData && tmdbData.poster_url) {
+        document.getElementById('movie-poster').src = tmdbData.poster_url;
+      } else {
+        document.getElementById('movie-poster').src = '/resources/images/movie-placeholder.jpg';
+      }
+    } catch (err) {
+      console.warn('Could not fetch poster from TMDB:', err);
+      document.getElementById('movie-poster').src = '/resources/images/movie-placeholder.jpg';
+    }
+
+
+
     const seats = await seatsRes.json();
 
     document.getElementById('movie-title').textContent = screeningData.movie.title;

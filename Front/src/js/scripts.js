@@ -25,38 +25,6 @@ async function waitForApi() {
   throw new Error('API is not available after multiple attempts');
 }
 
-function logout() {
-  localStorage.removeItem('token');
-  window.location.href = '/pages/login.html';
-}
-
-export async function showLoginStatus() {
-  const loginBtn = document.querySelector('.login-btn');
-  if (!loginBtn) return;
-
-  const token = localStorage.getItem('token');
-  if (token) {
-    try {
-      const res = await fetch('http://localhost:3000/api/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        loginBtn.innerHTML = `
-          <span class="user-info">👤 ${data.username}</span>
-          <button id="logoutBtn" class="logout-btn">Logout</button>
-        `;
-        loginBtn.querySelector('#logoutBtn')?.addEventListener('click', logout);
-      } else {
-        localStorage.removeItem('token');
-      }
-    } catch (err) {
-      console.error('Failed to fetch user info', err);
-    }
-  }
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOMContentLoaded event fired');
   await showLoginStatus();
@@ -257,12 +225,4 @@ export async function showLoginStatus() {
       console.error('Failed to fetch user info', err);
     }
   }
-}
-
-
-
-function resetCards() {
-  const movieList = document.getElementById('movie-list');
-  movieList.innerHTML = ''; // Clear existing cards
-  document.dispatchEvent(new Event('DOMContentLoaded')); // Re-trigger initial load
 }
