@@ -762,10 +762,6 @@ button:hover,
 }
 
 .show-less-btn {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  z-index: 20;
   padding: 0.7em 2em;
   font-size: 1.1em;
   border: none;
@@ -775,8 +771,39 @@ button:hover,
   font-weight: bold;
   cursor: pointer;
   transition: background 0.2s;
+  margin-top: 1.5rem; /* adds spacing below the release date */
+  align-self: flex-start; /* keeps it aligned to the left inside flex containers */
 }
 
 .show-less-btn:hover {
-  background: var(--color-light-yellow);
+  background: #f2c300;
+}
+
+
+#movie-detail-panel {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: var(--background);
+}
+
+.detail-left {
+  flex: 1;
+  max-width: 300px;
+}
+
+.detail-right {
+  flex: 2;
+}
+
+.detail-right h2 {
+  margin-top: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.show-less-btn {
+  margin-top: 2rem;
 }

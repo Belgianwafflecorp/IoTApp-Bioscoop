@@ -139,6 +139,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         await expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview);
       });
 
+      card.querySelector('.movie-poster').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview);
+      });
+
       movieList.appendChild(card);
     }
   } catch (error) {
@@ -149,64 +154,73 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Expands the card to fullscreen with left/middle/right layout
 async function expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview) {
-  document.querySelectorAll('.movie-card').forEach(c => {
-    if (c !== card) c.style.display = 'none';
-  });
-  card.classList.add('expanded-fullscreen');
+  // Hide all movie cards
+  document.querySelectorAll('.movie-card').forEach(c => c.style.display = 'none');
 
+  const detailPanel = document.getElementById('movie-detail-panel');
+  detailPanel.classList.remove('hidden');
+
+  let trailerEmbedHTML = '';
   try {
-    // Fetch trailer
-    let trailerEmbedHTML = '';
-    try {
-      const trailerRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/videos`);
-      const trailers = await trailerRes.json();
-      const trailer = trailers.find(t => t.site === 'YouTube' && t.type === 'Trailer');
-      if (trailer) {
-        trailerEmbedHTML = `
-          <div class="trailer-container">
-            <iframe width="100%" height="315"
-              src="https://www.youtube.com/embed/${trailer.key}"
-              title="YouTube trailer" frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen>
-            </iframe>
-          </div>
-        `;
-      }
-    } catch (trailerErr) {
-      console.warn('Failed to load trailer:', trailerErr);
+    const trailerRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/videos`);
+    const trailers = await trailerRes.json();
+    const trailer = trailers.find(t => t.site === 'YouTube' && t.type === 'Trailer');
+    if (trailer) {
+      trailerEmbedHTML = `
+        <iframe width="100%" height="315"
+          src="https://www.youtube.com/embed/${trailer.key}"
+          title="YouTube trailer" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      `;
     }
-
-    card.innerHTML = `
-      <div class="expanded-card-content">
-        <div class="expanded-left">
-          <img src="${posterUrl}" alt="${title}" class="movie-poster-large" />
-          <p><strong>Genres:</strong> ${genreText}</p>
-          <p><strong>Release date:</strong> ${release_date ?? 'Unknown'}</p>
-        </div>
-        <div class="expanded-middle">
-          <h2>${title}</h2>
-          <p>${overview || 'No description available.'}</p>
-        </div>
-        <div class="expanded-right">
-          ${trailerEmbedHTML || '<p>No trailer available.</p>'}
-        </div>
-      </div>
-      <button class="show-less-btn">Show less</button>
-    `;
-
-    card.querySelector('.show-less-btn').addEventListener('click', resetCards);
   } catch (err) {
-    console.error('Failed to fetch expanded movie info:', err);
-    card.innerHTML += '<p>Error loading additional details.</p>';
+    console.warn('Trailer fetch failed:', err);
   }
+
+  // Fetch cast info
+  let castHTML = '';
+  try {
+    const castRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/credits`);
+    const credits = await castRes.json();
+    if (Array.isArray(credits.cast)) {
+      const topCast = credits.cast.slice(0, 5).map(actor => actor.name).join(', ');
+      castHTML = `<p><strong>Cast:</strong> ${topCast}</p>`;
+    }
+  } catch (err) {
+    console.warn('Cast fetch failed:', err);
+  }
+
+  detailPanel.innerHTML = `
+    <div class="detail-left">
+      <img src="${posterUrl}" alt="${title}" class="movie-poster-large" />
+      <p><strong>Genres:</strong> ${genreText}</p>
+      <p><strong>Release date:</strong> ${release_date ?? 'Unknown'}</p>
+      <button class="show-less-btn">Back</button>
+    </div>
+    <div class="detail-right">
+      <h2>${title}</h2>
+      <p>${overview || 'No description available.'}</p>
+      ${castHTML}
+      <div class="trailer">${trailerEmbedHTML || '<p>No trailer available.</p>'}</div>
+    </div>
+  `;
+
+  detailPanel.querySelector('.show-less-btn').addEventListener('click', resetCards);
 }
+
 
 function resetCards() {
-  const movieList = document.getElementById('movie-list');
-  movieList.innerHTML = '';
-  document.dispatchEvent(new Event('DOMContentLoaded'));
+  const detailPanel = document.getElementById('movie-detail-panel');
+  detailPanel.classList.add('hidden');
+  detailPanel.innerHTML = '';
+
+  document.querySelectorAll('.movie-card').forEach(c => {
+    c.style.display = '';
+  });
 }
+
 
 function logout() {
   localStorage.removeItem('token');  // Clear the JWT
