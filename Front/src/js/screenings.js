@@ -1,11 +1,9 @@
 import { showLoginStatus } from './scripts.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
+$(document).ready(async () => {
   await showLoginStatus();
 
-  const circle = document.querySelector('.circle');
-  circle.style.cursor = 'pointer';
-  circle.addEventListener('click', () => {
+  $('.circle').css('cursor', 'pointer').on('click', () => {
     window.location.href = '../index.html';
   });
 
@@ -39,11 +37,10 @@ function groupByMovie(screenings) {
 }
 
 async function renderScreeningsWithTmdb(grouped) {
-  const container = document.getElementById('screenings-container');
-  container.innerHTML = '';
+  const $container = $('#screenings-container').empty();
 
   for (const [title, shows] of Object.entries(grouped)) {
-    let poster = '/resources/images/movie-placeholder.jpg'; // <- fixed fallback path
+    let poster = '/resources/images/movie-placeholder.jpg';
     let overview = 'No description available.';
     let movieTitle = title;
 
@@ -52,17 +49,15 @@ async function renderScreeningsWithTmdb(grouped) {
       const tmdbData = await tmdbRes.json();
       console.log(`TMDB data for "${title}":`, tmdbData);
 
-      if (tmdbData && tmdbData.poster_url) {
+      if (tmdbData?.poster_url) {
         poster = tmdbData.poster_url;
-      } else {
-        console.warn(`No poster found for movie "${title}"`);
       }
 
-      if (tmdbData && tmdbData.overview && tmdbData.overview.trim().length > 0) {
+      if (tmdbData?.overview?.trim()) {
         overview = tmdbData.overview;
       }
 
-      if (tmdbData && tmdbData.title && tmdbData.title.trim().toLowerCase() !== "undefined") {
+      if (tmdbData?.title && tmdbData.title.trim().toLowerCase() !== 'undefined') {
         movieTitle = tmdbData.title;
       }
     } catch (err) {
@@ -72,7 +67,7 @@ async function renderScreeningsWithTmdb(grouped) {
     const showingsHTML = shows.map(show => `
       <div>
         <strong>${show.hall_name}</strong>:
-        <span class="badge" onclick="window.location.href='booking.html?screeningId=${show.screening_id}'">
+        <span class="badge" data-id="${show.screening_id}">
           ${formatTime(show.start_time)}
         </span>
       </div>
@@ -93,12 +88,16 @@ async function renderScreeningsWithTmdb(grouped) {
       </div>
     `;
 
-    container.innerHTML += card;
+    $container.append(card);
   }
 
-  container.querySelectorAll('.badge').forEach(badge => {
-    badge.style.cursor = 'pointer';
+  // Delegate badge click handling after badges are added
+  $container.on('click', '.badge', function () {
+    const screeningId = $(this).data('id');
+    window.location.href = `booking.html?screeningId=${screeningId}`;
   });
+
+  $('.badge').css('cursor', 'pointer');
 }
 
 function formatTime(dateTime) {

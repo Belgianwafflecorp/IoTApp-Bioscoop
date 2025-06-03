@@ -4,7 +4,7 @@ let socket;
 let screeningId;
 let selectedSeatIds = [];
 
-document.addEventListener('DOMContentLoaded', async () => {
+$(document).ready(async () => {
   const token = localStorage.getItem('token');
   if (!token) {
     alert('You must be logged in to book tickets.');
@@ -16,11 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   screeningId = urlParams.get('screeningId');
-
-  if (!screeningId) {
-    alert('No screening selected');
-    return;
-  }
+  if (!screeningId) return alert('No screening selected');
 
   setupWebSocket(screeningId);
 
@@ -35,33 +31,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const screeningData = await screeningRes.json();
     const movieTitle = screeningData.movie.title;
 
-    // Try to fetch poster from backend TMDB proxy
     try {
       const tmdbRes = await fetch(`http://localhost:3000/api/movies/details/${encodeURIComponent(movieTitle)}`);
       const tmdbData = await tmdbRes.json();
-
-      if (tmdbData && tmdbData.poster_url) {
-        document.getElementById('movie-poster').src = tmdbData.poster_url;
-      } else {
-        document.getElementById('movie-poster').src = '/resources/images/movie-placeholder.jpg';
-      }
-    } catch (err) {
-      console.warn('Could not fetch poster from TMDB:', err);
-      document.getElementById('movie-poster').src = '/resources/images/movie-placeholder.jpg';
+      $('#movie-poster').attr('src', tmdbData?.poster_url || '/resources/images/movie-placeholder.jpg');
+    } catch {
+      $('#movie-poster').attr('src', '/resources/images/movie-placeholder.jpg');
     }
 
-
-
     const seats = await seatsRes.json();
+    $('#movie-title').text(screeningData.movie.title);
+    $('#start-time').text(formatTime(screeningData.start_time));
+    $('#genre').text(screeningData.movie.genre);
+    $('#duration').text(screeningData.movie.duration);
+    $('#release').text(screeningData.movie.release_date);
 
-    document.getElementById('movie-title').textContent = screeningData.movie.title;
-    document.getElementById('start-time').textContent = formatTime(screeningData.start_time);
-    document.getElementById('genre').textContent = screeningData.movie.genre;
-    document.getElementById('duration').textContent = screeningData.movie.duration;
-    document.getElementById('release').textContent = screeningData.movie.release_date;
-
-    window.availableSeats = seats.filter(seat => !seat.isTaken);
-    window.takenSeats = seats.filter(seat => seat.isTaken);
+    window.availableSeats = seats.filter(s => !s.isTaken);
+    window.takenSeats = seats.filter(s => s.isTaken);
 
     updateSeatsDisplay();
   } catch (err) {
@@ -69,11 +55,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     alert('Failed to load screening information.');
   }
 
-  document.getElementById('confirm-btn').addEventListener('click', async () => {
-    const token = localStorage.getItem('token');
-    const reduced = parseInt(document.getElementById('reduced').value) || 0;
-    const normal = parseInt(document.getElementById('normal').value) || 0;
-    const premium = parseInt(document.getElementById('premium').value) || 0;
+  $('#confirm-btn').on('click', async () => {
+    const reduced = parseInt($('#reduced').val()) || 0;
+    const normal = parseInt($('#normal').val()) || 0;
+    const premium = parseInt($('#premium').val()) || 0;
     const totalRequested = reduced + normal + premium;
 
     let seatIdsToReserve = [...selectedSeatIds];
@@ -87,8 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (seatIdsToReserve.length !== totalRequested) {
-      alert('Selected seats do not match ticket counts.');
-      return;
+      return alert('Selected seats do not match ticket counts.');
     }
 
     try {
@@ -118,18 +102,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  const circle = document.querySelector('.circle');
-  if (circle) {
-    circle.style.cursor = 'pointer';
-    circle.addEventListener('click', () => {
-      window.location.href = '/index.html';
-    });
-  }
+  $('.circle').css('cursor', 'pointer').on('click', () => {
+    window.location.href = '/index.html';
+  });
 
-  // Attach auto-selection to input changes
-  ['reduced', 'normal', 'premium'].forEach(id => {
-    const input = document.getElementById(id);
-    input.addEventListener('change', handleTicketInputChange);
+  ['#reduced', '#normal', '#premium'].forEach(id => {
+    $(id).on('change', handleTicketInputChange);
   });
 });
 
@@ -143,19 +121,14 @@ function setupWebSocket(screeningId) {
   socket.addEventListener('message', (event) => {
     const msg = JSON.parse(event.data);
     if (msg.type === 'update' && Array.isArray(msg.data)) {
-      window.availableSeats = msg.data.filter(seat => !seat.isTaken);
-      window.takenSeats = msg.data.filter(seat => seat.isTaken);
+      window.availableSeats = msg.data.filter(s => !s.isTaken);
+      window.takenSeats = msg.data.filter(s => s.isTaken);
       updateSeatsDisplay();
     }
   });
 
-  socket.addEventListener('close', () => {
-    console.log('WebSocket closed.');
-  });
-
-  socket.addEventListener('error', (err) => {
-    console.error('WebSocket error:', err);
-  });
+  socket.addEventListener('close', () => console.log('WebSocket closed.'));
+  socket.addEventListener('error', (err) => console.error('WebSocket error:', err));
 }
 
 function formatTime(dateTime) {
@@ -164,86 +137,67 @@ function formatTime(dateTime) {
 }
 
 function updateSeatsDisplay() {
-  const reducedSeats = window.availableSeats.filter(s => s.seat_type === 'reduced').length;
-  const normalSeats = window.availableSeats.filter(s => s.seat_type === 'normal').length;
-  const premiumSeats = window.availableSeats.filter(s => s.seat_type === 'premium').length;
-
-  document.getElementById('seats-reduced').textContent = reducedSeats;
-  document.getElementById('seats-normal').textContent = normalSeats;
-  document.getElementById('seats-premium').textContent = premiumSeats;
-
+  $('#seats-reduced').text(window.availableSeats.filter(s => s.seat_type === 'reduced').length);
+  $('#seats-normal').text(window.availableSeats.filter(s => s.seat_type === 'normal').length);
+  $('#seats-premium').text(window.availableSeats.filter(s => s.seat_type === 'premium').length);
   renderSeatGrid();
 }
 
 function renderSeatGrid() {
-  const grid = document.getElementById('seat-grid');
-  if (!grid) {
-    console.error('Seat grid container not found.');
-    return;
-  }
+  const $grid = $('#seat-grid');
+  if (!$grid.length) return console.error('Seat grid container not found.');
 
-  grid.innerHTML = '';
+  $grid.empty();
 
   const allSeats = [...window.availableSeats, ...window.takenSeats.map(s => ({ ...s, isTaken: true }))];
 
-  // Sort seats by row and number
   allSeats.sort((a, b) => {
     if (a.seat_row === b.seat_row) return a.seat_number - b.seat_number;
     return a.seat_row.localeCompare(b.seat_row);
   });
 
-  // Group seats by row
   const rows = {};
   allSeats.forEach(seat => {
     if (!rows[seat.seat_row]) rows[seat.seat_row] = [];
     rows[seat.seat_row].push(seat);
   });
 
-  // Render each row
-  for (const rowLabel of Object.keys(rows)) {
-    const labelEl = document.createElement('div');
-    labelEl.className = 'seat-row-label';
-    labelEl.textContent = `Row ${rowLabel}`;
-    grid.appendChild(labelEl);
-
-    const rowDiv = document.createElement('div');
-    rowDiv.className = 'seat-row';
+  for (const rowLabel in rows) {
+    $grid.append(`<div class="seat-row-label">Row ${rowLabel}</div>`);
+    const $row = $('<div class="seat-row"></div>');
 
     rows[rowLabel].forEach(seat => {
-      const btn = document.createElement('div');
-      btn.className = `seat ${seat.seat_type} ${seat.isTaken ? 'taken' : ''} ${selectedSeatIds.includes(seat.seat_id) ? 'selected' : ''}`;
-      btn.textContent = seat.seat_number;
+      const isSelected = selectedSeatIds.includes(seat.seat_id);
+      const $btn = $(`<div class="seat ${seat.seat_type} ${seat.isTaken ? 'taken' : ''} ${isSelected ? 'selected' : ''}">${seat.seat_number}</div>`);
 
       if (!seat.isTaken) {
-        btn.addEventListener('click', () => {
-          const seatInput = document.getElementById(seat.seat_type);
-          let count = parseInt(seatInput.value) || 0;
+        $btn.on('click', () => {
+          const $input = $(`#${seat.seat_type}`);
+          let count = parseInt($input.val()) || 0;
 
           if (selectedSeatIds.includes(seat.seat_id)) {
             selectedSeatIds = selectedSeatIds.filter(id => id !== seat.seat_id);
-            seatInput.value = Math.max(count - 1, 0);
+            $input.val(Math.max(count - 1, 0));
           } else {
             selectedSeatIds.push(seat.seat_id);
-            seatInput.value = count + 1;
+            $input.val(count + 1);
           }
 
           updateSeatsDisplay();
         });
       }
 
-      rowDiv.appendChild(btn);
+      $row.append($btn);
     });
 
-    grid.appendChild(rowDiv);
+    $grid.append($row);
   }
 }
 
-
-// Auto-select grouped seats when inputs change
 function handleTicketInputChange() {
-  const reduced = parseInt(document.getElementById('reduced').value) || 0;
-  const normal = parseInt(document.getElementById('normal').value) || 0;
-  const premium = parseInt(document.getElementById('premium').value) || 0;
+  const reduced = parseInt($('#reduced').val()) || 0;
+  const normal = parseInt($('#normal').val()) || 0;
+  const premium = parseInt($('#premium').val()) || 0;
 
   const foundSeats = findGroupedSeats(reduced, normal, premium);
 
@@ -257,7 +211,6 @@ function handleTicketInputChange() {
   updateSeatsDisplay();
 }
 
-// Grouped seat finder
 function findGroupedSeats(reduced, normal, premium) {
   const available = [...window.availableSeats];
 
@@ -270,16 +223,12 @@ function findGroupedSeats(reduced, normal, premium) {
 
   for (const seat of available) {
     if (seat.seat_type === 'reduced' && reduced > 0) {
-      grouped.push(seat);
-      reduced--;
+      grouped.push(seat); reduced--;
     } else if (seat.seat_type === 'normal' && normal > 0) {
-      grouped.push(seat);
-      normal--;
+      grouped.push(seat); normal--;
     } else if (seat.seat_type === 'premium' && premium > 0) {
-      grouped.push(seat);
-      premium--;
+      grouped.push(seat); premium--;
     }
-
     if (reduced + normal + premium === 0) break;
   }
 

@@ -1,5 +1,6 @@
 import { updateNavbarForRole } from './manager.js';
 
+// Utility functions remain similar but with jQuery syntax
 async function checkApiStatus() {
   try {
     const res = await fetch('http://localhost:3000/api/movies');
@@ -25,15 +26,16 @@ async function waitForApi() {
   throw new Error('API is not available after multiple attempts');
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('DOMContentLoaded event fired');
+// Document ready handler
+$(async function() {
+  console.log('DOM ready with jQuery');
   await showLoginStatus();
 
   const token = localStorage.getItem('token');
   if (token) await updateNavbarForRole();
 
-  const movieList = document.getElementById('movie-list');
-  if (!movieList) {
+  const $movieList = $('#movie-list');
+  if (!$movieList.length) {
     console.warn('No #movie-list element found; skipping movie rendering');
     return;
   }
@@ -41,91 +43,82 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await waitForApi();
 
-    // Fetch genre list from your API
+    // Fetch genre list
     const genresRes = await fetch('http://localhost:3000/api/movies/tmdb/genres');
     const genresJson = await genresRes.json();
     const genreMap = {};
     if (Array.isArray(genresJson)) {
-      genresJson.forEach(g => {
+      $.each(genresJson, function(index, g) {
         genreMap[g.id] = g.name;
       });
     }
 
-    // Fetch movie data after the API is ready
+    // Fetch movie data
     const res = await fetch(`http://localhost:3000/api/movies`);
     const data = await res.json();
 
-    for (const movie of data) {
-      if (!movie.title) continue;
+    $.each(data, async function(index, movie) {
+      if (!movie.title) return;
 
       const tmdbRes = await fetch(`http://localhost:3000/api/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
       const tmdbData = await tmdbRes.json();
 
-      if (!Array.isArray(tmdbData) || !tmdbData[0]) continue;
+      if (!Array.isArray(tmdbData) || !tmdbData[0]) return;
 
       const tmdbMovie = tmdbData[0];
       const { title, overview, vote_average, poster_path, release_date, genre_ids, id: tmdbId } = tmdbMovie;
 
-      // Use genre_ids from TMDB and map them to genre names using genreMap
+      // Genre mapping
       let genreText = 'Unknown';
       if (genre_ids && Array.isArray(genre_ids)) {
-        const genreNames = genre_ids
-          .map(id => genreMap[Number(id)])
-          .filter(Boolean);
+        const genreNames = $.map(genre_ids, function(id) {
+          return genreMap[Number(id)] || null;
+        }).filter(Boolean);
         genreText = genreNames.length > 0 ? genreNames.join(', ') : 'Unknown';
       }
-
-      const card = document.createElement('div');
-      card.classList.add('movie-card');
-      card.dataset.tmdbId = tmdbId;
-      card.dataset.localTitle = movie.title;
 
       const posterUrl = poster_path
         ? `https://image.tmdb.org/t/p/w500/${poster_path}`
         : './src/assets/placeholder.png';
 
-      card.innerHTML = `
-        <img src="${posterUrl}" alt="${title}" class="movie-poster" />
-        <div class="movie-info">
-          <h3>${title.toUpperCase()}</h3>
-          <p class="movie-overview">${overview ? overview.slice(0, 80) : 'No description available'}... 
-            <a href="#" class="read-more-link">read more</a>
-          </p>
-          <div class="rating">⭐ ${vote_average ?? 'N/A'}</div>
+      const $card = $(`
+        <div class="movie-card" data-tmdb-id="${tmdbId}" data-local-title="${movie.title}">
+          <img src="${posterUrl}" alt="${title}" class="movie-poster" />
+          <div class="movie-info">
+            <h3>${title.toUpperCase()}</h3>
+            <p class="movie-overview">${overview ? overview.slice(0, 80) : 'No description available'}... 
+              <a href="#" class="read-more-link">read more</a>
+            </p>
+            <div class="rating">⭐ ${vote_average ?? 'N/A'}</div>
+          </div>
         </div>
-      `;
+      `);
 
-      card.querySelector('.read-more-link').addEventListener('click', async (e) => {
+      $card.find('.read-more-link, .movie-poster').on('click', async function(e) {
         e.preventDefault();
-        await expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview);
+        await expandMovieCard($card, tmdbId, title, posterUrl, genreText, release_date, overview);
       });
 
-      card.querySelector('.movie-poster').addEventListener('click', async (e) => {
-        e.preventDefault();
-        await expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview);
-      });
-
-      movieList.appendChild(card);
-    }
+      $movieList.append($card);
+    });
   } catch (error) {
-    movieList.innerHTML = `<p>Error loading movies. Please try again later.</p>`;
-    console.error('Outer catch:', error);
+    $movieList.html('<p>Error loading movies. Please try again later.</p>');
+    console.error('Error loading movies:', error);
   }
 });
 
-// Expands the card to fullscreen with left/middle/right layout
-async function expandMovieCard(card, tmdbId, title, posterUrl, genreText, release_date, overview) {
+// Expanded movie card function
+async function expandMovieCard($card, tmdbId, title, posterUrl, genreText, release_date, overview) {
   // Hide all movie cards
-  document.querySelectorAll('.movie-card').forEach(c => c.style.display = 'none');
+  $('.movie-card').hide();
 
-  const detailPanel = document.getElementById('movie-detail-panel');
-  detailPanel.classList.remove('hidden');
+  const $detailPanel = $('#movie-detail-panel').removeClass('hidden');
 
   let trailerEmbedHTML = '';
   try {
     const trailerRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/videos`);
     const trailers = await trailerRes.json();
-    const trailer = trailers.find(t => t.site === 'YouTube' && t.type === 'Trailer');
+    const trailer = $.grep(trailers, t => t.site === 'YouTube' && t.type === 'Trailer')[0];
     if (trailer) {
       trailerEmbedHTML = `
         <iframe width="100%" height="315"
@@ -146,14 +139,14 @@ async function expandMovieCard(card, tmdbId, title, posterUrl, genreText, releas
     const castRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/credits`);
     const credits = await castRes.json();
     if (Array.isArray(credits.cast)) {
-      const topCast = credits.cast.slice(0, 5).map(actor => actor.name).join(', ');
+      const topCast = $.map(credits.cast.slice(0, 5), actor => actor.name).join(', ');
       castHTML = `<p><strong>Cast:</strong> ${topCast}</p>`;
     }
   } catch (err) {
     console.warn('Cast fetch failed:', err);
   }
 
-  detailPanel.innerHTML = `
+  $detailPanel.html(`
     <div class="detail-left">
       <img src="${posterUrl}" alt="${title}" class="movie-poster-large" />
       <p><strong>Genres:</strong> ${genreText}</p>
@@ -166,34 +159,26 @@ async function expandMovieCard(card, tmdbId, title, posterUrl, genreText, releas
       ${castHTML}
       <div class="trailer">${trailerEmbedHTML || '<p>No trailer available.</p>'}</div>
     </div>
-  `;
+  `);
 
-  detailPanel.querySelector('.show-less-btn').addEventListener('click', resetCards);
+  $detailPanel.find('.show-less-btn').on('click', resetCards);
 }
-
 
 function resetCards() {
-  const detailPanel = document.getElementById('movie-detail-panel');
-  detailPanel.classList.add('hidden');
-  detailPanel.innerHTML = '';
-
-  document.querySelectorAll('.movie-card').forEach(c => {
-    c.style.display = '';
-  });
+  $('#movie-detail-panel')
+    .addClass('hidden')
+    .empty();
+  $('.movie-card').show();
 }
 
-
 function logout() {
-  localStorage.removeItem('token');  // Clear the JWT
+  localStorage.removeItem('token');
   window.location.href = '/pages/login.html';
 }
 
 export async function showLoginStatus() {
-  const loginBtn = document.querySelector('.login-btn');
-  if (!loginBtn) {
-    // No login button on this page — safe to skip
-    return;
-  }
+  const $loginBtn = $('.login-btn');
+  if (!$loginBtn.length) return;
 
   const token = localStorage.getItem('token');
   if (token) {
@@ -207,17 +192,12 @@ export async function showLoginStatus() {
       if (res.ok) {
         const data = await res.json();
 
-        // Instead of outerHTML, update content inside the loginBtn element safely:
-        loginBtn.innerHTML = `
+        $loginBtn.html(`
           <span class="user-info">👤 ${data.username}</span>
           <button id="logoutBtn" class="logout-btn">Logout</button>
-        `;
+        `);
 
-        // Attach logout event listener
-        const logoutBtn = loginBtn.querySelector('#logoutBtn');
-        if (logoutBtn) {
-          logoutBtn.addEventListener('click', logout);
-        }
+        $loginBtn.find('#logoutBtn').on('click', logout);
       } else {
         localStorage.removeItem('token');
       }

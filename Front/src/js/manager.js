@@ -15,77 +15,52 @@ async function fetchTMDBGenres() {
   }
 }
 
-// Fetch genres on page load if the TMDB search form exists
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('tmdb-search-form')) {
-    fetchTMDBGenres();
-  }
+$(document).ready(() => {
+  if ($('#tmdb-search-form').length) fetchTMDBGenres();
 });
 
-// Check for manager role
+// Navbar manager tab injection
 export async function updateNavbarForRole() {
   const token = localStorage.getItem('token');
-  if (!token) {
-    console.log('No token found');
-    return;
-  }
+  if (!token) return;
 
   try {
     const res = await fetch(`${API_BASE}/api/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) {
-      console.log('Failed to fetch user info');
-      return;
-    }
+    if (!res.ok) return;
 
     const user = await res.json();
-    console.log('User info:', user); // <--- Add this line
     if (user.role === 'manager') {
-      // Show the manager tab
-      const navLinks = document.querySelector('.nav-links');
-      if (navLinks && !document.getElementById('manager-tab')) {
-        const managerTab = document.createElement('a');
-        managerTab.href = '/pages/manager.html';
-        managerTab.textContent = 'Manager';
-        managerTab.id = 'manager-tab';
-        managerTab.className = 'manager-tab'; // class for styling
-        navLinks.appendChild(managerTab);
+      if (!$('.nav-links #manager-tab').length) {
+        $('.nav-links').append(`<a href="/pages/manager.html" id="manager-tab" class="manager-tab">Manager</a>`);
       }
     }
   } catch (err) {
-    console.error('Failed to fetch user info', err);
+    console.error('Failed to fetch user info:', err);
   }
 }
 
-
-// Redirect non-managers away from manager.html
-document.addEventListener('DOMContentLoaded', async () => {
+// Redirect non-managers from manager.html
+$(document).ready(async () => {
   if (window.location.pathname.endsWith('manager.html')) {
     const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = '../index.html';
-      return;
-    }
+    if (!token) return (window.location.href = '../index.html');
+
     try {
       const res = await fetch(`${API_BASE}/api/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) {
-        window.location.href = '../index.html';
-        return;
-      }
+      if (!res.ok) return (window.location.href = '../index.html');
       const data = await res.json();
-      if (data.role !== 'manager') {
-        window.location.href = '../index.html';
-      }
+      if (data.role !== 'manager') window.location.href = '../index.html';
     } catch {
       window.location.href = '../index.html';
     }
   }
 });
 
-let allUsers = []; // Store all users for filtering
+let allUsers = [];
 
 async function fetchAndRenderUsers(searchTerm = '') {
   const token = localStorage.getItem('token');
@@ -103,8 +78,8 @@ async function fetchAndRenderUsers(searchTerm = '') {
 }
 
 function renderUsersTable(searchTerm = '', customList = null) {
-  const tbody = document.querySelector('#users-table tbody');
-  tbody.innerHTML = '';
+  const $tbody = $('#users-table tbody');
+  $tbody.empty();
 
   let filtered = customList || allUsers;
   if (searchTerm) {
@@ -117,84 +92,65 @@ function renderUsersTable(searchTerm = '', customList = null) {
   }
 
   filtered.forEach(user => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${user.username}</td>
-      <td>${user.email}</td>
-      <td>${user.role}</td>
-      <td>
-        ${
-          user.username !== 'manager'
-            ? `
-              <select data-user-id="${user.user_id}">
-                <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
-                <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
-              </select>
-              <button class="delete-user-btn" data-user-id="${user.user_id}">Delete</button>
-            `
-            : ''
-        }
-      </td>
-    `;
-    tbody.appendChild(tr);
+    const $tr = $(`
+      <tr>
+        <td>${user.username}</td>
+        <td>${user.email}</td>
+        <td>${user.role}</td>
+        <td>
+          ${
+            user.username !== 'manager'
+              ? `
+                <select data-user-id="${user.user_id}">
+                  <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
+                  <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
+                </select>
+                <button class="delete-user-btn" data-user-id="${user.user_id}">Delete</button>
+              `
+              : ''
+          }
+        </td>
+      </tr>
+    `);
+    $tbody.append($tr);
   });
 
-  // Add event listeners for role change
-  tbody.querySelectorAll('select').forEach(select => {
-    select.addEventListener('change', async (e) => {
-      const userId = e.target.getAttribute('data-user-id');
-      const newRole = e.target.value;
-      await changeUserRole(userId, newRole);
-      await fetchAndRenderUsers(document.getElementById('user-search-input').value);
-    });
+  $tbody.find('select').on('change', async function () {
+    const userId = $(this).data('user-id');
+    const newRole = $(this).val();
+    await changeUserRole(userId, newRole);
+    await fetchAndRenderUsers($('#user-search-input').val());
   });
 
-  // Add event listeners for delete buttons
-  tbody.querySelectorAll('.delete-user-btn').forEach(btn => {
-    if (!btn.disabled) {
-      btn.addEventListener('click', async (e) => {
-        const userId = btn.getAttribute('data-user-id');
-        if (confirm('Are you sure you want to delete this user?')) {
-          await deleteUser(userId);
-          await fetchAndRenderUsers(document.getElementById('user-search-input').value);
-        }
-      });
+  $tbody.find('.delete-user-btn').on('click', async function () {
+    const userId = $(this).data('user-id');
+    if (confirm('Are you sure you want to delete this user?')) {
+      await deleteUser(userId);
+      await fetchAndRenderUsers($('#user-search-input').val());
     }
   });
 }
 
-// Search bar event listeners
-document.addEventListener('DOMContentLoaded', () => {
-  const searchInput = document.getElementById('user-search-input');
-  const searchBtn = document.getElementById('user-search-btn');
-  const resetBtn = document.getElementById('user-search-reset');
-  const showManagersBtn = document.getElementById('show-managers-btn');
-
-  if (searchBtn) {
-    searchBtn.addEventListener('click', () => {
-      renderUsersTable(searchInput.value);
-    });
-  }
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      renderUsersTable('');
-    });
-  }
-  if (showManagersBtn) {
-    showManagersBtn.addEventListener('click', () => {
-      // Only show users with role 'manager'
-      const managers = allUsers.filter(user => user.role === 'manager');
-      renderUsersTable('', managers);
-    });
-  }
+// Search, reset, show managers
+$(document).ready(() => {
+  $('#user-search-btn').on('click', () => {
+    renderUsersTable($('#user-search-input').val());
+  });
+  $('#user-search-reset').on('click', () => {
+    $('#user-search-input').val('');
+    renderUsersTable('');
+  });
+  $('#show-managers-btn').on('click', () => {
+    const managers = allUsers.filter(user => user.role === 'manager');
+    renderUsersTable('', managers);
+  });
 });
 
 async function changeUserRole(userId, newRole) {
   const token = localStorage.getItem('token');
   try {
     const res = await fetch(`${API_BASE}/api/changeUserRole`, {
-      method: 'POST', 
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -211,15 +167,12 @@ async function changeUserRole(userId, newRole) {
   }
 }
 
-// Delete user function
 async function deleteUser(userId) {
   const token = localStorage.getItem('token');
   try {
     const res = await fetch(`${API_BASE}/api/deleteUser/${userId}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
       const data = await res.json();
@@ -231,121 +184,115 @@ async function deleteUser(userId) {
   }
 }
 
-// Only run on manager.html
 if (window.location.pathname.endsWith('manager.html')) {
-  document.addEventListener('DOMContentLoaded', () => fetchAndRenderUsers());
+  $(document).ready(() => fetchAndRenderUsers());
 }
 
-// Tab switching logic
-document.addEventListener('DOMContentLoaded', () => {
-  const userTab = document.getElementById('user-management-tab');
-  const movieTab = document.getElementById('movie-management-tab');
-  const screeningsTab = document.getElementById('screenings-management-tab');
-
-  const userSection = document.getElementById('user-management-section');
-  const movieSection = document.getElementById('movie-management-section');
-  const screeningsSection = document.getElementById('screenings-management-section');
-
-  function showSection(section) {
-    if (!userSection || !movieSection || !screeningsSection) return;
-    userSection.style.display = 'none';
-    movieSection.style.display = 'none';
-    screeningsSection.style.display = 'none';
-    if (section) section.style.display = '';
+// Tab switching
+$(document).ready(() => {
+  function showSection($section) {
+    $('#user-management-section, #movie-management-section, #screenings-management-section').hide();
+    $section.show();
   }
 
-  if (userTab) userTab.addEventListener('click', () => showSection(userSection));
-  if (movieTab) movieTab.addEventListener('click', () => showSection(movieSection));
-  if (screeningsTab) screeningsTab.addEventListener('click', () => showSection(screeningsSection));
+  $('#user-management-tab').on('click', () => showSection($('#user-management-section')));
+  $('#movie-management-tab').on('click', async () => {showSection($('#movie-management-section')); await fetchAndRenderMovies();});
+  $('#screenings-management-tab').on('click', () => showSection($('#screenings-management-section')));
 });
 
-// --- Movie Management Tab Logic ---
+// --- TMDB Movie Management ---
+$('#tmdb-search-form').on('submit', async function (e) {
+  e.preventDefault();
+  const query = $('#tmdb-search-input').val().trim();
+  if (!query) return;
 
-// Search TMDB
-const tmdbForm = document.getElementById('tmdb-search-form');
-if (tmdbForm) {
-  tmdbForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const query = document.getElementById('tmdb-search-input').value.trim();
-    if (!query) return;
-    // Ensure genres are loaded before searching
-    if (!Object.keys(tmdbGenres).length) {
-      await fetchTMDBGenres();
-    }
-    const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
-    const results = await res.json();
-    renderTMDBResults(results);
-  });
+  if (!Object.keys(tmdbGenres).length) {
+    await fetchTMDBGenres();
+  }
+
+  const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
+  const results = await res.json();
+  renderTMDBResults(results);
+});
+
+async function fetchTMDBRuntime(movieId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/movies/tmdb/details/${movieId}`);
+    if (!res.ok) return null;
+    const details = await res.json();
+    return details.runtime || null;
+  } catch {
+    return null;
+  }
 }
 
 function renderTMDBResults(results) {
-  const container = document.getElementById('tmdb-results');
-  if (!container) return;
-  container.innerHTML = '';
+  const $container = $('#tmdb-results');
+  $container.empty();
+
   if (!results.length) {
-    container.textContent = 'No results found.';
+    $container.text('No results found.');
     return;
   }
-  const ul = document.createElement('ul');
+
+  const $ul = $('<ul></ul>');
+
   results.forEach(async movie => {
-    // Map genre_ids to names
-    let genreNames = '';
-    if (Array.isArray(movie.genre_ids) && tmdbGenres) {
-      genreNames = movie.genre_ids
-        .map(id => tmdbGenres[Number(id)])
-        .filter(Boolean)
-        .join(', ');
-    }
-    // Fetch runtime
-    let duration = await fetchTMDBRuntime(movie.id);
+    const genreNames = (movie.genre_ids || [])
+      .map(id => tmdbGenres[Number(id)])
+      .filter(Boolean)
+      .join(', ');
 
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <strong>${movie.title}</strong> (${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'})<br>
-      <em>${movie.overview || ''}</em><br>
-      <span><b>Genres:</b> ${genreNames || 'Unknown'}</span><br>
-      <span><b>Release Date:</b> ${movie.release_date || 'Unknown'}</span><br>
-      <span><b>Duration:</b> ${duration ? duration + ' min' : 'Unknown'}</span><br>
-      <button class="add-tmdb-movie"
-        data-title="${encodeURIComponent(movie.title)}"
-        data-description="${encodeURIComponent(movie.overview || '')}"
-        data-release="${movie.release_date || ''}"
-        data-duration="${duration || ''}"
-        data-genre="${encodeURIComponent(genreNames)}"
-      >Add to Database</button>
-    `;
-    ul.appendChild(li);
+    const duration = await fetchTMDBRuntime(movie.id);
 
-    // Add event listener for the button
-    li.querySelector('.add-tmdb-movie').addEventListener('click', async () => {
-      const movieToAdd = {
-        title: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-title')),
-        description: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-description')),
-        release_date: li.querySelector('.add-tmdb-movie').getAttribute('data-release'),
-        duration_minutes: duration || 120,
-        genre: decodeURIComponent(li.querySelector('.add-tmdb-movie').getAttribute('data-genre')) || 'Unknown'
-      };
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/movies`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(movieToAdd)
-      });
-      if (res.ok) {
-        alert('Movie added!');
-        fetchAndRenderMovies();
-      } else {
-        alert('Failed to add movie');
-      }
-    });
+    const $li = $(`
+      <li>
+        <strong>${movie.title}</strong> (${movie.release_date?.split('-')[0] || 'N/A'})<br>
+        <em>${movie.overview || ''}</em><br>
+        <span><b>Genres:</b> ${genreNames || 'Unknown'}</span><br>
+        <span><b>Release Date:</b> ${movie.release_date || 'Unknown'}</span><br>
+        <span><b>Duration:</b> ${duration ? duration + ' min' : 'Unknown'}</span><br>
+        <button class="add-tmdb-movie"
+          data-title="${encodeURIComponent(movie.title)}"
+          data-description="${encodeURIComponent(movie.overview || '')}"
+          data-release="${movie.release_date || ''}"
+          data-duration="${duration || ''}"
+          data-genre="${encodeURIComponent(genreNames)}"
+        >Add to Database</button>
+      </li>
+    `);
+    $ul.append($li);
   });
-  container.appendChild(ul);
+
+  $container.append($ul);
+
+  $container.on('click', '.add-tmdb-movie', async function () {
+    const $btn = $(this);
+    const movieToAdd = {
+      title: decodeURIComponent($btn.data('title')),
+      description: decodeURIComponent($btn.data('description')),
+      release_date: $btn.data('release'),
+      duration_minutes: $btn.data('duration') || 120,
+      genre: decodeURIComponent($btn.data('genre')) || 'Unknown'
+    };
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_BASE}/api/movies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(movieToAdd)
+    });
+    if (res.ok) {
+      alert('Movie added!');
+      fetchAndRenderMovies();
+    } else {
+      alert('Failed to add movie');
+    }
+  });
 }
 
-// Fetch and render movies from your DB
 async function fetchAndRenderMovies() {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/api/movies`, {
@@ -356,64 +303,31 @@ async function fetchAndRenderMovies() {
 }
 
 function renderMoviesTable(movies) {
-  const tbody = document.querySelector('#movies-table tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
+  const $tbody = $('#movies-table tbody');
+  $tbody.empty();
+
   movies.forEach(movie => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${movie.title}</td>
-      <td>${movie.description || ''}</td>
-      <td>${movie.duration_minutes || ''}</td>
-      <td>${movie.genre || ''}</td>
-      <td><button class="delete-movie-btn" data-id="${movie.movie_id}">Delete</button></td>
-    `;
-    tbody.appendChild(tr);
+    const $tr = $(`
+      <tr>
+        <td>${movie.title}</td>
+        <td>${movie.description || ''}</td>
+        <td>${movie.duration_minutes || ''}</td>
+        <td>${movie.genre || ''}</td>
+        <td><button class="delete-movie-btn" data-id="${movie.movie_id}">Delete</button></td>
+      </tr>
+    `);
+    $tbody.append($tr);
   });
 
-  // Delete logic
-  tbody.querySelectorAll('.delete-movie-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-id');
-      if (confirm('Are you sure you want to delete this movie?')) {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE}/api/movies/${id}`, { 
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          fetchAndRenderMovies();
-        } else {
-          alert('Failed to delete movie');
-        }
-      }
-    });
+  $tbody.on('click', '.delete-movie-btn', async function () {
+    const id = $(this).data('id');
+    if (confirm('Are you sure you want to delete this movie?')) {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/movies/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) fetchAndRenderMovies();
+    }
   });
-}
-
-
-const movieTab = document.getElementById('movie-management-tab');
-if (movieTab) {
-  movieTab.addEventListener('click', fetchAndRenderMovies);
-}
-
-const tmdbClearBtn = document.getElementById('tmdb-clear-btn');
-if (tmdbClearBtn) {
-  tmdbClearBtn.addEventListener('click', () => {
-    const input = document.getElementById('tmdb-search-input');
-    const results = document.getElementById('tmdb-results');
-    if (input) input.value = '';
-    if (results) results.innerHTML = '';
-  });
-}
-
-async function fetchTMDBRuntime(tmdbId) {
-  try {
-    const res = await fetch(`${API_BASE}/api/movies/tmdb/${tmdbId}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.runtime || null;
-  } catch {
-    return null;
-  }
 }
