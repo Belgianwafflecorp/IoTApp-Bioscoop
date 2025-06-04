@@ -583,7 +583,7 @@ button.read-more-btn:hover, button.show-less-btn:hover {
 
 .premium {
   background-color: var(--color-yellow);
-  color: var(--color-black);
+  color: var,--color-black;
 }
 
 .seat.taken {
@@ -669,23 +669,48 @@ button.read-more-btn:hover, button.show-less-btn:hover {
   margin-top: 2em;
 }
 
-.delete-user-btn {
-  background: #d32f2f;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 0.3em 0.8em;
-  margin-left: 0.5em;
-  cursor: pointer;
+/* Manager tables: striped rows, header color, hover effect */
+.management-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2em;
+  font-size: 1em;
+  background: #181818;
+  color: var(--color-white);
+  box-shadow: 0 2px 12px #000a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.management-section th, .management-section td {
+  padding: 0.8em 1em;
+  text-align: left;
+}
+
+.management-section th {
+  background: var(--color-dark-blue);
+  color: var(--color-yellow);
   font-weight: bold;
-  transition: background 0.2s;
+  font-size: 1.1em;
+  border-bottom: 2px solid var(--color-yellow);
 }
-.delete-user-btn:disabled {
-  background: #888;
-  cursor: not-allowed;
+
+.management-section tbody tr:nth-child(even) {
+  background: #232323;
 }
-.delete-user-btn:hover:not(:disabled) {
-  background: #b71c1c;
+
+.management-section tbody tr:nth-child(odd) {
+  background: #181818;
+}
+
+.management-section tbody tr:hover {
+  background: var(--color-light-blue);
+  color: var(--color-black);
+  transition: background 0.2s, color 0.2s;
+}
+
+.management-section td button {
+  margin-right: 0.5em;
 }
 
 /* Movie Form Styles in management page*/
@@ -838,4 +863,45 @@ button.read-more-btn:hover, button.show-less-btn:hover {
 
 .show-less-btn {
   margin-top: 2rem;
+}
+
+/* Universal Manager Table Button Styles */
+.manager-btn {
+  padding: 0.4em 1.1em;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  font-family: var(--font-body);
+  cursor: pointer;
+  margin-right: 0.5em;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px #0002;
+  font-size: 1em;
+}
+
+.manager-btn.edit-btn {
+  background: var(--color-light-blue);
+  color: var(--color-white);
+}
+.manager-btn.edit-btn:hover {
+  background: #1a4e96;
+  color: var(--color-yellow);
+}
+
+.manager-btn.delete-btn {
+  background: var(--color-red);
+  color: var(--color-white);
+}
+.manager-btn.delete-btn:hover {
+  background: #a30000;
+  color: var(--color-yellow);
+}
+
+.manager-btn.add-btn {
+  background: var(--color-green);
+  color: var(--color-white);
+}
+.manager-btn.add-btn:hover {
+  background: #176d41;
+  color: var(--color-yellow);
 }

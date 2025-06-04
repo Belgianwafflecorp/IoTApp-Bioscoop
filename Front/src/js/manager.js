@@ -105,7 +105,7 @@ function renderUsersTable(searchTerm = '', customList = null) {
                   <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
                   <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
                 </select>
-                <button class="delete-user-btn" data-user-id="${user.user_id}">Delete</button>
+                <button class="manager-btn delete-btn" data-user-id="${user.user_id}">Delete</button>
               `
               : ''
           }
@@ -122,13 +122,13 @@ function renderUsersTable(searchTerm = '', customList = null) {
     await fetchAndRenderUsers($('#user-search-input').val());
   });
 
-  $tbody.find('.delete-user-btn').on('click', async function () {
-    const userId = $(this).data('user-id');
-    if (confirm('Are you sure you want to delete this user?')) {
-      await deleteUser(userId);
-      await fetchAndRenderUsers($('#user-search-input').val());
-    }
-  });
+  $tbody.find('.delete-btn[data-user-id]').on('click', async function () {
+  const userId = $(this).data('user-id');
+  if (confirm('Are you sure you want to delete this user?')) {
+    await deleteUser(userId);
+    await fetchAndRenderUsers($('#user-search-input').val());
+  }
+});
 }
 
 // Search, reset, show managers
@@ -143,6 +143,10 @@ $(document).ready(() => {
   $('#show-managers-btn').on('click', () => {
     const managers = allUsers.filter(user => user.role === 'manager');
     renderUsersTable('', managers);
+  });
+    $('#tmdb-clear-btn').on('click', () => {
+    $('#tmdb-search-input').val('');
+    $('#tmdb-results').empty();
   });
 });
 
@@ -269,33 +273,34 @@ function renderTMDBResults(results) {
   });
 
   $container.append($ul);
-
-  $container.on('click', '.add-tmdb-movie', async function () {
-    const $btn = $(this);
-    const movieToAdd = {
-      title: decodeURIComponent($btn.data('title')),
-      description: decodeURIComponent($btn.data('description')),
-      release_date: $btn.data('release'),
-      duration_minutes: $btn.data('duration') || 120,
-      genre: decodeURIComponent($btn.data('genre')) || 'Unknown'
-    };
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${API_BASE}/api/movies`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(movieToAdd)
-    });
-    if (res.ok) {
-      alert('Movie added!');
-      fetchAndRenderMovies();
-    } else {
-      alert('Failed to add movie');
-    }
-  });
 }
+
+// Place this ONCE in your $(document).ready() block, NOT inside renderTMDBResults!
+$('#tmdb-results').off('click', '.add-tmdb-movie').on('click', '.add-tmdb-movie', async function () {
+  const $btn = $(this);
+  const movieToAdd = {
+    title: decodeURIComponent($btn.data('title')),
+    description: decodeURIComponent($btn.data('description')),
+    release_date: $btn.data('release'),
+    duration_minutes: $btn.data('duration') || 120,
+    genre: decodeURIComponent($btn.data('genre')) || 'Unknown'
+  };
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/api/movies`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(movieToAdd)
+  });
+  if (res.ok) {
+    alert('Movie added!');
+    fetchAndRenderMovies();
+  } else {
+    alert('Failed to add movie');
+  }
+});
 
 async function fetchAndRenderMovies() {
   const token = localStorage.getItem('token');
@@ -317,22 +322,22 @@ function renderMoviesTable(movies) {
         <td>${movie.description || ''}</td>
         <td>${movie.duration_minutes || ''}</td>
         <td>${movie.genre || ''}</td>
-        <td><button class="delete-movie-btn" data-id="${movie.movie_id}">Delete</button></td>
+        <td><button id="delete-movie-btn-${movie.movie_id}" data-id="${movie.movie_id}" class="manager-btn delete-btn">Delete</button></td>
       </tr>
     `);
     $tbody.append($tr);
-  });
 
-  $tbody.on('click', '.delete-movie-btn', async function () {
-    const id = $(this).data('id');
-    if (confirm('Are you sure you want to delete this movie?')) {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/movies/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) fetchAndRenderMovies();
-    }
+    $(`#delete-movie-btn-${movie.movie_id}`).on('click', async function () {
+      const id = $(this).data('id');
+      if (confirm('Are you sure you want to delete this movie?')) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/api/movies/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) fetchAndRenderMovies();
+      }
+    });
   });
 }
 
@@ -360,15 +365,15 @@ function renderMoviesForScreenings() {
         <td>${movie.description || ''}</td>
         <td>${movie.duration_minutes || ''}</td>
         <td>${movie.genre || ''}</td>
-        <td><button class="add-screening-btn" data-id="${movie.movie_id}">Add Screening</button></td>
+        <td><button id="add-screening-btn-${movie.movie_id}" data-id="${movie.movie_id}" class="manager-btn add-btn">Add Screening</button></td>
       </tr>
     `);
     $tbody.append($tr);
-  });
 
-  $tbody.find('.add-screening-btn').on('click', function () {
-    const movieId = $(this).data('id');
-    showAddScreeningModal(movieId);
+    $(`#add-screening-btn-${movie.movie_id}`).on('click', function () {
+      const movieId = $(this).data('id');
+      showAddScreeningModal(movieId);
+    });
   });
 }
 
@@ -424,66 +429,64 @@ function renderScreeningsTable() {
         <td>${s.hall_name || ''}</td>
         <td>${
           s.start_time
-            ? s.start_time.replace('T', ' ').slice(0, 16) // Format to YYYY-MM-DD HH:MM removes seconds and time zone
+            ? s.start_time.replace('T', ' ').slice(0, 16)
             : ''
         }</td>
         <td>
-          <button class="edit-screening-btn" data-id="${s.screening_id}">Edit</button>
-          <button class="delete-screening-btn" data-id="${s.screening_id}">Delete</button>
+          <button id="edit-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn edit-btn">Edit</button>
+          <button id="delete-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn delete-btn">Delete</button>
         </td>
       </tr>
     `);
     $tbody.append($tr);
-  });
 
-  $tbody.find('.delete-screening-btn').on('click', async function () {
-    const id = $(this).data('id');
-    if (confirm('Delete this screening?')) {
+    // Attach event listeners directly to the buttons
+    $(`#delete-screening-btn-${s.screening_id}`).on('click', async function () {
+      const id = $(this).data('id');
+      if (confirm('Delete this screening?')) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) fetchAndRenderScreenings();
+      }
+    });
+
+    $(`#edit-screening-btn-${s.screening_id}`).on('click', async function () {
+      const id = $(this).data('id');
+      const screening = allScreenings.find(s => s.screening_id === id);
+
+      if (!allHalls.length) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/api/halls`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        allHalls = await res.json();
+      }
+
+      const currentHallId = typeof screening.hall_id !== 'undefined' ? screening.hall_id : '';
+      const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
+      const newHallId = prompt(
+        `Enter new hall ID (current: ${currentHallId}):\n${hallOptions}`,
+        currentHallId
+      );
+      if (!newHallId) return;
+
+      const newTime = prompt(
+        'Enter new start time (YYYY-MM-DDTHH:MM):',
+        screening.start_time?.slice(0, 16)
+      );
+      if (!newTime) return;
+
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ hall_id: newHallId, start_time: newTime })
       });
       if (res.ok) fetchAndRenderScreenings();
-    }
-  });
-
-  $tbody.find('.edit-screening-btn').on('click', async function () {
-    const id = $(this).data('id');
-    const screening = allScreenings.find(s => s.screening_id === id);
-
-    // Fetch halls if not already loaded
-    if (!allHalls.length) {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/halls`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      allHalls = await res.json();
-    }
-
-    // Always show the actual current hall ID
-    const currentHallId = typeof screening.hall_id !== 'undefined' ? screening.hall_id : '';
-    const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
-    const newHallId = prompt(
-      `Enter new hall ID (current: ${currentHallId}):\n${hallOptions}`,
-      currentHallId
-    );
-    if (!newHallId) return;
-
-    // Prompt for new start time
-    const newTime = prompt(
-      'Enter new start time (YYYY-MM-DDTHH:MM):',
-      screening.start_time?.slice(0, 16)
-    );
-    if (!newTime) return;
-
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ hall_id: newHallId, start_time: newTime })
     });
-    if (res.ok) fetchAndRenderScreenings();
   });
 }
 
