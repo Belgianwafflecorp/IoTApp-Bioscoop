@@ -336,7 +336,6 @@ router.get('/movies/tmdb/genres', MovieTMDB.getTMDBGenres);
  */
 router.get('/movies/:id/videos', MovieTMDB.getMovieVideos);
 
-
 /**
  * @swagger
  * /api/movies/tmdb/{id}:
@@ -366,8 +365,6 @@ router.get('/movies/:id/videos', MovieTMDB.getMovieVideos);
 router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
 
 router.get('/movies/details/:title', MovieTMDB.getMovieByTitle);
-
-router.get('/movies/:id/videos', MovieTMDB.getMovieVideos);
 
 
 /////////////////////////////////////////////////////////////////
@@ -407,7 +404,6 @@ router.get('/movies', MovieController.getAllMovies);
  *         description: Movie not found
  */
 router.get('/movies/:id', MovieController.getMovieById);
-
 
 /**
  * @swagger
@@ -596,11 +592,8 @@ router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreeni
  *       200:
  *         description: List of all seats and their availability
  */
-
-
 // POST reserve seats
 router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
-
 
 router.get('/my-reservations', authenticateToken, ReservationController.getMyReservations);
 /**
@@ -647,35 +640,6 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  *       409:
  *         description: One or more seats already reserved
  */
-
-
-/////////////////////////////////////////////////////////////////
-//////////////////////////// manager ////////////////////////////
-/////////////////////////////////////////////////////////////////
-
-/**
- * @swagger
- * /api/changeUserRole:
- *   post:
- *     summary: Change a user's role
- *     tags:
- *       - Manager
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: integer
- *                 example: 1
- *               new_role:
- *                 type: string
- *                 example: manager
- */
-router.post('/changeUserRole', ManagerController.changeUserRole);
-
 
 
 export default router;
