@@ -8,6 +8,7 @@ import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
 import * as MovieTMDB from '../controllers/Movies.js';
 import * as ReservationController from '../controllers/ReservationController.js';
+import * as HallController from '../controllers/HallController.js';
 
 
 /////////////////////////////////////////////////////////////////
@@ -641,5 +642,11 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  *         description: One or more seats already reserved
  */
 
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////// Halls ///////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+router.get('/halls', HallController.getAllHalls);
 
 export default router;
