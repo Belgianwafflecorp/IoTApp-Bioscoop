@@ -647,6 +647,35 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
 /////////////////////////// Halls ///////////////////////////////
 /////////////////////////////////////////////////////////////////
 
+/**
+ * @swagger
+ * /api/halls:
+ *   get:
+ *     summary: Get all halls
+ *     tags:
+ *       - Halls
+ *     responses:
+ *       200:
+ *         description: List of all halls
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   hall_id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: Main Hall
+ *                   total_seats:
+ *                     type: integer
+ *                     example: 50
+ *       500:
+ *         description: Failed to fetch halls
+ */
 router.get('/halls', HallController.getAllHalls);
 
 export default router;
