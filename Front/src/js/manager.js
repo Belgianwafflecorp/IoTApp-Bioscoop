@@ -197,7 +197,11 @@ $(document).ready(() => {
 
   $('#user-management-tab').on('click', () => showSection($('#user-management-section')));
   $('#movie-management-tab').on('click', async () => {showSection($('#movie-management-section')); await fetchAndRenderMovies();});
-  $('#screenings-management-tab').on('click', () => showSection($('#screenings-management-section')));
+  $('#screenings-management-tab').on('click', async () => {
+    showSection($('#screenings-management-section'));
+    await fetchMoviesForScreenings();
+    await fetchAndRenderScreenings();
+  });
 });
 
 // --- TMDB Movie Management ---
@@ -328,6 +332,130 @@ function renderMoviesTable(movies) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) fetchAndRenderMovies();
+    }
+  });
+}
+
+// --- Screening Management ---
+let allMovies = [];
+let allHalls = [];
+
+async function fetchMoviesForScreenings() {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/api/movies`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  allMovies = await res.json();
+  renderMoviesForScreenings();
+}
+
+function renderMoviesForScreenings() {
+  const $tbody = $('#screenings-movies-table tbody');
+  if (!$tbody.length) return;
+  $tbody.empty();
+  allMovies.forEach(movie => {
+    const $tr = $(`
+      <tr>
+        <td>${movie.title}</td>
+        <td>${movie.description || ''}</td>
+        <td>${movie.duration_minutes || ''}</td>
+        <td>${movie.genre || ''}</td>
+        <td><button class="add-screening-btn" data-id="${movie.movie_id}">Add Screening</button></td>
+      </tr>
+    `);
+    $tbody.append($tr);
+  });
+
+  $tbody.find('.add-screening-btn').on('click', function () {
+    const movieId = $(this).data('id');
+    showAddScreeningModal(movieId);
+  });
+}
+
+async function showAddScreeningModal(movieId) {
+  // Fetch halls if not already loaded
+  if (!allHalls.length) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_BASE}/api/halls`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    allHalls = await res.json();
+  }
+  const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
+  const hallId = prompt(`Enter hall ID:\n${hallOptions}`);
+  if (!hallId) return;
+  const startTime = prompt('Enter start time (YYYY-MM-DDTHH:MM):');
+  if (!startTime) return;
+
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/api/screenings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ movie_id: movieId, hall_id: hallId, start_time: startTime })
+  });
+  if (res.ok) {
+    alert('Screening added!');
+    fetchAndRenderScreenings();
+  } else {
+    alert('Failed to add screening');
+  }
+}
+
+let allScreenings = [];
+
+async function fetchAndRenderScreenings() {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/api/screenings`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  allScreenings = await res.json();
+  renderScreeningsTable();
+}
+
+function renderScreeningsTable() {
+  const $tbody = $('#screenings-table tbody');
+  if (!$tbody.length) return;
+  $tbody.empty();
+  allScreenings.forEach(s => {
+    const $tr = $(`
+      <tr>
+        <td>${s.screening_id}</td>
+        <td>${s.movie_title || s.title || ''}</td>
+        <td>${s.hall_name || ''}</td>
+        <td>${s.start_time ? new Date(s.start_time).toLocaleString() : ''}</td>
+        <td>
+          <button class="edit-screening-btn" data-id="${s.screening_id}">Edit</button>
+          <button class="delete-screening-btn" data-id="${s.screening_id}">Delete</button>
+        </td>
+      </tr>
+    `);
+    $tbody.append($tr);
+  });
+
+  $tbody.find('.delete-screening-btn').on('click', async function () {
+    const id = $(this).data('id');
+    if (confirm('Delete this screening?')) {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) fetchAndRenderScreenings();
+    }
+  });
+
+  $tbody.find('.edit-screening-btn').on('click', async function () {
+    const id = $(this).data('id');
+    const screening = allScreenings.find(s => s.screening_id === id);
+    const newTime = prompt('Enter new start time (YYYY-MM-DDTHH:MM):', screening.start_time?.slice(0,16));
+    if (newTime) {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ start_time: newTime })
+      });
+      if (res.ok) fetchAndRenderScreenings();
     }
   });
 }

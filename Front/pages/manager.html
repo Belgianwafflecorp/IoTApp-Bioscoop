@@ -83,7 +83,36 @@
 
   <section id="screenings-management-section" class="management-section" style="display:none;">
     <h2>Screenings Management</h2>
-    <p>Screenings management table coming soon...</p>
+    <h3>Movies in Database</h3>
+    <table id="screenings-movies-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Duration</th>
+          <th>Genre</th>
+          <th>Add Screening</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Movies will be loaded here -->
+      </tbody>
+    </table>
+    <h3>Screenings</h3>
+    <table id="screenings-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Movie</th>
+          <th>Hall</th>
+          <th>Start Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Screenings will be loaded here -->
+      </tbody>
+    </table>
   </section>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
