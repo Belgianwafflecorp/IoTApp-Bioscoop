@@ -65,6 +65,19 @@
     </form>
     <div id="tmdb-results"></div>
     <h3>Movies in Database</h3>
+    <div class="movie-db-controls" style="margin-bottom:1em;">
+      <input type="text" id="movie-db-search-input" placeholder="Search movies by title, genre, or description..." />
+      <button id="movie-db-search-btn">Search</button>
+      <button id="movie-db-search-reset">Reset</button>
+      <select id="movie-db-sort">
+        <option value="title-asc">Title (A-Z)</option>
+        <option value="title-desc">Title (Z-A)</option>
+        <option value="duration-asc">Duration (Shortest)</option>
+        <option value="duration-desc">Duration (Longest)</option>
+        <option value="genre-asc">Genre (A-Z)</option>
+        <option value="genre-desc">Genre (Z-A)</option>
+      </select>
+    </div>
     <table id="movies-table">
       <thead>
         <tr>

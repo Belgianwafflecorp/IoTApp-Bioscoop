@@ -308,13 +308,15 @@ $('#tmdb-results').off('click', '.add-tmdb-movie').on('click', '.add-tmdb-movie'
   }
 });
 
+let allMoviesDb = []; // Store all movies for filtering/sorting
+
 async function fetchAndRenderMovies() {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/api/movies`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
-  const movies = await res.json();
-  renderMoviesTable(movies);
+  allMoviesDb = await res.json();
+  renderMoviesTable(allMoviesDb);
 }
 
 function renderMoviesTable(movies) {
@@ -346,6 +348,56 @@ function renderMoviesTable(movies) {
     });
   });
 }
+
+// Filtering and sorting logic
+function filterAndSortMovies() {
+  let filtered = allMoviesDb;
+  const search = $('#movie-db-search-input').val().toLowerCase();
+  const sort = $('#movie-db-sort').val();
+
+  if (search) {
+    filtered = filtered.filter(m =>
+      (m.title || '').toLowerCase().includes(search) ||
+      (m.genre || '').toLowerCase().includes(search) ||
+      (m.description || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (sort) {
+    const [field, dir] = sort.split('-');
+    filtered = filtered.slice().sort((a, b) => {
+      let va = a[field] || '';
+      let vb = b[field] || '';
+      if (field === 'duration') {
+        va = Number(va) || 0;
+        vb = Number(vb) || 0;
+      } else {
+        va = va.toString().toLowerCase();
+        vb = vb.toString().toLowerCase();
+      }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  renderMoviesTable(filtered);
+}
+
+// Event handlers
+$(document).ready(() => {
+  $('#movie-db-search-btn').on('click', filterAndSortMovies);
+  $('#movie-db-search-reset').on('click', () => {
+    $('#movie-db-search-input').val('');
+    filterAndSortMovies();
+  });
+  $('#movie-db-sort').on('change', filterAndSortMovies);
+
+  // Optionally: trigger sort/filter on Enter in search input
+  $('#movie-db-search-input').on('keypress', function(e) {
+    if (e.which === 13) filterAndSortMovies();
+  });
+});
 
 // --- Screening Management ---
 let allMovies = [];
