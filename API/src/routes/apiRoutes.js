@@ -556,7 +556,7 @@ router.post('/screenings', ScreeningController.createScreenings);
  *     tags:
  *       - Screenings
  */
-router.put('/screenings/:id', ScreeningController.updateScreenings);
+router.patch('/screenings/:id', ScreeningController.updateScreenings);
 
 /**
  * @swagger

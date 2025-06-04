@@ -447,15 +447,85 @@ function renderScreeningsTable() {
   $tbody.find('.edit-screening-btn').on('click', async function () {
     const id = $(this).data('id');
     const screening = allScreenings.find(s => s.screening_id === id);
-    const newTime = prompt('Enter new start time (YYYY-MM-DDTHH:MM):', screening.start_time?.slice(0,16));
-    if (newTime) {
+
+    // Fetch halls if not already loaded
+    if (!allHalls.length) {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ start_time: newTime })
+      const res = await fetch(`${API_BASE}/api/halls`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchAndRenderScreenings();
+      allHalls = await res.json();
     }
+
+    // Prompt for new hall
+    const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
+    const newHallId = prompt(
+      `Enter new hall ID (current: ${screening.hall_id || ''}):\n${hallOptions}`,
+      screening.hall_id || ''
+    );
+    if (!newHallId) return;
+
+    // Prompt for new start time
+    const newTime = prompt(
+      'Enter new start time (YYYY-MM-DDTHH:MM):',
+      screening.start_time?.slice(0, 16)
+    );
+    if (!newTime) return;
+
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ hall_id: newHallId, start_time: newTime })
+    });
+    if (res.ok) fetchAndRenderScreenings();
   });
 }
+
+// --- New Screening Update Endpoint ---
+export const updateScreenings = async (req, res) => {
+  const { id } = req.params;
+  let { hall_id, start_time } = req.body;
+
+  // Convert undefined to null
+  if (typeof hall_id === 'undefined') hall_id = null;
+  if (typeof start_time === 'undefined') start_time = null;
+
+  if (!hall_id || !start_time) {
+    return res.status(400).json({ error: 'hall_id and start_time are required' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'UPDATE screenings SET hall_id = ?, start_time = ? WHERE screening_id = ?',
+      [hall_id, start_time, id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Screening not found' });
+    }
+    res.json({ message: 'Screening updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update screening' });
+  }
+};
+
+export const createScreenings = async (req, res) => {
+  let { movie_id, hall_id, start_time } = req.body;
+  if (typeof movie_id === 'undefined') movie_id = null;
+  if (typeof hall_id === 'undefined') hall_id = null;
+  if (typeof start_time === 'undefined') start_time = null;
+
+  if (!movie_id || !hall_id || !start_time) {
+    return res.status(400).json({ error: 'movie_id, hall_id, and start_time are required' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'INSERT INTO screenings (movie_id, hall_id, start_time) VALUES (?, ?, ?)',
+      [movie_id, hall_id, start_time]
+    );
+    res.status(201).json({ screening_id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create screening' });
+  }
+};

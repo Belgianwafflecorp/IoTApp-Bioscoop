@@ -78,19 +78,38 @@ const createScreenings = async (req, res) => {
 
 // PUT /screenings/:id - voorstelling aanpassen
 const updateScreenings = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { movie_id, hall_id, start_time } = req.body;
+  const { id } = req.params;
+  const { hall_id, start_time } = req.body;
 
-        await db.execute(
-            'UPDATE screenings SET movie_id = ?, hall_id = ?, start_time = ? WHERE screening_id = ?',
-            [movie_id, hall_id, start_time, id]
-        );
+  // Build dynamic SQL and params
+  const fields = [];
+  const params = [];
 
-        res.json({ message: 'Voorstelling bijgewerkt' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+  if (typeof hall_id !== 'undefined') {
+    fields.push('hall_id = ?');
+    params.push(hall_id);
+  }
+  if (typeof start_time !== 'undefined') {
+    fields.push('start_time = ?');
+    params.push(start_time);
+  }
+  if (!fields.length) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+  params.push(id);
+
+  try {
+    const [result] = await db.query(
+      `UPDATE screenings SET ${fields.join(', ')} WHERE screening_id = ?`,
+      params
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Screening not found' });
     }
+    res.json({ message: 'Screening updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update screening' });
+  }
 };
 
 // DELETE /screenings/:id - voorstelling verwijderen
