@@ -422,7 +422,11 @@ function renderScreeningsTable() {
         <td>${s.screening_id}</td>
         <td>${s.movie_title || s.title || ''}</td>
         <td>${s.hall_name || ''}</td>
-        <td>${s.start_time ? new Date(s.start_time).toLocaleString() : ''}</td>
+        <td>${
+          s.start_time
+            ? s.start_time.replace('T', ' ').slice(0, 16) // Format to YYYY-MM-DD HH:MM removes seconds and time zone
+            : ''
+        }</td>
         <td>
           <button class="edit-screening-btn" data-id="${s.screening_id}">Edit</button>
           <button class="delete-screening-btn" data-id="${s.screening_id}">Delete</button>
