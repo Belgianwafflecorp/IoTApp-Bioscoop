@@ -9,6 +9,7 @@ const getAllScreenings = async (req, res) => {
                 m.title AS movie_title,
                 m.duration_minutes,
                 h.name AS hall_name,
+                s.hall_id,
                 s.start_time
             FROM screenings s
             JOIN movies m ON s.movie_id = m.movie_id

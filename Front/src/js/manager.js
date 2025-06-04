@@ -461,11 +461,12 @@ function renderScreeningsTable() {
       allHalls = await res.json();
     }
 
-    // Prompt for new hall
+    // Always show the actual current hall ID
+    const currentHallId = typeof screening.hall_id !== 'undefined' ? screening.hall_id : '';
     const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
     const newHallId = prompt(
-      `Enter new hall ID (current: ${screening.hall_id || ''}):\n${hallOptions}`,
-      screening.hall_id || ''
+      `Enter new hall ID (current: ${currentHallId}):\n${hallOptions}`,
+      currentHallId
     );
     if (!newHallId) return;
 
