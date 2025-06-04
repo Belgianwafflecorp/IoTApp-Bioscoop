@@ -905,3 +905,277 @@ button.read-more-btn:hover, button.show-less-btn:hover {
   background: #176d41;
   color: var(--color-yellow);
 }
+
+/* --- Screening Chart Styles --- */
+.screening-chart-wrapper {
+    margin-bottom: 30px;
+    background-color: #111; /* Match movie-card/login-container background */
+    border-radius: var(--border-radius);
+    padding: 1.5em;
+    box-shadow: var(--box-shadow);
+    color: var(--color-white); /* Ensure text is visible */
+}
+
+.screening-chart-wrapper h3 {
+    font-family: var(--font-header);
+    color: var(--color-yellow); /* Match other headings */
+    margin-top: 0;
+    margin-bottom: 1em;
+    text-align: center;
+}
+
+.screening-chart {
+    /* These custom properties are set by JavaScript to handle dynamic sizing */
+    /* Converted to fluid units for better responsiveness */
+    --hall-name-width: 15vw;   /* Changed from 150px to 15% of viewport width */
+    --day-width: 13vw;     /* Changed from 150px to 13% of viewport width */
+    --header-height: 12vh;   /* Increased from 100px, now 12% of viewport height */
+    --hall-height: 10vh;    /* Increased from 80px, now 10% of viewport height */
+    --num-days: 7;
+    --num-halls: 1; /* Default, will be overridden */
+
+    border: 1px solid var(--color-dark-blue);
+    background: var(--color-black);
+    overflow-x: auto; /* Still needed for horizontal scrolling */
+    min-height: 40vh; /* Minimum height in relation to viewport height */
+    border-radius: var(--border-radius);
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+}
+
+.screening-chart-inner {
+    /* CSS Grid for the main layout */
+    display: grid;
+    /* Grid columns: Hall Name column + 7 Day columns */
+    grid-template-columns: var(--hall-name-width) repeat(var(--num-days), var(--day-width));
+    /* Grid rows: Header row + N Hall rows */
+    grid-template-rows: var(--header-height) repeat(var(--num-halls), var(--hall-height));
+    /* Total explicit width and height now depend on fluid units */
+    width: calc(var(--hall-name-width) + (var(--day-width) * var(--num-days)));
+    height: calc(var(--header-height) + (var(--hall-height) * var(--num-halls)));
+    font-family: var(--font-body);
+    font-size: 1.1em; /* Increased font size slightly with em */
+    color: var(--color-white);
+    position: relative; /* Needed for absolute positioning of grid lines */
+}
+
+/* --- Header Rows --- */
+.chart-header-row {
+    grid-column: 2 / -1; /* Spans all day columns */
+    display: flex; /* Use flexbox for day/hour headers within this row */
+    overflow: hidden; /* Prevent content from spilling outside */
+    box-sizing: border-box;
+    position: relative; /* For absolute children */
+}
+
+.chart-day-names {
+    grid-row: 1; /* First row for day names */
+    background: var(--color-dark-blue);
+    border-bottom: 1px solid var(--color-light-blue);
+    font-size: 1.1em; /* Adjusted font size for day headers */
+}
+
+.chart-time-slots {
+    grid-row: 1; /* Also first row, stacked on top of day names (visually, due to absolute positioning of children) */
+    margin-top: 5.5vh; /* Adjusted to be responsive to header height */
+    background: #1a4e96;
+    border-bottom: 2px solid var(--color-light-blue);
+    display: none;
+}
+
+.chart-day-header {
+    flex: 1; /* Take equal width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    /* Font sizes generally should be `em` or `rem` for accessibility and responsiveness */
+    font-size: 1.1em; /* Changed from 13px */
+    background: var(--color-dark-blue);
+    border-right: 1px solid var(--color-light-blue);
+    color: var(--color-yellow);
+}
+
+.chart-day-header:last-child {
+    border-right: none;
+}
+
+.chart-hour-slot {
+    position: absolute; /* Absolute within its flex parent (chart-time-slots) */
+    top: 0;
+    height: 100%;
+    /* Calculate left and width based on CSS variables */
+    left: calc(var(--day-index) * var(--day-width) + (var(--hour-offset) / 24) * var(--day-width));
+    width: calc(4 / 24 * var(--day-width));
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em; /* Changed from 10px */
+    color: var(--color-white);
+    box-sizing: border-box;
+}
+
+/* --- Hall Rows --- */
+.chart-hall-row {
+    grid-column: 1 / -1; /* Spans all columns (hall name + days) */
+    display: contents; /* Makes children participate directly in the grid layout */
+    /* --hall-index is used by children for grid-row positioning */
+}
+
+.chart-hall-name {
+    grid-column: 1; /* First column */
+    grid-row: calc(2 + var(--hall-index)); /* Starts from row 2 (after header), based on index */
+    background: var(--color-dark-blue);
+    border: 1px solid var(--color-light-blue);
+    border-right: 2px solid var(--color-light-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1em; /* Changed from 14px */
+    box-sizing: border-box;
+    color: var(--color-yellow);
+    z-index: 1;
+}
+
+.chart-hall-timeline {
+    grid-column: 2 / -1; /* Spans day columns */
+    grid-row: calc(2 + var(--hall-index));
+    border: 1px solid var(--color-dark-blue);
+    background: #111;
+    box-sizing: border-box;
+    position: relative; /* For absolute positioning of screening blocks within it */
+}
+
+/* --- Screening Blocks --- */
+.chart-screening-block {
+    position: absolute;
+    top: 0.5em; /* Offset from top of hall row, changed to em */
+    height: calc(var(--hall-height) - 1em); /* Fill most of the hall row height, changed to em */
+    border: 1px solid var(--color-black);
+    border-radius: var(--border-radius);
+    padding: 0.5em; /* Changed from 5px to em */
+    box-sizing: border-box;
+    color: var(--color-black);
+    font-size: 0.9em; /* Changed from 11px */
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 0.15em 0.5em rgba(0,0,0,0.4); /* Changed to em for shadow */
+    font-weight: bold;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    text-shadow: 0 0.05em 0.05em rgba(255,255,255,0.2); /* Changed to em for shadow */
+    z-index: 4; /* Ensure blocks are above grid lines */
+
+    /* Calculate left and width dynamically based on CSS variables */
+    left: calc(var(--day-index) * var(--day-width) + (var(--start-hour) / 24) * var(--day-width));
+    width: calc(max(6em, (var(--duration-hours) / 24) * var(--day-width))); /* Changed from 60px to em */
+}
+
+.chart-screening-block:hover {
+    transform: translateY(-0.1em); /* Changed from 2px to em */
+    box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.6); /* Changed to em for shadow */
+}
+
+.screening-movie-title {
+    color: var(--color-black);
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.screening-time-text {
+    color: #333;
+    font-size: 0.8em; /* Changed from 10px */
+    margin-top: 0.2em; /* Changed from 2px to em */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Grid Lines (Absolute positioned within .screening-chart-inner) --- */
+.chart-day-separator {
+    position: absolute;
+    width: 2px; /* Keeping this small, fixed px is often fine for thin lines */
+    background: var(--color-light-blue);
+    pointer-events: none;
+    z-index: 3;
+    /* Position based on day index, relative to full chart area */
+    left: calc(var(--hall-name-width) + (var(--day-index) * var(--day-width)));
+    top: var(--header-height);
+    height: calc(var(--hall-height) * var(--num-halls));
+}
+
+.chart-hour-grid-line {
+    position: absolute;
+    width: 1px; /* Keeping this small, fixed px is often fine for thin lines */
+    pointer-events: none;
+    top: var(--header-height);
+    height: calc(var(--hall-height) * var(--num-halls));
+    z-index: 2; /* Below separators, above hall timelines */
+    /* Position based on day and hour index */
+    left: calc(var(--hall-name-width) + (var(--day-index) * var(--day-width)) + (var(--hour-offset) / 24) * var(--day-width));
+}
+
+.chart-grid-line-strong {
+    background: rgba(255,255,255,0.2);
+}
+
+.chart-grid-line-light {
+    background: rgba(255,255,255,0.05);
+}
+
+/* --- Legend Styles --- */
+.chart-legend {
+    margin-top: 1.5em; /* Changed from 20px to em */
+    padding: 1em;
+    background-color: #111;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.chart-legend h4 {
+    font-family: var(--font-header);
+    color: var(--color-yellow);
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+.chart-legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em; /* Changed from 15px to em */
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5em; /* Changed from 8px to em */
+    color: var(--color-white);
+}
+
+.chart-legend-color-box {
+    width: 1.5em; /* Changed from 20px to em */
+    height: 1.5em; /* Changed from 20px to em */
+    border-radius: 4px; /* Keeping border-radius in px is fine */
+    border: 1px solid var(--color-light-blue);
+    box-shadow: 0 0.1em 0.2em rgba(0,0,0,0.3); /* Changed to em for shadow */
+}
+
+/* Specific styling for the Refresh Chart button */
+#refresh-chart-btn {
+    margin: 1em 0; /* Changed from 10px to em */
+    background-color: var(--color-yellow);
+    color: var(--color-black);
+    padding: 0.7em 1.5em;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    box-shadow: var(--box-shadow);
+}
+
+#refresh-chart-btn:hover {
+    background-color: var(--color-light-yellow);
+    opacity: 0.9;
+}
