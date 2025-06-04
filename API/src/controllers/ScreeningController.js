@@ -80,6 +80,7 @@ const createScreenings = async (req, res) => {
 const updateScreenings = async (req, res) => {
   const { id } = req.params;
   const { hall_id, start_time } = req.body;
+  console.log('PATCH screening', id, 'with', req.body); // Debugging line
 
   // Build dynamic SQL and params
   const fields = [];

@@ -20,7 +20,7 @@ setupWebSocket(server); // 👈 Initialize WS here
 app.use(express.json());
 app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH' , 'DELETE'],
 }));
 
 // Log incoming requests

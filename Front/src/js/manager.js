@@ -507,6 +507,7 @@ export const updateScreenings = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Failed to update screening' });
   }
+  if (res.ok) fetchAndRenderScreenings();
 };
 
 export const createScreenings = async (req, res) => {
@@ -528,4 +529,5 @@ export const createScreenings = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Failed to create screening' });
   }
+  if (res.ok) fetchAndRenderScreenings();
 };
