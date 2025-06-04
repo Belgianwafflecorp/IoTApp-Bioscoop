@@ -15,6 +15,12 @@ async function fetchTMDBGenres() {
   }
 }
 
+function getCurrentDateTimeLocal() {
+  const now = new Date();
+  const pad = n => n.toString().padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 $(document).ready(() => {
   if ($('#tmdb-search-form').length) fetchTMDBGenres();
 });
@@ -389,7 +395,10 @@ async function showAddScreeningModal(movieId) {
   const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
   const hallId = prompt(`Enter hall ID:\n${hallOptions}`);
   if (!hallId) return;
-  const startTime = prompt('Enter start time (YYYY-MM-DDTHH:MM):');
+
+  // Use current date/time as default
+  const defaultTime = getCurrentDateTimeLocal();
+  const startTime = prompt('Enter start time (YYYY-MM-DDTHH:MM):', defaultTime);
   if (!startTime) return;
 
   const token = localStorage.getItem('token');
@@ -539,3 +548,5 @@ export const createScreenings = async (req, res) => {
   }
   if (res.ok) fetchAndRenderScreenings();
 };
+
+
