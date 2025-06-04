@@ -106,14 +106,12 @@ function renderUsersTable(searchTerm = '', customList = null) {
         <td>
           ${
             user.username !== 'manager'
-              ? `
-                <select data-user-id="${user.user_id}">
+              ? `                <select data-user-id="${user.user_id}">
                   <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
                   <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
                 </select>
                 <button class="manager-btn delete-btn" data-user-id="${user.user_id}">Delete</button>
-              `
-              : ''
+`            : ''
           }
         </td>
       </tr>
@@ -454,16 +452,23 @@ async function showAddScreeningModal(movieId) {
   if (!startTime) return;
 
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}/api/screenings`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ movie_id: movieId, hall_id: hallId, start_time: startTime })
-  });
-  if (res.ok) {
-    alert('Screening added!');
-    fetchAndRenderScreenings();
-  } else {
-    alert('Failed to add screening');
+  try { // Added try-catch for better error handling
+    const res = await fetch(`${API_BASE}/api/screenings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ movie_id: movieId, hall_id: hallId, start_time: startTime })
+    });
+    if (res.ok) {
+      alert('Screening added!');
+      fetchAndRenderScreenings();
+    } else {
+      // Parse error response from backend
+      const errorData = await res.json();
+      alert(`Failed to add screening: ${errorData.error || res.statusText}`);
+    }
+  } catch (error) {
+    console.error('Error adding screening:', error);
+    alert('Failed to add screening due to a network error.');
   }
 }
 
@@ -541,64 +546,29 @@ function renderScreeningsTable() {
       if (!newTime) return;
 
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ hall_id: newHallId, start_time: newTime })
-      });
-      if (res.ok) fetchAndRenderScreenings();
+      try { // Added try-catch for better error handling
+        const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          // IMPORTANT: Pass movie_id to the backend for overlap check
+          body: JSON.stringify({ hall_id: newHallId, start_time: newTime, movie_id: screening.movie_id })
+        });
+        if (res.ok) {
+          alert('Screening updated!');
+          fetchAndRenderScreenings();
+        } else {
+          // Parse error response from backend
+          const errorData = await res.json();
+          alert(`Failed to update screening: ${errorData.error || res.statusText}`);
+        }
+      } catch (error) {
+        console.error('Error updating screening:', error);
+        alert('Failed to update screening due to a network error.');
+      }
     });
   });
 }
 
-// --- New Screening Update Endpoint ---
-export const updateScreenings = async (req, res) => {
-  const { id } = req.params;
-  let { hall_id, start_time } = req.body;
-
-  // Convert undefined to null
-  if (typeof hall_id === 'undefined') hall_id = null;
-  if (typeof start_time === 'undefined') start_time = null;
-
-  if (!hall_id || !start_time) {
-    return res.status(400).json({ error: 'hall_id and start_time are required' });
-  }
-
-  try {
-    const [result] = await db.query(
-      'UPDATE screenings SET hall_id = ?, start_time = ? WHERE screening_id = ?',
-      [hall_id, start_time, id]
-    );
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Screening not found' });
-    }
-    res.json({ message: 'Screening updated' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update screening' });
-  }
-  if (res.ok) fetchAndRenderScreenings();
-};
-
-export const createScreenings = async (req, res) => {
-  let { movie_id, hall_id, start_time } = req.body;
-  if (typeof movie_id === 'undefined') movie_id = null;
-  if (typeof hall_id === 'undefined') hall_id = null;
-  if (typeof start_time === 'undefined') start_time = null;
-
-  if (!movie_id || !hall_id || !start_time) {
-    return res.status(400).json({ error: 'movie_id, hall_id, and start_time are required' });
-  }
-
-  try {
-    const [result] = await db.query(
-      'INSERT INTO screenings (movie_id, hall_id, start_time) VALUES (?, ?, ?)',
-      [movie_id, hall_id, start_time]
-    );
-    res.status(201).json({ screening_id: result.insertId });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create screening' });
-  }
-  if (res.ok) fetchAndRenderScreenings();
-};
-
-
+// These are no longer needed in manager.js as they are now in ScreeningController.js
+// export const updateScreenings = async (req, res) => { /* ... */ };
+// export const createScreenings = async (req, res) => { /* ... */ };
