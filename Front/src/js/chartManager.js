@@ -56,19 +56,13 @@ function generateColors() {
 }
 
 export async function renderScreeningChart() {
-    const $chartContainer = $('#screening-chart');
+    const $chartWrapper = $('.screening-chart-wrapper');
     const chartId = 'screening-chart';
-    const chartContainerId = 'screening-chart-container';
 
-    // Create chart container if it doesn't exist
-    if (!$chartContainer.length) {
-        $('#screenings-management-section').prepend(`
-            <div id="${chartContainerId}" class="screening-chart-wrapper">
-                <h3>Weekly Screening Schedule</h3>
-                <div id="${chartId}" class="screening-chart"></div>
-            </div>
-        `);
-    }
+    // Always clear and render inside the existing wrapper
+    $chartWrapper.html(`
+        <div id="${chartId}" class="screening-chart"></div>
+    `);
 
     const weekRange = getWeekDateRange();
     const daySlots = generateDaySlots();

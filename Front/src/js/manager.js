@@ -697,7 +697,6 @@ function renderScreeningsTable(screenings = allScreenings) {
     });
 }
 
-
 // Add chart refresh button
 $(document).ready(() => {
   $('#screenings-management-tab').on('click', async () => {
@@ -738,7 +737,6 @@ export const updateScreenings = async (req, res) => {
   if (!hall_id || !start_time) {
     return res.status(400).json({ error: 'hall_id and start_time are required' });
   }
-
   try {
     const [result] = await db.query(
       'UPDATE screenings SET hall_id = ?, start_time = ? WHERE screening_id = ?',
@@ -806,6 +804,16 @@ $('#toggle-screenings-table').on('click', function () {
     $btn.text('Show Screenings Table');
   } else {
     $btn.text('Hide Screenings Table');
+  }
+});
+
+$('#toggle-screening-chart').on('click', function () {
+  $('#screening-chart-container').slideToggle(200);
+  const $btn = $(this);
+  if ($btn.text().includes('Hide')) {
+    $btn.text('Show Weekly Screening Schedule');
+  } else {
+    $btn.text('Hide Weekly Screening Schedule');
   }
 });
 
