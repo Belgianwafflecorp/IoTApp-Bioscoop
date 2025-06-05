@@ -914,6 +914,10 @@ button.read-more-btn:hover, button.show-less-btn:hover {
     padding: 1.5em;
     box-shadow: var(--box-shadow);
     color: var(--color-white); /* Ensure text is visible */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 200px; /* ensures some height even if chart is small */
 }
 
 .screening-chart-wrapper h3 {
