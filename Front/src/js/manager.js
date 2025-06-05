@@ -649,3 +649,28 @@ $('#screenings-movie-db-search-input').on('keypress', function(e) {
   if (e.which === 13) filterAndSortScreeningsMovies();
 });
 
+
+// -- Toggle screenings table visibility --
+
+$('#toggle-screenings-movies-table').on('click', function () {
+  $('#screenings-movies-table-container').slideToggle(200);
+  const $btn = $(this);
+  if ($btn.text().includes('Hide')) {
+    $btn.text('Show Movies in Database Table');
+  } else {
+    $btn.text('Hide Movies in Database Table');
+  }
+});
+
+$('#toggle-screenings-table').on('click', function () {
+  $('#screenings-table-container').slideToggle(200);
+  const $btn = $(this);
+  if ($btn.text().includes('Hide')) {
+    $btn.text('Show Screenings Table');
+  } else {
+    $btn.text('Hide Screenings Table');
+  }
+});
+
+
+

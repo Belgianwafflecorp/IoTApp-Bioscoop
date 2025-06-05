@@ -97,7 +97,10 @@
   <section id="screenings-management-section" class="management-section" style="display:none;">
     <h2>Screenings Management</h2>
     <h3>Movies in Database</h3>
-    <div class="screenings-movie-db-controls" style="margin-bottom:1em;">
+    
+    <button id="toggle-screenings-movies-table" class="manager-btn" style="margin-bottom: 1em;">Hide Movies in Database Table</button>
+    <div id="screenings-movies-table-container">
+      <div class="screenings-movie-db-controls" style="margin-bottom:1em;">
       <input type="text" id="screenings-movie-db-search-input" placeholder="Search movies by title, genre, or description..." />
       <button id="screenings-movie-db-search-btn">Search</button>
       <button id="screenings-movie-db-search-reset">Reset</button>
@@ -110,35 +113,39 @@
         <option value="genre-desc">Genre (Z-A)</option>
       </select>
     </div>
-    <table id="screenings-movies-table">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Description</th>
-          <th>Duration</th>
-          <th>Genre</th>
-          <th>Add Screening</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Movies will be loaded here -->
-      </tbody>
-    </table>
+      <table id="screenings-movies-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Duration</th>
+            <th>Genre</th>
+            <th>Add Screening</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Movies will be loaded here -->
+        </tbody>
+      </table>
+    </div>
     <h3>Screenings</h3>
-    <table id="screenings-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Movie</th>
-          <th>Hall</th>
-          <th>Start Time</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Screenings will be loaded here -->
-      </tbody>
-    </table>
+    <button id="toggle-screenings-table" class="manager-btn" style="margin-bottom: 1em;">Hide Screenings Table</button>
+    <div id="screenings-table-container">
+      <table id="screenings-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Movie</th>
+            <th>Hall</th>
+            <th>Start Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Screenings will be loaded here -->
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
