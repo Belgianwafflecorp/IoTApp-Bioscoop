@@ -1,4 +1,8 @@
+// manager.js
+import { renderScreeningChart, setScreeningsData, setHallsData } from './chartManager.js'; // Import chart functions
+
 const API_BASE = 'http://localhost:3000';
+
 let tmdbGenres = {};
 
 async function fetchTMDBGenres() {
@@ -129,12 +133,12 @@ function renderUsersTable(searchTerm = '', customList = null) {
   });
 
   $tbody.find('.delete-btn[data-user-id]').on('click', async function () {
-  const userId = $(this).data('user-id');
-  if (confirm('Are you sure you want to delete this user?')) {
-    await deleteUser(userId);
-    await fetchAndRenderUsers($('#user-search-input').val());
-  }
-});
+    const userId = $(this).data('user-id');
+    if (confirm('Are you sure you want to delete this user?')) {
+      await deleteUser(userId);
+      await fetchAndRenderUsers($('#user-search-input').val());
+    }
+  });
 }
 
 // Search, reset, show managers
@@ -150,7 +154,7 @@ $(document).ready(() => {
     const managers = allUsers.filter(user => user.role === 'manager');
     renderUsersTable('', managers);
   });
-    $('#tmdb-clear-btn').on('click', () => {
+  $('#tmdb-clear-btn').on('click', () => {
     $('#tmdb-search-input').val('');
     $('#tmdb-results').empty();
   });
@@ -206,11 +210,14 @@ $(document).ready(() => {
   }
 
   $('#user-management-tab').on('click', () => showSection($('#user-management-section')));
-  $('#movie-management-tab').on('click', async () => {showSection($('#movie-management-section')); await fetchAndRenderMovies();});
+  $('#movie-management-tab').on('click', async () => { showSection($('#movie-management-section')); await fetchAndRenderMovies(); });
   $('#screenings-management-tab').on('click', async () => {
     showSection($('#screenings-management-section'));
     await fetchMoviesForScreenings();
     await fetchAndRenderScreenings();
+    setScreeningsData(allScreenings); // Pass data to chartManager
+    setHallsData(allHalls); // Pass data to chartManager
+    await renderScreeningChart(); // Call imported chart rendering function
   });
 });
 
@@ -434,7 +441,7 @@ $(document).ready(() => {
   $('#movie-db-sort').on('change', filterAndSortMovies);
 
   // Optionally: trigger sort/filter on Enter in search input
-  $('#movie-db-search-input').on('keypress', function(e) {
+  $('#movie-db-search-input').on('keypress', function (e) {
     if (e.which === 13) filterAndSortMovies();
   });
 });
@@ -514,35 +521,52 @@ function renderMoviesForScreenings(movies = allMovies) {
 }
 
 async function showAddScreeningModal(movieId) {
-  // Fetch halls if not already loaded
-  if (!allHalls.length) {
+    // Fetch halls if not already loaded
+    if (!allHalls.length) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/api/halls`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        allHalls = await res.json();
+    }
+    const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
+    const hallId = prompt(`Enter hall ID:\n${hallOptions}`);
+    if (!hallId) return;
+
+    // Use current date/time as default
+    const defaultTime = getCurrentDateTimeLocal(); // Assuming this returns YYYY-MM-DDTHH:MM local format
+    const startTimeLocal = prompt('Enter start time (YYYY-MM-DDTHH:MM):', defaultTime);
+    if (!startTimeLocal) return;
+
+    // Create a Date object from the local time string entered by the user.
+    const dateObjLocal = new Date(startTimeLocal);
+
+    // Convert this local Date object to its UTC string representation (e.g., "2025-06-06T00:15:00.000Z").
+    // We then slice it to get "YYYY-MM-DDTHH:MM" in UTC, which is a common format for backends.
+    const startTimeUTC = dateObjLocal.toISOString().slice(0, 16);
+
     const token = localStorage.getItem('token');
-    const res = await fetch(`${API_BASE}/api/halls`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    allHalls = await res.json();
-  }
-  const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
-  const hallId = prompt(`Enter hall ID:\n${hallOptions}`);
-  if (!hallId) return;
-
-  // Use current date/time as default
-  const defaultTime = getCurrentDateTimeLocal();
-  const startTime = prompt('Enter start time (YYYY-MM-DDTHH:MM):', defaultTime);
-  if (!startTime) return;
-
-  const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}/api/screenings`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ movie_id: movieId, hall_id: hallId, start_time: startTime })
-  });
-  if (res.ok) {
-    alert('Screening added!');
-    fetchAndRenderScreenings();
-  } else {
-    alert('Failed to add screening');
-  }
+    try {
+        const res = await fetch(`${API_BASE}/api/screenings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            // Send the UTC converted time to the backend
+            body: JSON.stringify({ movie_id: movieId, hall_id: hallId, start_time: startTimeUTC })
+        });
+        if (res.ok) {
+            alert('Screening added!');
+            await fetchAndRenderScreenings();
+            setScreeningsData(allScreenings); // Update chart data
+            setHallsData(allHalls); // Update chart data
+            await renderScreeningChart(); // Update chart when screening added
+        } else {
+            const errorData = await res.json();
+            alert(`Failed to add screening: ${errorData.error || res.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error adding screening:', error);
+        alert('Failed to add screening due to a network error.');
+    }
 }
 
 let allScreenings = [];
@@ -557,78 +581,151 @@ async function fetchAndRenderScreenings() {
 }
 
 function renderScreeningsTable(screenings = allScreenings) {
-  const $tbody = $('#screenings-table tbody');
-  if (!$tbody.length) return;
-  $tbody.empty();
-  screenings.forEach(s => {
-    const $tr = $(`
-      <tr>
-        <td>${s.screening_id}</td>
-        <td>${s.movie_title || s.title || ''}</td>
-        <td>${s.hall_name || ''}</td>
-        <td>${
-          s.start_time
+    const $tbody = $('#screenings-table tbody');
+    if (!$tbody.length) return;
+    $tbody.empty();
+    screenings.forEach(s => {
+        // For display in the table, we'll keep the original string formatting.
+        // If 's.start_time' comes from the backend as '2025-06-06T00:15:00.000Z' (UTC),
+        // this will display '2025-06-06 00:15'.
+        // To show LOCAL time here, refer to 'Option 2' in the previous explanation.
+        const displayTime = s.start_time
             ? s.start_time.replace('T', ' ').slice(0, 16)
-            : ''
-        }</td>
-        <td>
-          <button id="edit-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn edit-btn">Edit</button>
-          <button id="delete-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn delete-btn">Delete</button>
-        </td>
-      </tr>
-    `);
-    $tbody.append($tr);
+            : '';
 
-    // Attach event listeners as before...
-    $(`#delete-screening-btn-${s.screening_id}`).on('click', async function () {
-      const id = $(this).data('id');
-      if (confirm('Delete this screening?')) {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
+        const $tr = $(`
+            <tr>
+                <td>${s.screening_id}</td>
+                <td>${s.movie_title || s.title || ''}</td>
+                <td>${s.hall_name || ''}</td>
+                <td>${displayTime}</td>
+                <td>
+                    <button id="edit-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn edit-btn">Edit</button>
+                    <button id="delete-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn delete-btn">Delete</button>
+                </td>
+            </tr>
+        `);
+        $tbody.append($tr);
+
+        // Attach event listeners as before...
+        $(`#delete-screening-btn-${s.screening_id}`).on('click', async function () {
+            const id = $(this).data('id');
+            if (confirm('Delete this screening?')) {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    await fetchAndRenderScreenings();
+                    setScreeningsData(allScreenings); // Update chart data
+                    setHallsData(allHalls); // Update chart data
+                    await renderScreeningChart(); // Update chart when screening deleted
+                } else {
+                    const errorData = await res.json();
+                    alert(`Failed to delete screening: ${errorData.error || res.statusText}`);
+                }
+            }
         });
-        if (res.ok) fetchAndRenderScreenings();
-      }
-    });
 
-    $(`#edit-screening-btn-${s.screening_id}`).on('click', async function () {
-      const id = $(this).data('id');
-      const screening = allScreenings.find(s => s.screening_id === id);
+        $(`#edit-screening-btn-${s.screening_id}`).on('click', async function () {
+            const id = $(this).data('id');
+            const screening = allScreenings.find(s => s.screening_id === id);
 
-      if (!allHalls.length) {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE}/api/halls`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+            if (!allHalls.length) {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_BASE}/api/halls`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                allHalls = await res.json();
+            }
+
+            const currentHallId = typeof screening.hall_id !== 'undefined' ? screening.hall_id : '';
+            const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
+            const newHallId = prompt(
+                `Enter new hall ID (current: ${currentHallId}):\n${hallOptions}`,
+                currentHallId
+            );
+            if (!newHallId) return;
+
+            // --- IMPORTANT: UTC Conversion Logic for Edit Prompt and Send ---
+            // If screening.start_time is UTC (e.g., '2025-06-06T00:15:00.000Z'),
+            // convert it to the user's LOCAL time for pre-filling the prompt.
+            const currentLocalTime = screening.start_time
+                ? new Date(screening.start_time).toLocaleTimeString('en-CA', { // 'en-CA' for YYYY-MM-DD format
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false // Ensure 24-hour format
+                  }).replace(', ', 'T') // Replace space with 'T' for the desired format
+                : '';
+
+            const newTimeInput = prompt(
+                'Enter new start time (YYYY-MM-DDTHH:MM):',
+                currentLocalTime // Pre-fill with the LOCAL time
+            );
+            if (!newTimeInput) return;
+
+            // Take the user's local input and convert it back to UTC before sending to the backend.
+            const newTimeUTC = new Date(newTimeInput).toISOString().slice(0, 16);
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    // IMPORTANT: Pass movie_id to the backend for overlap check
+                    body: JSON.stringify({ hall_id: newHallId, start_time: newTimeUTC, movie_id: screening.movie_id }) // Send the UTC time
+                });
+                if (res.ok) {
+                    alert('Screening updated!');
+                    await fetchAndRenderScreenings();
+                    setScreeningsData(allScreenings); // Update chart data
+                    setHallsData(allHalls); // Update chart data
+                    await renderScreeningChart(); // Update chart when screening edited
+                } else {
+                    const errorData = await res.json();
+                    alert(`Failed to update screening: ${errorData.error || res.statusText}`);
+                }
+            } catch (error) {
+                console.error('Error updating screening:', error);
+                alert('Failed to update screening due to a network error.');
+            }
         });
-        allHalls = await res.json();
-      }
-
-      const currentHallId = typeof screening.hall_id !== 'undefined' ? screening.hall_id : '';
-      const hallOptions = allHalls.map(h => `${h.hall_id}: ${h.name}`).join('\n');
-      const newHallId = prompt(
-        `Enter new hall ID (current: ${currentHallId}):\n${hallOptions}`,
-        currentHallId
-      );
-      if (!newHallId) return;
-
-      const newTime = prompt(
-        'Enter new start time (YYYY-MM-DDTHH:MM):',
-        screening.start_time?.slice(0, 16)
-      );
-      if (!newTime) return;
-
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ hall_id: newHallId, start_time: newTime })
-      });
-      if (res.ok) fetchAndRenderScreenings();
     });
-  });
 }
 
+
+// Add chart refresh button
+$(document).ready(() => {
+  $('#screenings-management-tab').on('click', async () => {
+    showSection($('#screenings-management-section'));
+    // Assuming these functions are defined elsewhere and manage `allScreenings` and `allHalls`
+    await fetchMoviesForScreenings();
+    await fetchAndRenderScreenings();
+    setScreeningsData(allScreenings); // Pass data to chartManager
+    setHallsData(allHalls); // Pass data to chartManager
+    await renderScreeningChart();
+
+    // Add refresh chart button if it doesn't exist
+    if (!$('#refresh-chart-btn').length) {
+      $('#screenings-management-section h2').after(`
+        <button id="refresh-chart-btn" class="manager-btn">
+          Refresh Chart
+        </button>
+      `);
+
+      $('#refresh-chart-btn').on('click', async () => {
+        await fetchAndRenderScreenings();
+        setScreeningsData(allScreenings); // Pass data to chartManager
+        setHallsData(allHalls); // Pass data to chartManager
+        await renderScreeningChart();
+      });
+    }
+  });
+});
 // --- New Screening Update Endpoint ---
 export const updateScreenings = async (req, res) => {
   const { id } = req.params;
