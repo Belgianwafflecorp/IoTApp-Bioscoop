@@ -1131,8 +1131,8 @@ button.read-more-btn:hover, button.show-less-btn:hover {
 
 /* --- Legend Styles --- */
 .chart-legend {
-    margin-top: 1.5em; /* Changed from 20px to em */
-    padding: 1em;
+    margin-top: 1.5em;
+    padding: 0.4em 0.7em;
     background-color: #111;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
@@ -1146,24 +1146,23 @@ button.read-more-btn:hover, button.show-less-btn:hover {
 }
 
 .chart-legend-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1em; /* Changed from 15px to em */
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5em 1.5em;
+  max-width: 100%;
 }
-
 .chart-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5em; /* Changed from 8px to em */
-    color: var(--color-white);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin-bottom: 0.5em;
 }
-
 .chart-legend-color-box {
-    width: 1.5em; /* Changed from 20px to em */
-    height: 1.5em; /* Changed from 20px to em */
-    border-radius: 4px; /* Keeping border-radius in px is fine */
-    border: 1px solid var(--color-light-blue);
-    box-shadow: 0 0.1em 0.2em rgba(0,0,0,0.3); /* Changed to em for shadow */
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5em;
+  border-radius: 3px;
+  border: 1px solid #ccc;
 }
 
 /* Specific styling for the Refresh Chart button */
