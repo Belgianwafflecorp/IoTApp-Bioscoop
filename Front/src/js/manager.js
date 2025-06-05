@@ -368,9 +368,9 @@ function filterAndSortMovies() {
     filtered = filtered.slice().sort((a, b) => {
       let va = a[field] || '';
       let vb = b[field] || '';
-      if (field === 'duration') {
-        va = Number(va) || 0;
-        vb = Number(vb) || 0;
+      if (field === 'duration' || field === 'duration_minutes') {
+        va = Number(a.duration_minutes) || 0;
+        vb = Number(b.duration_minutes) || 0;
       } else {
         va = va.toString().toLowerCase();
         vb = vb.toString().toLowerCase();
@@ -432,9 +432,9 @@ function filterAndSortScreeningsMovies() {
     filtered = filtered.slice().sort((a, b) => {
       let va = a[field] || '';
       let vb = b[field] || '';
-      if (field === 'duration') {
-        va = Number(va) || 0;
-        vb = Number(vb) || 0;
+      if (field === 'duration' || field === 'duration_minutes') {
+        va = Number(a.duration_minutes) || 0;
+        vb = Number(b.duration_minutes) || 0;
       } else {
         va = va.toString().toLowerCase();
         vb = vb.toString().toLowerCase();
@@ -513,14 +513,14 @@ async function fetchAndRenderScreenings() {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   allScreenings = await res.json();
-  renderScreeningsTable();
+  filterAndSortScreenings();
 }
 
-function renderScreeningsTable() {
+function renderScreeningsTable(screenings = allScreenings) {
   const $tbody = $('#screenings-table tbody');
   if (!$tbody.length) return;
   $tbody.empty();
-  allScreenings.forEach(s => {
+  screenings.forEach(s => {
     const $tr = $(`
       <tr>
         <td>${s.screening_id}</td>
@@ -539,7 +539,7 @@ function renderScreeningsTable() {
     `);
     $tbody.append($tr);
 
-    // Attach event listeners directly to the buttons
+    // Attach event listeners as before...
     $(`#delete-screening-btn-${s.screening_id}`).on('click', async function () {
       const id = $(this).data('id');
       if (confirm('Delete this screening?')) {
@@ -670,6 +670,54 @@ $('#toggle-screenings-table').on('click', function () {
   } else {
     $btn.text('Hide Screenings Table');
   }
+});
+
+let filteredScreenings = [];
+
+function filterAndSortScreenings() {
+  let filtered = allScreenings;
+  const search = $('#screenings-table-search-input').val().toLowerCase();
+  const sort = $('#screenings-table-sort').val();
+
+  if (search) {
+    filtered = filtered.filter(s =>
+      (s.movie_title || s.title || '').toLowerCase().includes(search) ||
+      (s.hall_name || '').toLowerCase().includes(search) ||
+      String(s.screening_id).includes(search)
+    );
+  }
+
+  if (sort) {
+    const [field, dir] = sort.split('-');
+    filtered = filtered.slice().sort((a, b) => {
+      let va = a[field] || '';
+      let vb = b[field] || '';
+      // For start_time, sort as date
+      if (field === 'start_time') {
+        va = new Date(va);
+        vb = new Date(vb);
+      } else {
+        va = va.toString().toLowerCase();
+        vb = vb.toString().toLowerCase();
+      }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  filteredScreenings = filtered;
+  renderScreeningsTable(filteredScreenings);
+}
+
+$('#screenings-table-search-btn').on('click', filterAndSortScreenings);
+$('#screenings-table-search-reset').on('click', () => {
+  $('#screenings-table-search-input').val('');
+  filterAndSortScreenings();
+});
+$('#screenings-table-sort').on('change', filterAndSortScreenings);
+$('#screenings-table-search-input').on('keypress', function(e) {
+  if (e.which === 13) filterAndSortScreenings();
 });
 
 

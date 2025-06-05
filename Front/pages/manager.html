@@ -107,8 +107,8 @@
       <select id="screenings-movie-db-sort">
         <option value="title-asc">Title (A-Z)</option>
         <option value="title-desc">Title (Z-A)</option>
-        <option value="duration-asc">Duration (Shortest)</option>
-        <option value="duration-desc">Duration (Longest)</option>
+        <option value="duration_minutes-asc">Duration (Shortest)</option>
+        <option value="duration_minutes-desc">Duration (Longest)</option>
         <option value="genre-asc">Genre (A-Z)</option>
         <option value="genre-desc">Genre (Z-A)</option>
       </select>
@@ -129,8 +129,22 @@
       </table>
     </div>
     <h3>Screenings</h3>
+
     <button id="toggle-screenings-table" class="manager-btn" style="margin-bottom: 1em;">Hide Screenings Table</button>
     <div id="screenings-table-container">
+          <div class="screenings-table-controls" style="margin-bottom:1em;">
+      <input type="text" id="screenings-table-search-input" placeholder="Search by movie, hall, or ID..." />
+      <button id="screenings-table-search-btn">Search</button>
+      <button id="screenings-table-search-reset">Reset</button>
+      <select id="screenings-table-sort">
+        <option value="start_time-asc">Start Time (Earliest)</option>
+        <option value="start_time-desc">Start Time (Latest)</option>
+        <option value="movie_title-asc">Movie (A-Z)</option>
+        <option value="movie_title-desc">Movie (Z-A)</option>
+        <option value="hall_name-asc">Hall (A-Z)</option>
+        <option value="hall_name-desc">Hall (Z-A)</option>
+      </select>
+    </div>
       <table id="screenings-table">
         <thead>
           <tr>
