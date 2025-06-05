@@ -97,6 +97,19 @@
   <section id="screenings-management-section" class="management-section" style="display:none;">
     <h2>Screenings Management</h2>
     <h3>Movies in Database</h3>
+    <div class="screenings-movie-db-controls" style="margin-bottom:1em;">
+      <input type="text" id="screenings-movie-db-search-input" placeholder="Search movies by title, genre, or description..." />
+      <button id="screenings-movie-db-search-btn">Search</button>
+      <button id="screenings-movie-db-search-reset">Reset</button>
+      <select id="screenings-movie-db-sort">
+        <option value="title-asc">Title (A-Z)</option>
+        <option value="title-desc">Title (Z-A)</option>
+        <option value="duration-asc">Duration (Shortest)</option>
+        <option value="duration-desc">Duration (Longest)</option>
+        <option value="genre-asc">Genre (A-Z)</option>
+        <option value="genre-desc">Genre (Z-A)</option>
+      </select>
+    </div>
     <table id="screenings-movies-table">
       <thead>
         <tr>

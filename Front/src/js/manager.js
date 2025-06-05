@@ -412,11 +412,49 @@ async function fetchMoviesForScreenings() {
   renderMoviesForScreenings();
 }
 
-function renderMoviesForScreenings() {
+let filteredScreeningsMovies = [];
+
+function filterAndSortScreeningsMovies() {
+  let filtered = allMovies;
+  const search = $('#screenings-movie-db-search-input').val().toLowerCase();
+  const sort = $('#screenings-movie-db-sort').val();
+
+  if (search) {
+    filtered = filtered.filter(m =>
+      (m.title || '').toLowerCase().includes(search) ||
+      (m.genre || '').toLowerCase().includes(search) ||
+      (m.description || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (sort) {
+    const [field, dir] = sort.split('-');
+    filtered = filtered.slice().sort((a, b) => {
+      let va = a[field] || '';
+      let vb = b[field] || '';
+      if (field === 'duration') {
+        va = Number(va) || 0;
+        vb = Number(vb) || 0;
+      } else {
+        va = va.toString().toLowerCase();
+        vb = vb.toString().toLowerCase();
+      }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  filteredScreeningsMovies = filtered;
+  renderMoviesForScreenings(filteredScreeningsMovies);
+}
+
+// Update renderMoviesForScreenings to accept a parameter:
+function renderMoviesForScreenings(movies = allMovies) {
   const $tbody = $('#screenings-movies-table tbody');
   if (!$tbody.length) return;
   $tbody.empty();
-  allMovies.forEach(movie => {
+  movies.forEach(movie => {
     const $tr = $(`
       <tr>
         <td>${movie.title}</td>
@@ -601,4 +639,13 @@ export const createScreenings = async (req, res) => {
   if (res.ok) fetchAndRenderScreenings();
 };
 
+$('#screenings-movie-db-search-btn').on('click', filterAndSortScreeningsMovies);
+$('#screenings-movie-db-search-reset').on('click', () => {
+  $('#screenings-movie-db-search-input').val('');
+  filterAndSortScreeningsMovies();
+});
+$('#screenings-movie-db-sort').on('change', filterAndSortScreeningsMovies);
+$('#screenings-movie-db-search-input').on('keypress', function(e) {
+  if (e.which === 13) filterAndSortScreeningsMovies();
+});
 
