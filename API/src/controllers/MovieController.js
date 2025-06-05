@@ -46,13 +46,34 @@ const editMovie = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, description, duration_minutes, genre } = req.body;
-
-        if (!title) {
-            return res.status(400).json({ error: 'Title veld is verplicht' });
+        // Dynamic SQL for PATCH-like behavior 
+        const fields = [];
+        const params = [];
+        if (title !== undefined) {
+            fields.push('title = ?');
+            params.push(title);
         }
+        if (description !== undefined) {
+            fields.push('description = ?');
+            params.push(description);
+        }
+        if (duration_minutes !== undefined) {
+            fields.push('duration_minutes = ?');
+            params.push(duration_minutes);
+        }
+        if (genre !== undefined) {
+            fields.push('genre = ?');
+            params.push(genre);
+        }
+        if (!fields.length) {
+            return res.status(400).json({ error: 'No fields to update' });
+        }
+        params.push(id);
 
-        // Update movie in database
-        const [result] = await db.execute('UPDATE movies SET title = ?, description = ?, duration_minutes = ?, genre = ? WHERE movie_id = ?', [title, description, duration_minutes, genre, id]);
+        const [result] = await db.execute(
+            `UPDATE movies SET ${fields.join(', ')} WHERE movie_id = ?`,
+            params
+        );
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Film niet gevonden' });

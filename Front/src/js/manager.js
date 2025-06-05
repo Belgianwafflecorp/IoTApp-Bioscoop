@@ -330,11 +330,15 @@ function renderMoviesTable(movies) {
         <td>${movie.description || ''}</td>
         <td>${movie.duration_minutes || ''}</td>
         <td>${movie.genre || ''}</td>
-        <td><button id="delete-movie-btn-${movie.movie_id}" data-id="${movie.movie_id}" class="manager-btn delete-btn">Delete</button></td>
+        <td>
+          <button id="edit-movie-btn-${movie.movie_id}" data-id="${movie.movie_id}" class="manager-btn edit-btn">Edit</button>
+          <button id="delete-movie-btn-${movie.movie_id}" data-id="${movie.movie_id}" class="manager-btn delete-btn">Delete</button>
+        </td>
       </tr>
     `);
     $tbody.append($tr);
 
+    // delete handler...
     $(`#delete-movie-btn-${movie.movie_id}`).on('click', async function () {
       const id = $(this).data('id');
       if (confirm('Are you sure you want to delete this movie?')) {
@@ -344,6 +348,42 @@ function renderMoviesTable(movies) {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) fetchAndRenderMovies();
+      }
+    });
+
+    // edit movie handler
+    $(`#edit-movie-btn-${movie.movie_id}`).on('click', async function () {
+      const id = $(this).data('id');
+      const movie = movies.find(m => m.movie_id === id);
+
+      // Prompt for new values
+      const newDescription = prompt('Edit description:', movie.description || '');
+      if (newDescription === null) return;
+
+      const newDuration = prompt('Edit duration (minutes):', movie.duration_minutes || '');
+      if (newDuration === null) return;
+
+      const newGenres = prompt('Edit genres (comma separated):', movie.genre || '');
+      if (newGenres === null) return;
+
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/movies/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          description: newDescription,
+          duration_minutes: newDuration,
+          genre: newGenres
+        })
+      });
+      if (res.ok) {
+        alert('Movie updated!');
+        fetchAndRenderMovies();
+      } else {
+        alert('Failed to update movie');
       }
     });
   });

@@ -489,7 +489,7 @@ router.post('/movies', MovieController.addMovie);
  *       404:
  *         description: Movie not found
  */
-router.put('/movies/:id', MovieController.editMovie);
+router.patch('/movies/:id', MovieController.editMovie);
 
 /**
  * @swagger
