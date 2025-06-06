@@ -16,36 +16,46 @@ export function setHallsData(halls) {
 
 // --- SCREENING CHART VISUALIZATION ---
 function getWeekDateRange() {
-    const now = new Date();
+    const now = new Date(); // Current date (e.g., June 5, 2025)
+
+    // Calculate the start date (Monday of the current week)
     const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const monday = new Date(now);
     // Adjust to Monday of the current week. If today is Sunday (0), go back 6 days. Otherwise, go back dayOfWeek - 1 days.
     monday.setDate(now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
     monday.setHours(0, 0, 0, 0);
 
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    // Set the end date to July 1, 2025 at 00:00:00.000
+    const endDate = new Date('2025-07-01T00:00:00');
+    // Ensure the end date includes the entire day by setting to the very end of the day before
+    // Or, if we want to show up to and including July 1st, we need to go to the end of July 1st
+    // Let's make it exclusive to 00:00 on July 1st, so it shows days *before* July 1st.
+    // If it means "up to and including screenings that start at 2025-06-30 23:59:59", then '2025-07-01T00:00:00' as end is fine.
+    // For simplicity, let's just make the range extend far enough.
 
-    return { start: monday, end: sunday };
+    return { start: monday, end: endDate };
 }
 
 function generateDaySlots() {
-    const weekRange = getWeekDateRange();
+    const { start: startDate, end: endDate } = getWeekDateRange();
     const days = [];
-    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; // Corrected to start with Sunday for getDay()
 
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(weekRange.start);
-        date.setDate(weekRange.start.getDate() + i);
+    let currentDate = new Date(startDate);
+    currentDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+
+    // Loop to generate days until endDate is reached
+    while (currentDate.getTime() < endDate.getTime()) {
         days.push({
-            name: dayNames[i],
-            date: date.toISOString().split('T')[0], // YYYY-MM-DD format
-            fullDate: new Date(date)
+            name: dayNames[currentDate.getDay()],
+            date: currentDate.toISOString().split('T')[0], // YYYY-MM-DD format
+            fullDate: new Date(currentDate)
         });
+        currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
     }
     return days;
 }
+
 
 function generateColors() {
     return [
@@ -64,12 +74,11 @@ export async function renderScreeningChart() {
         <div id="${chartId}" class="screening-chart"></div>
     `);
 
-    const weekRange = getWeekDateRange();
-    const daySlots = generateDaySlots();
+    const weekRange = getWeekDateRange(); // This will now fetch a longer range
+    const daySlots = generateDaySlots(); // This will generate days for the longer range
     const colors = generateColors();
 
     // Ensure halls are loaded for chart rendering.
-    // If allHalls is empty, try to fetch it, but it should ideally be populated by manager.js
     if (!allHalls.length) {
         const token = localStorage.getItem('token');
         try {
@@ -83,18 +92,19 @@ export async function renderScreeningChart() {
         }
     }
 
-    // Filter screenings for this week
+    // Filter screenings for the extended date range
     const weekScreenings = allScreenings.filter(screening => {
-        const screeningDate = new Date(screening.start_time);
-        return screeningDate >= weekRange.start && screeningDate <= weekRange.end;
+        // Parse screening time as UTC if it has 'Z', else assume local for consistency
+        const screeningDate = new Date(screening.start_time.includes('Z') ? screening.start_time : screening.start_time + 'Z');
+        return screeningDate >= weekRange.start && screeningDate < weekRange.end; // Use < for endDate (exclusive)
     });
 
-    // Chart dimensions and constants - These will now be used to set CSS variables
-    const hallNameWidth = 150;
-    const dayWidth = 150;
-    const headerHeight = 60;
-    const hallHeight = 80;
-    const numDays = 7;
+    // Chart dimensions and constants
+    const hallNameWidth = 150; // px
+    const dayWidth = 600; // px (representing 24 hours) - Each day needs its own full width
+    const headerHeight = 60; // px
+    const hallHeight = 80; // px
+    const numDays = daySlots.length; // Dynamically set based on generated days
     const numHalls = allHalls.length;
 
     // Set CSS Custom Properties on the main chart element
@@ -110,34 +120,23 @@ export async function renderScreeningChart() {
     let chartHTML = `
         <div class="screening-chart-inner">
             <div class="chart-header-row chart-day-names">
+                <div class="chart-corner-placeholder"></div>
     `;
 
+    // Day headers
     daySlots.forEach((day, index) => {
         chartHTML += `
-            <div class="chart-day-header" style="--day-index: ${index};">
+            <div class="chart-day-header" style="grid-column: ${index + 2};">
                 ${day.name} ${day.date.slice(5)}
             </div>
         `;
     });
-    chartHTML += `</div>`;
-
-    // Time slots header (hours within each day)
-    chartHTML += `<div class="chart-header-row chart-time-slots">`;
-    daySlots.forEach((day, dayIndex) => {
-        for (let hour = 0; hour < 24; hour += 4) { // Show every 4 hours to save space
-            chartHTML += `
-                <div class="chart-hour-slot" style="--day-index: ${dayIndex}; --hour-offset: ${hour};">
-                    ${hour.toString().padStart(2, '0')}:00
-                </div>
-            `;
-        }
-    });
-    chartHTML += `</div>`;
+    chartHTML += `</div>`; // Close chart-day-names
 
     // Add hall rows and screenings
     allHalls.forEach((hall, hallIndex) => {
         chartHTML += `
-            <div class="chart-hall-row" style="--hall-index: ${hallIndex};">
+            <div class="chart-hall-row" style="grid-row: ${hallIndex + 2};">
                 <div class="chart-hall-name">
                     ${hall.name}
                 </div>
@@ -149,26 +148,38 @@ export async function renderScreeningChart() {
 
         hallScreenings.forEach((screening, screeningIndex) => {
             const startTimeStr = screening.start_time;
-            const startTime = new Date(startTimeStr + (startTimeStr.includes('T') && !startTimeStr.includes('Z') ? 'Z' : ''));
+            // Parse start time as UTC if it includes 'Z', otherwise assume local and append 'Z' for consistent parsing
+            const _startTime = new Date(startTimeStr.includes('Z') ? startTimeStr : startTimeStr + 'Z');
 
-            const duration = screening.duration_minutes || 120; // Default 2 hours
-            const endTime = new Date(startTime.getTime() + duration * 60000);
+            const duration = screening.duration_minutes || 120; // Default 2 hours (120 minutes)
+            const endTime = new Date(_startTime.getTime() + duration * 60000);
 
-            const screeningDateStr = startTime.toISOString().split('T')[0];
+            const screeningDateStr = _startTime.toISOString().split('T')[0];
             const dayIndex = daySlots.findIndex(day => day.date === screeningDateStr);
 
-            if (dayIndex === -1) return; // Skip if not in current week
+            if (dayIndex === -1) return; // Skip if not in current range
 
-            const startHour = startTime.getUTCHours() + startTime.getUTCMinutes() / 60;
+            // Calculate start time as a fraction of the day (0-23.99) in UTC
+            const startOfDay = new Date(_startTime);
+            startOfDay.setUTCHours(0, 0, 0, 0);
+            const minutesIntoDay = (_startTime.getTime() - startOfDay.getTime()) / (60 * 1000);
+            const startHourFraction = minutesIntoDay / 60; // e.g., 12.0 for 12:00, 16.0 for 16:00
+
             const durationHours = duration / 60;
 
-            const color = colors[screeningIndex % colors.length]; // Still dynamic color
+            const color = colors[screeningIndex % colors.length];
             const movieTitle = screening.movie_title || screening.title || 'Unknown Movie';
-            const timeText = `${startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })} - ${endTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+
+            // Display time in local timezone for the tooltip and block text
+            // Create a *new* Date object for local time display, so it uses the browser's timezone
+            const displayLocalStartTime = new Date(startTimeStr).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const displayLocalEndTime = new Date(new Date(startTimeStr).getTime() + duration * 60000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const timeText = `${displayLocalStartTime} - ${displayLocalEndTime}`;
+
 
             chartHTML += `
                 <div class="chart-screening-block"
-                     style="--day-index: ${dayIndex}; --start-hour: ${startHour}; --duration-hours: ${durationHours}; background-color: ${color};"
+                     style="--day-index: ${dayIndex}; --start-hour-fraction: ${startHourFraction}; --duration-hours: ${durationHours}; background-color: ${color};"
                      title="Movie: ${movieTitle}&#10;Hall: ${hall.name}&#10;Date: ${screeningDateStr}&#10;Time: ${timeText}&#10;Duration: ${duration} minutes">
                     <div class="screening-movie-title">
                         ${movieTitle}
@@ -186,19 +197,21 @@ export async function renderScreeningChart() {
     });
 
     // Add vertical day separator lines and hour grid lines
-    for (let day = 0; day <= 7; day++) {
+    // These should span the height of the entire content area, including headers and hall rows
+    for (let day = 0; day < numDays; day++) {
+        // Vertical separators between days
         chartHTML += `
-            <div class="chart-day-separator" style="--day-index: ${day};"></div>
+            <div class="chart-day-separator" style="grid-column: ${day + 2};"></div>
         `;
-        if (day < 7) {
-            for (let hour = 0; hour <= 24; hour += 2) {
-                const opacityClass = hour % 6 === 0 ? 'chart-grid-line-strong' : 'chart-grid-line-light';
-                chartHTML += `
-                    <div class="chart-hour-grid-line ${opacityClass}" style="--day-index: ${day}; --hour-offset: ${hour};"></div>
-                `;
-            }
+        // Hour grid lines within each day's column
+        for (let hour = 0; hour <= 24; hour += 2) {
+            const opacityClass = hour % 6 === 0 ? 'chart-grid-line-strong' : 'chart-grid-line-light';
+            chartHTML += `
+                <div class="chart-hour-grid-line ${opacityClass}" style="grid-column: ${day + 2}; --hour-offset: ${hour};"></div>
+            `;
         }
     }
+
     chartHTML += `</div>`; // Close the main chart-inner container
 
     // Add legend
