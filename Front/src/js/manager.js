@@ -827,21 +827,32 @@ function renderScreeningsTable(screenings = allScreenings) {
     $tbody.empty();
 
     screenings.forEach(s => {
-        // Append 'Z' to treat the retrieved MySQL DATETIME string as UTC
-        const localDate = new Date(s.start_time + 'Z'); 
-        const displayTime = localDate.toLocaleString('en-CA', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }).replace(', ', ' ');
+        let displayTime = '';
+        if (s.start_time) {
+            // Only add 'Z' if not already present
+            let dateStr = s.start_time;
+            if (!dateStr.endsWith('Z')) {
+                dateStr += 'Z';
+            }
+            const localDate = new Date(dateStr);
+            if (!isNaN(localDate.getTime())) {
+                displayTime = localDate.toLocaleString('en-CA', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).replace(', ', ' ');
+            }
+        }
 
         const $tr = $(`
             <tr>
                 <td>${s.screening_id}</td>
-                <td>${s.movie_title || s.title || ''}</td> <td>${s.hall_name || ''}</td> <td>${displayTime}</td>
+                <td>${s.movie_title || s.title || ''}</td>
+                <td>${s.hall_name || ''}</td>
+                <td>${displayTime}</td>
                 <td>
                     <button id="edit-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn edit-btn">Edit</button>
                     <button id="delete-screening-btn-${s.screening_id}" data-id="${s.screening_id}" class="manager-btn delete-btn">Delete</button>
