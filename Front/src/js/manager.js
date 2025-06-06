@@ -218,6 +218,20 @@ function renderUsersTable(searchTerm = '', customList = null) {
         }
     });
 
+
+    function formatToLocal(dateStr) {
+    if (!dateStr) return '';
+    // Ensure UTC interpretation
+    let d = dateStr.endsWith('Z') ? new Date(dateStr) : new Date(dateStr + 'Z');
+    if (isNaN(d.getTime())) return '';
+    // Format as YYYY-MM-DD HH:mm in local time
+    return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0') + ' ' +
+        String(d.getHours()).padStart(2, '0') + ':' +
+        String(d.getMinutes()).padStart(2, '0');
+}
+    
     // Collapsible: Show reservations on row click
     $tbody.find('.user-row').on('click', async function (e) {
         // Prevent toggle if clicking on select or button
@@ -235,6 +249,7 @@ function renderUsersTable(searchTerm = '', customList = null) {
         $resRow.show();
         const $content = $resRow.find('.user-reservations-content');
         $content.text('Loading...');
+        
         try {
             const token = localStorage.getItem('token');
             const res = await fetch(`${API_BASE}/api/users/${userId}/reservations`, {
@@ -264,8 +279,8 @@ function renderUsersTable(searchTerm = '', customList = null) {
                         <td>${r.movie_title || ''}</td>
                         <td>${r.hall_name || ''}</td>
                         <td>${r.seats.join(', ')}</td>
-                        <td>${r.start_time ? r.start_time.replace('T', ' ').slice(0, 16) : ''}</td>
-                        <td>${r.reservation_time ? r.reservation_time.replace('T', ' ').slice(0, 16) : ''}</td>
+                        <td>${formatToLocal(r.start_time)}</td>
+                        <td>${formatToLocal(r.reservation_time)}</td>
                       </tr>
                     `).join('')}
                   </tbody>
