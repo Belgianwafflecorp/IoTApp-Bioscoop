@@ -642,6 +642,59 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  *         description: One or more seats already reserved
  */
 
+router.get('/users/:id/reservations', ReservationController.getReservationsForUser);
+/**
+ * @swagger
+ * /api/users/{id}/reservations:
+ *   get:
+ *     summary: Get all reservations for a specific user (manager only)
+ *     tags:
+ *       - Reservations
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The user ID to fetch reservations for
+ *     responses:
+ *       200:
+ *         description: List of reservations for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   reservation_id:
+ *                     type: integer
+ *                   screening_id:
+ *                     type: integer
+ *                   seat_id:
+ *                     type: integer
+ *                   seat_row:
+ *                     type: string
+ *                   seat_number:
+ *                     type: string
+ *                   start_time:
+ *                     type: string
+ *                     format: date-time
+ *                   movie_title:
+ *                     type: string
+ *                   hall_name:
+ *                     type: string
+ *                   reservation_time:
+ *                     type: string
+ *                     format: date-time
+ *       403:
+ *         description: Forbidden - Only managers can access this endpoint
+ *       500:
+ *         description: Internal server error
+ */
+
 
 /////////////////////////////////////////////////////////////////
 /////////////////////////// Halls ///////////////////////////////

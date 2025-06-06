@@ -175,8 +175,41 @@ const getTicketsForScreening = async (req, res) => {
   }
 };
 
+// GET /users/:id/reservations - Get all reservations for a specific user (manager only)
+const getReservationsForUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [reservations] = await db.execute(`
+      SELECT 
+        r.reservation_id,
+        r.screening_id,
+        r.seat_id,
+        s.seat_row,
+        s.seat_number,
+        sc.start_time,
+        m.title AS movie_title,
+        h.name AS hall_name,
+        r.reservation_time
+      FROM reservations r
+      JOIN seats s ON r.seat_id = s.seat_id
+      JOIN screenings sc ON r.screening_id = sc.screening_id
+      JOIN movies m ON sc.movie_id = m.movie_id
+      JOIN halls h ON sc.hall_id = h.hall_id
+      WHERE r.user_id = ?
+      ORDER BY sc.start_time DESC
+    `, [id]);
+
+    res.json(reservations);
+  } catch (error) {
+    console.error('getReservationsForUser error:', error); // <--- Add this for debugging
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   reserveTickets,
   getMyReservations,
-  getTicketsForScreening
+  getTicketsForScreening,
+  getReservationsForUser,
 };

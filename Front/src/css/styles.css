@@ -669,6 +669,16 @@ button.read-more-btn:hover, button.show-less-btn:hover {
   margin-top: 2em;
 }
 
+.user-row { 
+  cursor: pointer; 
+}
+.user-reservations-row { 
+  background: #222; 
+}
+.user-reservations-table th, .user-reservations-table td { 
+  padding: 0.3em 0.5em; 
+}
+
 /* Manager tables: striped rows, header color, hover effect */
 .management-section table {
   width: 100%;
