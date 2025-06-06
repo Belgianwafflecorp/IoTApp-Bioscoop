@@ -29,6 +29,10 @@ import * as HallController from '../controllers/HallController.js';
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
  *             properties:
  *               username:
  *                 type: string
@@ -40,10 +44,10 @@ import * as HallController from '../controllers/HallController.js';
  *                 type: string
  *                 example: password123
  *     responses:
- *       200:
+ *       201:
  *         description: User registered successfully
  *       400:
- *         description: Bad request
+ *         description: Bad request (missing or invalid fields)
  */
 router.post('/register', UserController.registerUser); 
 
@@ -60,6 +64,9 @@ router.post('/register', UserController.registerUser);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - usernameOrEmail
+ *               - password
  *             properties:
  *               usernameOrEmail:
  *                 type: string
@@ -69,9 +76,16 @@ router.post('/register', UserController.registerUser);
  *                 example: password123
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Login successful, returns JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized (invalid credentials)
  */
 router.post('/login', UserController.loginUser);
 
@@ -101,6 +115,9 @@ router.post('/login', UserController.loginUser);
  *                   email:
  *                     type: string
  *                     example: johndoe@hotmail.com
+ *                   role:
+ *                     type: string
+ *                     example: user
  *       500:
  *         description: Internal server error
  */
@@ -143,6 +160,9 @@ router.get('/getAllUsers', UserController.getAllUsers);
  *                 email:
  *                   type: string
  *                   example: johndoe@hotmail.com
+ *                 role:
+ *                   type: string
+ *                   example: user
  *       404:
  *         description: User not found
  *       500:
@@ -174,6 +194,38 @@ router.get('/getUserBy/:param/:value', UserController.getUserBy);
  */
 router.delete('/deleteUser/:user_id', UserController.deleteUser);
 
+/**
+ * @swagger
+ * /api/me:
+ *   get:
+ *     summary: Get the currently authenticated user's info
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user_id:
+ *                   type: integer
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized – missing or invalid token
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/me', authenticateToken, UserController.getMe);
 /**
  * @swagger
@@ -192,7 +244,13 @@ router.get('/me', authenticateToken, UserController.getMe);
  *             schema:
  *               type: object
  *               properties:
+ *                 user_id:
+ *                   type: integer
  *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
  *                   type: string
  *       401:
  *         description: Unauthorized – missing or invalid token
@@ -220,6 +278,9 @@ router.get('/me', authenticateToken, UserController.getMe);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - user_id
+ *               - new_role
  *             properties:
  *               user_id:
  *                 type: integer
@@ -227,6 +288,13 @@ router.get('/me', authenticateToken, UserController.getMe);
  *               new_role:
  *                 type: string
  *                 example: manager
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: User not found
  */
 router.post('/changeUserRole', ManagerController.changeUserRole);
 
@@ -365,6 +433,32 @@ router.get('/movies/:id/videos', MovieTMDB.getMovieVideos);
  */
 router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
 
+/**
+ * @swagger
+ * /api/movies/details/{title}:
+ *   get:
+ *     summary: Get movie details from TMDB by title
+ *     tags:
+ *       - TMDB
+ *     parameters:
+ *       - in: path
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The title of the movie to search for
+ *     responses:
+ *       200:
+ *         description: Movie details from TMDB
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Movie not found on TMDB
+ *       500:
+ *         description: Failed to fetch movie details from TMDB
+ */
 router.get('/movies/details/:title', MovieTMDB.getMovieByTitle);
 
 
@@ -382,6 +476,26 @@ router.get('/movies/details/:title', MovieTMDB.getMovieByTitle);
  *     responses:
  *       200:
  *         description: List of movies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   movie_id:
+ *                     type: integer
+ *                   title:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   duration:
+ *                     type: integer
+ *                   genre:
+ *                     type: string
  */
 router.get('/movies', MovieController.getAllMovies);
 
@@ -398,9 +512,28 @@ router.get('/movies', MovieController.getAllMovies);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: The ID of the movie
  *     responses:
  *       200:
  *         description: Movie details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 movie_id:
+ *                   type: integer
+ *                 title:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 release_date:
+ *                   type: string
+ *                   format: date
+ *                 duration:
+ *                   type: integer
+ *                 genre:
+ *                   type: string
  *       404:
  *         description: Movie not found
  */
@@ -419,6 +552,12 @@ router.get('/movies/:id', MovieController.getMovieById);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - release_date
+ *               - duration
+ *               - genre
  *             properties:
  *               title:
  *                 type: string
@@ -447,7 +586,7 @@ router.post('/movies', MovieController.addMovie);
 /**
  * @swagger
  * /api/movies/{id}:
- *   put:
+ *   patch:
  *     summary: Edit a movie by ID
  *     tags:
  *       - Movies
@@ -525,10 +664,31 @@ router.delete('/movies/:id', MovieController.deleteMovie);
  *     summary: Get all screenings
  *     tags:
  *       - Screenings
+ *     responses:
+ *       200:
+ *         description: List of screenings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   screening_id:
+ *                     type: integer
+ *                   movie_id:
+ *                     type: integer
+ *                   hall_id:
+ *                     type: integer
+ *                   start_time:
+ *                     type: string
+ *                     format: date-time
+ *                   end_time:
+ *                     type: string
+ *                     format: date-time
  */
 router.get('/screenings', ScreeningController.getAllScreenings);
 
-router.get('/screenings/:id', ScreeningController.getScreeningById);
 /**
  * @swagger
  * /api/screenings/{id}:
@@ -536,7 +696,37 @@ router.get('/screenings/:id', ScreeningController.getScreeningById);
  *     summary: Get screening details by ID
  *     tags:
  *       - Screenings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the screening
+ *     responses:
+ *       200:
+ *         description: Screening details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 screening_id:
+ *                   type: integer
+ *                 movie_id:
+ *                   type: integer
+ *                 hall_id:
+ *                   type: integer
+ *                 start_time:
+ *                   type: string
+ *                   format: date-time
+ *                 end_time:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: Screening not found
  */
+router.get('/screenings/:id', ScreeningController.getScreeningById);
 
 /**
  * @swagger
@@ -545,16 +735,74 @@ router.get('/screenings/:id', ScreeningController.getScreeningById);
  *     summary: Create a new screening
  *     tags:
  *       - Screenings
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - movie_id
+ *               - hall_id
+ *               - start_time
+ *               - end_time
+ *             properties:
+ *               movie_id:
+ *                 type: integer
+ *               hall_id:
+ *                 type: integer
+ *               start_time:
+ *                 type: string
+ *                 format: date-time
+ *               end_time:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       201:
+ *         description: Screening created successfully
+ *       400:
+ *         description: Bad request
  */
 router.post('/screenings', ScreeningController.createScreenings);
 
 /**
  * @swagger
  * /api/screenings/{id}:
- *   put:
+ *   patch:
  *     summary: Update a screening by ID
  *     tags:
  *       - Screenings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the screening to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               movie_id:
+ *                 type: integer
+ *               hall_id:
+ *                 type: integer
+ *               start_time:
+ *                 type: string
+ *                 format: date-time
+ *               end_time:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Screening updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Screening not found
  */
 router.patch('/screenings/:id', ScreeningController.updateScreenings);
 
@@ -565,6 +813,18 @@ router.patch('/screenings/:id', ScreeningController.updateScreenings);
  *     summary: Delete a screening by ID
  *     tags:
  *       - Screenings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the screening to delete
+ *     responses:
+ *       200:
+ *         description: Screening deleted successfully
+ *       404:
+ *         description: Screening not found
  */
 router.delete('/screenings/:id', ScreeningController.deleteScreenings);
 
@@ -592,11 +852,24 @@ router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreeni
  *     responses:
  *       200:
  *         description: List of all seats and their availability
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   seat_id:
+ *                     type: integer
+ *                   row:
+ *                     type: integer
+ *                   number:
+ *                     type: integer
+ *                   is_reserved:
+ *                     type: boolean
  */
-// POST reserve seats
-router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
+router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreening);
 
-router.get('/my-reservations', authenticateToken, ReservationController.getMyReservations);
 /**
  * @swagger
  * /api/my-reservations:
@@ -609,7 +882,24 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  *     responses:
  *       200:
  *         description: List of reservations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   reservation_id:
+ *                     type: integer
+ *                   screening_id:
+ *                     type: integer
+ *                   seat_id:
+ *                     type: integer
+ *                   reserved_at:
+ *                     type: string
+ *                     format: date-time
  */
+router.get('/my-reservations', authenticateToken, ReservationController.getMyReservations);
 
 /**
  * @swagger
@@ -626,9 +916,10 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - screening_id
+ *               - seat_ids
  *             properties:
- *               user_id:
- *                 type: integer
  *               screening_id:
  *                 type: integer
  *               seat_ids:
@@ -640,7 +931,10 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  *         description: Tickets reserved successfully
  *       409:
  *         description: One or more seats already reserved
+ *       400:
+ *         description: Bad request
  */
+router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
 
 router.get('/users/:id/reservations', ReservationController.getReservationsForUser);
 /**
