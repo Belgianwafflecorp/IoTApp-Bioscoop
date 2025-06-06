@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Booking</title>
   <link rel="stylesheet" href="../src/css/styles.css" />
 </head>
@@ -21,25 +21,24 @@
 
   <main class="booking-container">
     <div class="movie-section">
-    <img id="movie-poster" src="../src/resources/images/movie-placeholder.jpg" alt="Movie Image" />
+      <img id="movie-poster" src="../src/resources/images/movie-placeholder.jpg" alt="Movie Image" />
       <div class="movie-info">
         <h3 id="movie-title">MOVIE TITLE</h3>
+        <span class="screening-date" id="screening-date"></span>
         <span class="screening-time" id="start-time">12:30</span>
         <p class="movie-meta">Genre: <span id="genre"></span></p>
         <p class="movie-meta">Duration: <span id="duration"></span> min</p>
         <p class="movie-meta">Release date: <span id="release"></span></p>
-        <p class="movie-meta">Score:
-          <span class="stars">⭐️⭐️⭐️</span>
-        </p>
+        <p class="movie-meta">Score: <span class="stars">⭐️⭐️⭐️</span></p>
       </div>
     </div>
 
     <div class="booking-panel">
       <div class="ticket-selection">
         <h4>TICKET SELECTION</h4>
-        <label>Reduced <input type="number" min="0" value="0" id="reduced"/> $12.50</label><br/>
-        <label>Normal <input type="number" min="0" value="0" id="normal"/> $14.50</label><br/>
-        <label>Premium <input type="number" min="0" value="0" id="premium"/> $16.50</label>
+        <label>Reduced <input type="number" min="0" value="0" id="reduced" /> $12.50</label><br />
+        <label>Normal <input type="number" min="0" value="0" id="normal" /> $14.50</label><br />
+        <label>Premium <input type="number" min="0" value="0" id="premium" /> $16.50</label>
       </div>
 
       <div class="seats-left">
@@ -50,14 +49,14 @@
       </div>
 
       <div class="booking-footer">
-        <input type="text" disabled value="Don't wait, tickets are limited!">
+        <input type="text" disabled value="Don't wait, tickets are limited!" />
         <button id="confirm-btn">CONFIRM SELECTION</button>
       </div>
     </div>
 
     <div class="seat-map">
-        <h4>SELECT YOUR SEATS</h4>
-        <div id="seat-grid"></div>
+      <h4>SELECT YOUR SEATS</h4>
+      <div id="seat-grid"></div>
     </div>
   </main>
 

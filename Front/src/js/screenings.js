@@ -177,11 +177,6 @@ function formatDate(dateString) {
   }
 }
 
-/**
- * Extracts the date part (YYYY-MM-DD) from a date-time string.
- * @param {string} dateTime - The date-time string.
- * @returns {string} The date part in YYYY-MM-DD format.
- */
 function getDateString(dateTime) {
   const date = new Date(dateTime);
   return date.toISOString().split('T')[0]; // Gets YYYY-MM-DD

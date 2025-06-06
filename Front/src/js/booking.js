@@ -41,6 +41,8 @@ $(document).ready(async () => {
 
     const seats = await seatsRes.json();
     $('#movie-title').text(screeningData.movie.title);
+    // Display the date of the screening
+    $('#screening-date').text(formatDate(screeningData.start_time));
     $('#start-time').text(formatTime(screeningData.start_time));
     $('#genre').text(screeningData.movie.genre);
     $('#duration').text(screeningData.movie.duration);
@@ -134,6 +136,38 @@ function setupWebSocket(screeningId) {
 function formatTime(dateTime) {
   const date = new Date(dateTime);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * Formats a date string (YYYY-MM-DD) or a date-time string into a human-readable date.
+ * If the date is today or tomorrow, it will display "Today" or "Tomorrow".
+ * @param {string} dateString - The date string (YYYY-MM-DD) or full dateTime string.
+ * @returns {string} The formatted date string (e.g., "Today", "Tomorrow", "Saturday, June 8, 2025").
+ */
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Normalize dates to just the day part for comparison
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const tm = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+
+  if (d.getTime() === t.getTime()) {
+    return 'Today';
+  } else if (d.getTime() === tm.getTime()) {
+    return 'Tomorrow';
+  } else {
+    // For other days, format as "Day, Month Day, Year"
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
 }
 
 function updateSeatsDisplay() {

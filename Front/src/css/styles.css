@@ -476,172 +476,183 @@ button.read-more-btn:hover, button.show-less-btn:hover {
    Booking Page
    =============== */
 .booking-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2em;
-  padding: 2em;
-  max-width: 1200px;
-  margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2em;
+    padding: 2em;
+    max-width: 1200px;
+    margin: auto;
 }
 
 .movie-section {
-  flex: 1 1 300px;
-  background-color: #111;
-  border-radius: 15px;
-  box-shadow: var(--box-shadow);
-  padding: 1.5em;
-  text-align: center;
+    flex: 1 1 300px;
+    background-color: #111;
+    border-radius: 15px;
+    box-shadow: var(--box-shadow);
+    padding: 1.5em;
+    text-align: center;
 }
 
 .movie-section img {
-  max-width: 300px;
-  width: 100%;
-  border-radius: 15px;
-  margin-bottom: 1em;
+    max-width: 300px;
+    width: 100%;
+    border-radius: 15px;
+    margin-bottom: 1em;
 }
 
 .movie-info {
-  text-align: left;
+    text-align: left;
 }
 
 .movie-info h3 {
-  font-family: var(--font-header);
-  font-size: 1.8em;
-  color: var(--color-yellow);
-  margin-bottom: 0.5em;
+    font-family: var(--font-header);
+    font-size: 1.8em;
+    color: var(--color-yellow);
+    margin-bottom: 0.2em; /* Adjusted margin for better spacing with the new date */
+}
+
+/* Added style for the screening date */
+.movie-info .screening-date {
+    display: block;
+    font-size: 1.1em;
+    color: var(--color-yellow);
+    margin: 0.5em 0 0.8em 0;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.3em;
 }
 
 .movie-meta {
-  margin: 0.3em 0;
-  font-size: 0.95em;
-  color: #ccc;
+    margin: 0.3em 0;
+    font-size: 0.95em;
+    color: #ccc;
 }
 
 .screening-time {
-  display: inline-block;
-  background-color: var(--color-light-blue);
-  padding: 0.3em 0.7em;
-  border-radius: 15px;
-  font-size: 0.9em;
-  font-weight: bold;
-  color: var(--color-white);
-  margin-bottom: 1em;
+    display: inline-block;
+    background-color: var(--color-light-blue);
+    padding: 0.3em 0.7em;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: var(--color-white);
+    margin-bottom: 1em;
+    margin-top: 0.5em; /* Added margin for spacing after the date */
 }
 
 .booking-panel {
-  flex: 2 1 400px;
-  background-color: #111;
-  padding: 2em;
-  border-radius: 15px;
-  box-shadow: var(--box-shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 2em;
+    flex: 2 1 400px;
+    background-color: #111;
+    padding: 2em;
+    border-radius: 15px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
 }
 
 .booking-panel h4 {
-  font-family: var(--font-header);
-  font-size: 1.3em;
-  color: var(--color-yellow);
-  margin-bottom: 1em;
+    font-family: var(--font-header);
+    font-size: 1.3em;
+    color: var(--color-yellow);
+    margin-bottom: 1em;
 }
 
 .ticket-selection label,
 .seats-left p {
-  display: flex;
-  justify-content: space-between;
-  font-size: 1em;
-  margin: 0.5em 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 1em;
+    margin: 0.5em 0;
 }
 
 .ticket-selection input {
-  width: 60px;
-  padding: 0.4em;
-  border-radius: 8px;
-  border: none;
-  background-color: var(--color-white);
-  color: var(--color-black);
+    width: 60px;
+    padding: 0.4em;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--color-white);
+    color: var(--color-black);
 }
 
 .booking-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
 }
 
 .booking-footer input[type="text"] {
-  padding: 0.7em;
-  border-radius: var(--border-radius);
-  background-color: var(--color-dark-blue);
-  color: var(--color-white);
-  font-style: italic;
-  border: none;
+    padding: 0.7em;
+    border-radius: var(--border-radius);
+    background-color: var(--color-dark-blue);
+    color: var(--color-white);
+    font-style: italic;
+    border: none;
 }
 
 /* Seat Map */
 #seat-grid {
-  padding: 2em;
+    padding: 2em;
 }
 
 .seat-row-label {
-  font-family: var(--font-header);
-  font-size: 1.2em;
-  color: var(--color-yellow);
-  font-weight: bold;
-  margin: 1em 0 0.5em;
+    font-family: var(--font-header);
+    font-size: 1.2em;
+    color: var(--color-yellow);
+    font-weight: bold;
+    margin: 1em 0 0.5em;
 }
 
 .seat-row {
-  display: flex;
-  gap: 0.5em;
-  margin-bottom: 1em;
-  flex-wrap: wrap;
-  border-bottom: 1px dashed #444;
-  padding-bottom: 0.5em;
+    display: flex;
+    gap: 0.5em;
+    margin-bottom: 1em;
+    flex-wrap: wrap;
+    border-bottom: 1px dashed #444;
+    padding-bottom: 0.5em;
 }
 
 .seat {
-  width: 42px;
-  height: 42px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 0.9em;
-  user-select: none;
-  transition: transform 0.1s ease;
-  cursor: pointer;
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9em;
+    user-select: none;
+    transition: transform 0.1s ease;
+    cursor: pointer;
 }
 
 .seat:hover {
-  filter: brightness(1.1);
+    filter: brightness(1.1);
 }
 
 /* Seat Types */
 .reduced {
-  background-color: var(--color-green);
+    background-color: var(--color-green);
 }
 
 .normal {
-  background-color: var(--color-light-blue);
+    background-color: var(--color-light-blue);
 }
 
 .premium {
-  background-color: var(--color-yellow);
-  color: var,--color-black;
+    background-color: var(--color-yellow);
+    color: var(--color-black); /* Corrected syntax here */
 }
 
 .seat.taken {
-  background-color: #555;
-  color: #aaa;
-  cursor: not-allowed;
+    background-color: #555;
+    color: #aaa;
+    cursor: not-allowed;
 }
 
 .seat.selected {
-  outline: 3px solid rgba(255, 255, 255, 0.9);
-  outline-offset: -2px;
-  background-color: #1749a8;
+    outline: 3px solid rgba(255, 255, 255, 0.9);
+    outline-offset: -2px;
+    background-color: #1749a8;
 }
 
 
