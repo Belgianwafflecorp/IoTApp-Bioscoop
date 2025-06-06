@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ABSOLUTE</title>
+  <title>Absolute - Home</title>
   <link rel="icon" type="image/png" href="./src/assets/yellow-circle.png">
   <link rel="apple-touch-icon" href="./src/assets/yellow-circle.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -13,12 +13,12 @@
   <header class="navbar">
     <div class="logo">
       <div class="circle"></div>
-      <span class="brand">ABSOLUTE</span>
+      <span class="brand">ABSOLUTE CINEMA</span>
     </div>
     <nav class="nav-links">
-      <a href="#">Movies</a>
+      <a href="/">Movies</a>
       <a href="./pages/screenings.html">Screenings</a>
-      <button class="login-btn" onclick="window.location.href='./pages/login.html'">Login</button>
+      <button class="login-btn" id="loginButton">Login</button>
     </nav>
   </header>
 
@@ -27,7 +27,7 @@
     <p>Book your tickets now and immerse yourself in the world of cinema!</p>
     <p>Explore our movie collection, check screening times, and enjoy a seamless booking experience.</p>
     <p>Whether you're a fan of action, romance, comedy, or drama, we have something for everyone. Join us for an unforgettable cinematic journey!</p>
-    <button class="book-btn" onclick="window.location.href='./pages/screenings.html'">
+    <button class="book-btn" id="bookNowButton">
       <i class="fas fa-calendar-alt"></i> Book now!
     </button>
   </section>
@@ -53,9 +53,9 @@
 
   <div id="movie-container" class="movie-container"></div>
   
-  <section id="movie-list" class="movie-grid">  </section>
+  <section id="movie-list" class="movie-grid">  </section>
 
-  <section id="movie-detail-panel" class="hidden">  </section>
+  <section id="movie-detail-panel" class="hidden">  </section>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="./src/js/scripts.js" type="module"></script>

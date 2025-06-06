@@ -1,35 +1,69 @@
 import { updateNavbarForRole } from './manager.js';
 
-let allMovies = []; // Store all fetched movies
-let genreMap = {}; // Store genre ID to name mapping
+// --- Constants ---
+const API_BASE_URL = 'http://localhost:3000/api';
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500/';
+const PLACEHOLDER_IMAGE_URL = './src/assets/placeholder.png';
+const OVERVIEW_SNIPPET_LENGTH = 150; // Increased from 80 for better readability
+const API_CHECK_MAX_ATTEMPTS = 10;
+const API_CHECK_DELAY = 2000; // ms
 
-// Utility functions remain similar but with jQuery syntax
+// --- Global State ---
+let allMovies = []; // Stores all fetched movies with their TMDB data
+let genreMap = {};  // Stores genre ID to name mapping
+
+// --- Utility Functions ---
+
+// Checks if the API is reachable.
 async function checkApiStatus() {
   try {
-    const res = await fetch('http://localhost:3000/api/movies');
+    const res = await fetch(`${API_BASE_URL}/movies`);
     return res.ok;
   } catch (error) {
-    console.error('API not ready yet:', error);
+    console.warn('API not ready yet, retrying...');
+    return false;
   }
-  return false;
 }
 
+// Waits for the API to become available with retries.
 async function waitForApi() {
   let attempts = 0;
-  const maxAttempts = 10;
-  const delay = 2000;
-
-  while (attempts < maxAttempts) {
-    if (await checkApiStatus()) return;
+  while (attempts < API_CHECK_MAX_ATTEMPTS) {
+    if (await checkApiStatus()) {
+      return;
+    }
     attempts++;
-    console.log(`Attempt ${attempts} failed, retrying in ${delay / 1000} seconds...`);
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise(resolve => setTimeout(resolve, API_CHECK_DELAY));
   }
-
-  throw new Error('API is not available after multiple attempts');
+  throw new Error('API is not available after multiple attempts.');
 }
 
-// Function to render movies
+// Fetches data from a given URL.
+async function fetchData(url) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+  return res.json();
+}
+
+// Fetches TMDB movie data for a given movie title.
+async function fetchTmdbMovieData(title) {
+  if (!title) return null;
+  const tmdbData = await fetchData(`${API_BASE_URL}/movies/tmdb/search?title=${encodeURIComponent(title)}`);
+  return Array.isArray(tmdbData) && tmdbData.length > 0 ? tmdbData[0] : null;
+}
+
+// Gets genre names from an array of genre IDs.
+function getGenreNames(genreIds) {
+  if (!genreIds || !Array.isArray(genreIds)) return 'Unknown';
+  const genreNames = $.map(genreIds, id => genreMap[Number(id)] || null).filter(Boolean);
+  return genreNames.length > 0 ? genreNames.join(', ') : 'Unknown';
+}
+
+// --- Render Functions ---
+
+// Renders a list of movies to the movie grid.
 async function renderMovies(moviesToRender) {
   const $movieList = $('#movie-list');
   $movieList.empty(); // Clear existing movies
@@ -39,53 +73,116 @@ async function renderMovies(moviesToRender) {
     return;
   }
 
-  // Use a traditional for loop or $.each to correctly handle async operations inside
-  for (const movie of moviesToRender) {
-    if (!movie.title) continue;
+  const movieCardsHtml = moviesToRender.map(movie => {
+    const tmdbMovie = movie.tmdbData;
+    if (!tmdbMovie || !tmdbMovie.title) return ''; // Skip if TMDB data is missing or incomplete
 
-    const tmdbRes = await fetch(`http://localhost:3000/api/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
-    const tmdbData = await tmdbRes.json();
-
-    if (!Array.isArray(tmdbData) || !tmdbData[0]) continue;
-
-    const tmdbMovie = tmdbData[0];
     const { title, overview, vote_average, poster_path, release_date, genre_ids, id: tmdbId } = tmdbMovie;
+    const genreText = getGenreNames(genre_ids);
+    const posterUrl = poster_path ? `${TMDB_IMAGE_BASE_URL}${poster_path}` : PLACEHOLDER_IMAGE_URL;
+    const displayOverview = overview ? overview.slice(0, OVERVIEW_SNIPPET_LENGTH) + '...' : 'No description available.';
 
-    let genreText = 'Unknown';
-    if (genre_ids && Array.isArray(genre_ids)) {
-      const genreNames = $.map(genre_ids, function(id) {
-        return genreMap[Number(id)] || null;
-      }).filter(Boolean);
-      genreText = genreNames.length > 0 ? genreNames.join(', ') : 'Unknown';
-    }
-
-    const posterUrl = poster_path
-      ? `https://image.tmdb.org/t/p/w500/${poster_path}`
-      : './src/assets/placeholder.png';
-
-    const $card = $(`
-      <div class="movie-card" data-tmdb-id="${tmdbId}" data-local-title="${movie.title}" data-genre="${genreText}" data-score="${vote_average}">
+    // Store necessary data in data attributes for click handler
+    return `
+      <div class="movie-card"
+           data-tmdb-id="${tmdbId}"
+           data-local-title="${movie.title}"
+           data-genre="${genreText}"
+           data-score="${vote_average}"
+           data-poster-url="${posterUrl}"
+           data-release-date="${release_date || ''}"
+           data-overview="${overview || ''}">
         <img src="${posterUrl}" alt="${title}" class="movie-poster" />
         <div class="movie-info">
           <h3>${title.toUpperCase()}</h3>
-          <p class="movie-overview">${overview ? overview.slice(0, 80) : 'No description available'}... 
+          <p class="movie-overview">${displayOverview} 
             <a href="#" class="read-more-link">read more</a>
           </p>
           <div class="rating">⭐ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</div>
         </div>
       </div>
-    `);
+    `;
+  }).join('');
 
-    $card.find('.read-more-link, .movie-poster').on('click', async function(e) {
-      e.preventDefault();
-      await expandMovieCard($card, tmdbId, title, posterUrl, genreText, release_date, overview);
-    });
+  $movieList.html(movieCardsHtml);
 
-    $movieList.append($card);
-  }
+  // Attach event listeners to the newly added movie cards
+  $movieList.find('.movie-card .read-more-link, .movie-card .movie-poster').on('click', function(e) {
+    e.preventDefault();
+    const $card = $(this).closest('.movie-card');
+    const tmdbId = $card.data('tmdb-id');
+    const title = $card.find('h3').text(); // Use text from the card
+    const posterUrl = $card.data('poster-url');
+    const genreText = $card.data('genre');
+    const releaseDate = $card.data('release-date');
+    const overview = $card.data('overview');
+    expandMovieCard(tmdbId, title, posterUrl, genreText, releaseDate, overview);
+  });
 }
 
-// Function to apply filters and sorting
+// Expands a movie card to show detailed information.
+async function expandMovieCard(tmdbId, title, posterUrl, genreText, releaseDate, overview) {
+  $('.movie-card').hide(); // Hide all movie cards
+  const $detailPanel = $('#movie-detail-panel').removeClass('hidden');
+
+  let trailerEmbedHTML = '<p>No trailer available.</p>';
+  try {
+    const trailers = await fetchData(`${API_BASE_URL}/movies/${tmdbId}/videos`);
+    const trailer = $.grep(trailers, t => t.site === 'YouTube' && t.type === 'Trailer')[0];
+    if (trailer) {
+      trailerEmbedHTML = `
+        <iframe width="100%" height="315"
+          src="https://www.youtube.com/embed/${trailer.key}"
+          title="YouTube trailer" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      `;
+    }
+  } catch (err) {
+    console.warn('Trailer fetch failed:', err);
+  }
+
+  let castHTML = '';
+  try {
+    const credits = await fetchData(`${API_BASE_URL}/movies/${tmdbId}/credits`);
+    if (Array.isArray(credits.cast)) {
+      const topCast = $.map(credits.cast.slice(0, 5), actor => actor.name).join(', ');
+      castHTML = `<p><strong>Cast:</strong> ${topCast}</p>`;
+    }
+  } catch (err) {
+    console.warn('Cast fetch failed:', err);
+  }
+
+  $detailPanel.html(`
+    <div class="detail-left">
+      <img src="${posterUrl}" alt="${title}" class="movie-poster-large" />
+      <p><strong>Genres:</strong> ${genreText}</p>
+      <p><strong>Release date:</strong> ${releaseDate || 'Unknown'}</p>
+      <button class="show-less-btn">Back</button>
+    </div>
+    <div class="detail-right">
+      <h2>${title}</h2>
+      <p>${overview || 'No description available.'}</p>
+      ${castHTML}
+      <div class="trailer">${trailerEmbedHTML}</div>
+    </div>
+  `);
+
+  $detailPanel.find('.show-less-btn').on('click', resetCards);
+}
+
+// Resets the view to show movie cards and hides the detail panel.
+function resetCards() {
+  $('#movie-detail-panel')
+    .addClass('hidden')
+    .empty();
+  $('.movie-card').show();
+}
+
+// --- Filter and Sort Logic ---
+
+// Applies filters and sorting to the movie list and re-renders it. 
 function applyFiltersAndSort() {
   let filteredMovies = [...allMovies]; // Start with all movies
 
@@ -96,11 +193,9 @@ function applyFiltersAndSort() {
   // Filter by genre
   if (selectedGenre) {
     filteredMovies = filteredMovies.filter(movie => {
-      const tmdbMovie = movie.tmdbData && movie.tmdbData[0];
+      const tmdbMovie = movie.tmdbData;
       if (!tmdbMovie || !tmdbMovie.genre_ids) return false;
-      const movieGenreNames = $.map(tmdbMovie.genre_ids, function(id) {
-        return genreMap[Number(id)] || null;
-      }).filter(Boolean);
+      const movieGenreNames = getGenreNames(tmdbMovie.genre_ids);
       return movieGenreNames.includes(selectedGenre);
     });
   }
@@ -108,17 +203,20 @@ function applyFiltersAndSort() {
   // Filter by score
   if (!isNaN(selectedScore)) {
     filteredMovies = filteredMovies.filter(movie => {
-      const tmdbMovie = movie.tmdbData && movie.tmdbData[0];
-      return tmdbMovie && tmdbMovie.vote_average >= selectedScore;
+      const tmdbMovie = movie.tmdbData;
+      return tmdbMovie && (tmdbMovie.vote_average || 0) >= selectedScore;
     });
   }
 
   // Sort movies
   filteredMovies.sort((a, b) => {
-    const tmdbA = a.tmdbData && a.tmdbData[0];
-    const tmdbB = b.tmdbData && b.tmdbData[0];
+    const tmdbA = a.tmdbData;
+    const tmdbB = b.tmdbData;
 
-    if (!tmdbA || !tmdbB) return 0; // Handle cases where TMDB data might be missing
+    // Ensure TMDB data exists for comparison
+    if (!tmdbA && !tmdbB) return 0;
+    if (!tmdbA) return 1; // Put movies without TMDB data at the end
+    if (!tmdbB) return -1;
 
     switch (selectedSort) {
       case 'title-asc':
@@ -137,17 +235,66 @@ function applyFiltersAndSort() {
   renderMovies(filteredMovies);
 }
 
-// Document ready handler
-$(async function() {
-  console.log('DOM ready with jQuery');
-  await showLoginStatus();
+// --- User Authentication/Session ---
+
+//Logs out the user by removing the token and redirecting to the login page.
+function logout() {
+  localStorage.removeItem('token');
+  window.location.href = './pages/login.html';
+}
+
+// Displays login status in the navbar and attaches logout handler.
+//This is an exported function as it's used by manager.js.
+export async function showLoginStatus() {
+  const $loginBtn = $('#loginButton'); // Use ID for specific button
+  if (!$loginBtn.length) return;
 
   const token = localStorage.getItem('token');
-  if (token) await updateNavbarForRole();
+  if (token) {
+    try {
+      const data = await fetchData(`${API_BASE_URL}/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      $loginBtn.html(`<span class="user-info">👤 ${data.username}</span><button id="logoutBtn" class="logout-btn">Logout</button>`);
+      $loginBtn.find('#logoutBtn').on('click', logout);
+    } catch (err) {
+      console.error('Failed to fetch user info or token invalid:', err);
+      localStorage.removeItem('token'); // Invalidate token if fetch fails
+      $loginBtn.text('Login'); // Reset button text
+    }
+  } else {
+    $loginBtn.text('Login');
+  }
+}
+
+// --- Initialization ---
+
+$(async function() {
+  console.log('DOM ready and scripts.js initializing...');
+
+  // Attach event listeners for direct page navigation from buttons
+  $('#loginButton').on('click', function() {
+    // Only navigate if the user is not already logged in (i.e., button still says "Login")
+    if ($(this).text().trim() === 'Login') {
+      window.location.href = './pages/login.html';
+    }
+  });
+  $('#bookNowButton').on('click', function() {
+    window.location.href = './pages/screenings.html';
+  });
+
+  await showLoginStatus(); // Update login status immediately
+  const token = localStorage.getItem('token');
+  if (token) {
+    // This call is redundant if showLoginStatus handles the display.
+    // Assuming updateNavbarForRole does more than just show username, keep for now.
+    await updateNavbarForRole(); 
+  }
+
 
   const $movieList = $('#movie-list');
   if (!$movieList.length) {
-    console.warn('No #movie-list element found; skipping movie rendering');
+    console.warn('No #movie-list element found; skipping movie rendering setup.');
     return;
   }
 
@@ -155,29 +302,25 @@ $(async function() {
     await waitForApi();
 
     // Fetch genre list and populate filter
-    const genresRes = await fetch('http://localhost:3000/api/movies/tmdb/genres');
-    const genresJson = await genresRes.json();
+    const genresJson = await fetchData(`${API_BASE_URL}/movies/tmdb/genres`);
     if (Array.isArray(genresJson)) {
       const $genreFilter = $('#genre-filter');
-      $.each(genresJson, function(index, g) {
+      $.each(genresJson, function(_, g) {
         genreMap[g.id] = g.name;
         $genreFilter.append($('<option></option>').attr('value', g.name).text(g.name));
       });
     }
 
-    // Fetch movie data and store it
-    const res = await fetch(`http://localhost:3000/api/movies`);
-    const data = await res.json();
+    // Fetch local movie data
+    const localMovies = await fetchData(`${API_BASE_URL}/movies`);
 
-    // Fetch TMDB data for all movies and store it
-    const moviePromises = data.map(async movie => {
-      if (!movie.title) return null;
-      const tmdbRes = await fetch(`http://localhost:3000/api/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
-      const tmdbData = await tmdbRes.json();
-      return { ...movie, tmdbData: tmdbData };
+    // Fetch TMDB data for all movies concurrently and combine
+    const moviePromises = localMovies.map(async movie => {
+      const tmdbData = await fetchTmdbMovieData(movie.title);
+      return tmdbData ? { ...movie, tmdbData: tmdbData } : null;
     });
 
-    allMovies = (await Promise.all(moviePromises)).filter(Boolean); // Filter out nulls
+    allMovies = (await Promise.all(moviePromises)).filter(Boolean); // Store enriched movie data
 
     // Initial rendering of movies
     renderMovies(allMovies);
@@ -193,103 +336,6 @@ $(async function() {
 
   } catch (error) {
     $movieList.html('<p>Error loading movies. Please try again later.</p>');
-    console.error('Error loading movies:', error);
+    console.error('Initialization error:', error);
   }
 });
-
-// Expanded movie card function (remains the same)
-async function expandMovieCard($card, tmdbId, title, posterUrl, genreText, release_date, overview) {
-  // Hide all movie cards
-  $('.movie-card').hide();
-
-  const $detailPanel = $('#movie-detail-panel').removeClass('hidden');
-
-  let trailerEmbedHTML = '';
-  try {
-    const trailerRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/videos`);
-    const trailers = await trailerRes.json();
-    const trailer = $.grep(trailers, t => t.site === 'YouTube' && t.type === 'Trailer')[0];
-    if (trailer) {
-      trailerEmbedHTML = `
-        <iframe width="100%" height="315"
-          src="https://www.youtube.com/embed/${trailer.key}"
-          title="YouTube trailer" frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen>
-        </iframe>
-      `;
-    }
-  } catch (err) {
-    console.warn('Trailer fetch failed:', err);
-  }
-
-  // Fetch cast info
-  let castHTML = '';
-  try {
-    const castRes = await fetch(`http://localhost:3000/api/movies/${tmdbId}/credits`);
-    const credits = await castRes.json();
-    if (Array.isArray(credits.cast)) {
-      const topCast = $.map(credits.cast.slice(0, 5), actor => actor.name).join(', ');
-      castHTML = `<p><strong>Cast:</strong> ${topCast}</p>`;
-    }
-  } catch (err) {
-    console.warn('Cast fetch failed:', err);
-  }
-
-  $detailPanel.html(`
-    <div class="detail-left">
-      <img src="${posterUrl}" alt="${title}" class="movie-poster-large" />
-      <p><strong>Genres:</strong> ${genreText}</p>
-      <p><strong>Release date:</strong> ${release_date ?? 'Unknown'}</p>
-      <button class="show-less-btn">Back</button>
-    </div>
-    <div class="detail-right">
-      <h2>${title}</h2>
-      <p>${overview || 'No description available.'}</p>
-      ${castHTML}
-      <div class="trailer">${trailerEmbedHTML || '<p>No trailer available.</p>'}</div>
-    </div>
-  `);
-
-  $detailPanel.find('.show-less-btn').on('click', resetCards);
-}
-
-function resetCards() {
-  $('#movie-detail-panel')
-    .addClass('hidden')
-    .empty();
-  $('.movie-card').show();
-}
-
-function logout() {
-  localStorage.removeItem('token');
-  window.location.href = '/pages/login.html';
-}
-
-export async function showLoginStatus() {
-  const $loginBtn = $('.login-btn');
-  if (!$loginBtn.length) return;
-
-  const token = localStorage.getItem('token');
-  if (token) {
-    try {
-      const res = await fetch('http://localhost:3000/api/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-
-        $loginBtn.html(`<span class="user-info">👤 ${data.username}</span><button id="logoutBtn" class="logout-btn">Logout</button>`);
-
-        $loginBtn.find('#logoutBtn').on('click', logout);
-      } else {
-        localStorage.removeItem('token');
-      }
-    } catch (err) {
-      console.error('Failed to fetch user info', err);
-    }
-  }
-}
