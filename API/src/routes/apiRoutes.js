@@ -227,38 +227,6 @@ router.delete('/deleteUser/:user_id', UserController.deleteUser);
  *         description: Internal server error
  */
 router.get('/me', authenticateToken, UserController.getMe);
-/**
- * @swagger
- * /api/me:
- *   get:
- *     summary: Get the currently authenticated user's info
- *     tags:
- *       - Users
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully retrieved user info
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 user_id:
- *                   type: integer
- *                 username:
- *                   type: string
- *                 email:
- *                   type: string
- *                 role:
- *                   type: string
- *       401:
- *         description: Unauthorized – missing or invalid token
- *       404:
- *         description: User not found
- *       500:
- *         description: Internal server error
- */
 
 
 /////////////////////////////////////////////////////////////////
@@ -832,9 +800,6 @@ router.delete('/screenings/:id', ScreeningController.deleteScreenings);
 /////////////////////// reservations ////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-// GET available tickets for a screening
-router.get('/screenings/:id/tickets', ReservationController.getTicketsForScreening);
-
 /**
  * @swagger
  * /api/screenings/{id}/tickets:
@@ -936,7 +901,6 @@ router.get('/my-reservations', authenticateToken, ReservationController.getMyRes
  */
 router.post('/reserve', authenticateToken, ReservationController.reserveTickets);
 
-router.get('/users/:id/reservations', ReservationController.getReservationsForUser);
 /**
  * @swagger
  * /api/users/{id}/reservations:
@@ -988,6 +952,7 @@ router.get('/users/:id/reservations', ReservationController.getReservationsForUs
  *       500:
  *         description: Internal server error
  */
+router.get('/users/:id/reservations', ReservationController.getReservationsForUser);
 
 
 /////////////////////////////////////////////////////////////////
