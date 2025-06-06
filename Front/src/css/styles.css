@@ -477,7 +477,7 @@ button.read-more-btn:hover, button.show-less-btn:hover {
    =============== */
 .booking-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allows items to wrap to the next line */
     gap: 2em;
     padding: 2em;
     max-width: 1200px;
@@ -485,7 +485,7 @@ button.read-more-btn:hover, button.show-less-btn:hover {
 }
 
 .movie-section {
-    flex: 1 1 300px;
+    flex: 1 1 300px; /* Movie section takes at least 300px, can grow */
     background-color: #111;
     border-radius: 15px;
     box-shadow: var(--box-shadow);
@@ -508,10 +508,9 @@ button.read-more-btn:hover, button.show-less-btn:hover {
     font-family: var(--font-header);
     font-size: 1.8em;
     color: var(--color-yellow);
-    margin-bottom: 0.2em; /* Adjusted margin for better spacing with the new date */
+    margin-bottom: 0.2em;
 }
 
-/* Added style for the screening date */
 .movie-info .screening-date {
     display: block;
     font-size: 1.1em;
@@ -536,11 +535,11 @@ button.read-more-btn:hover, button.show-less-btn:hover {
     font-weight: bold;
     color: var(--color-white);
     margin-bottom: 1em;
-    margin-top: 0.5em; /* Added margin for spacing after the date */
+    margin-top: 0.5em;
 }
 
 .booking-panel {
-    flex: 2 1 400px;
+    flex: 2 1 400px; /* Booking panel takes at least 400px, grows twice as much as movie section */
     background-color: #111;
     padding: 2em;
     border-radius: 15px;
@@ -589,9 +588,13 @@ button.read-more-btn:hover, button.show-less-btn:hover {
     border: none;
 }
 
-/* Seat Map */
-#seat-grid {
+/* Seat Map - Modified to allow full width when wrapped */
+.seat-map {
+    flex: 1 1 100%; /* This makes it take full width if it wraps, and allows it to grow */
+    background-color: #111; /* Add background for the seat map container too */
     padding: 2em;
+    border-radius: 15px;
+    box-shadow: var(--box-shadow);
 }
 
 .seat-row-label {
@@ -606,14 +609,15 @@ button.read-more-btn:hover, button.show-less-btn:hover {
     display: flex;
     gap: 0.5em;
     margin-bottom: 1em;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Important for wrapping seats within the row */
     border-bottom: 1px dashed #444;
     padding-bottom: 0.5em;
+    justify-content: center; /* This is the key change to center the seats */
 }
 
 .seat {
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -640,7 +644,7 @@ button.read-more-btn:hover, button.show-less-btn:hover {
 
 .premium {
     background-color: var(--color-yellow);
-    color: var(--color-black); /* Corrected syntax here */
+    color: var(--color-black);
 }
 
 .seat.taken {
@@ -654,7 +658,6 @@ button.read-more-btn:hover, button.show-less-btn:hover {
     outline-offset: -2px;
     background-color: #1749a8;
 }
-
 
 /* ===============
    User Management
