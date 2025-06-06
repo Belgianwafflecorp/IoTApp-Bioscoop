@@ -368,9 +368,50 @@ button.read-more-btn:hover, button.show-less-btn:hover {
   background-color: #111;
   border-radius: 15px;
   overflow: hidden;
+  height: auto;
   display: flex;
   flex-direction: column;
   box-shadow: var(--box-shadow);
+}
+
+.screening-details {
+    margin-top: 1em; 
+    border-top: 1px solid #222; 
+    padding-top: 1em;
+}
+
+.date-group {
+    margin-bottom: 1em;
+}
+
+.screening-date { /* This class is now on the h5 for date headings */
+    font-size: 1.1em;
+    color: var(--color-yellow); /* Highlight the date */
+    margin: 0 0 0.5em 0; /* Adjust margin for heading */
+    border-bottom: 1px solid #333; /* Underline for the date heading */
+    padding-bottom: 0.3em;
+}
+
+.showings-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8em; /* Space between different show items */
+    margin-top: 0.5em;
+}
+
+.show-item {
+    background-color: #222; /* Slightly different background for each show item */
+    border-radius: 5px;
+    padding: 0.5em 1em;
+    display: flex;
+    align-items: center;
+    font-size: 0.95em;
+    color: #eee;
+}
+
+.show-item strong {
+    color: #ccc; /* Hall name color */
+    margin-right: 5px;
 }
 
 .screening-card img {
@@ -385,7 +426,7 @@ button.read-more-btn:hover, button.show-less-btn:hover {
   padding: 1em;
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
+  gap: 0.8em;
 }
 
 .movie-title {
@@ -408,7 +449,12 @@ button.read-more-btn:hover, button.show-less-btn:hover {
   border-radius: 20px;
   font-size: 0.9em;
   font-weight: bold;
+  cursor: pointer;
   margin-left: 0.5em;
+}
+
+.badge:hover {
+    background-color: #3e82b7; /* Darker blue on hover */
 }
 
 .labels {
