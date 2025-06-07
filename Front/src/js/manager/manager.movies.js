@@ -314,4 +314,3 @@ function filterAndSortMovies() {
 
     renderMoviesTable(filtered);
 }
-

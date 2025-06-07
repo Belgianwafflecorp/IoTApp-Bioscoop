@@ -1,4 +1,4 @@
-// manager.js
+// manager.jsAdd commentMore actions
 import * as userTab from './manager.users.js';
 import * as movieTab from './manager.movies.js';
 import * as screeningsTab from './manager.screenings.js';
@@ -73,4 +73,3 @@ $(document).ready(() => {
         await renderScreeningChart();
     });
 });
-

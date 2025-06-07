@@ -1,6 +1,6 @@
 //script.js
 
-import { updateNavbarForRole } from './manager.js';
+import { updateNavbarForRole } from './manager/manager.js';
 
 // ============================================================================
 // Configuration and Global State
