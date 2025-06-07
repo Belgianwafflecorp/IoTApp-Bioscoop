@@ -18,7 +18,8 @@ export function initMovieManagement() {
 }
 
 // --- TMDB Movie Search and Add to Database ---
-let tmdbGenres = {};
+
+let tmdbGenres = {}; // Store TMDB genres globally
 
 async function fetchTMDBGenres() {
     try {
@@ -52,6 +53,7 @@ async function fetchTMDBRuntime(movieId) {
     }
 }
 
+// Render TMDB search results
 async function renderTMDBResults(results) {
     const $container = $('#tmdb-results');
     $container.empty();
@@ -89,7 +91,7 @@ async function renderTMDBResults(results) {
             </li>
         `;
     });
-
+    // Wait for all promises to resolve and join the results
     const liElements = await Promise.all(moviePromises);
     $ul.append(liElements.join(''));
     $container.append($ul);
@@ -105,6 +107,8 @@ $(document).ready(() => {
     $('#tmdb-search-form').on('submit', async function (e) {
         e.preventDefault();
         // Always show the movie management section after search
+        // This ensures the section is visible when the search is performed
+        // and allows the user to see results immediately
         if (typeof showSection === 'function') showSection($('#movie-management-section'));
         const query = $('#tmdb-search-input').val().trim();
         if (!query) return;
@@ -166,7 +170,8 @@ $(document).ready(() => {
     });
 });
 
-
+// Fetch and render movies from the database
+// This function fetches movies from the backend and renders them in the table
 export async function fetchAndRenderMovies() {
     const token = localStorage.getItem('token');
     try {
@@ -182,6 +187,8 @@ export async function fetchAndRenderMovies() {
     }
 }
 
+// Render movies in the table
+// This function takes an array of movie objects and renders them in the movies table
 export function renderMoviesTable(movies) {
     const $tbody = $('#movies-table tbody');
     if (!$tbody.length) return;
@@ -276,6 +283,7 @@ export function renderMoviesTable(movies) {
     });
 }
 
+// Filter and sort movies based on search input and selected sort option
 function filterAndSortMovies() {
     let filtered = allMoviesDb;
     const search = $('#movie-db-search-input').val().toLowerCase();

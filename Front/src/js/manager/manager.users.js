@@ -1,7 +1,12 @@
 const API_BASE = window.API_BASE || 'http://localhost:3000';
 
+// global variable to store all users
 let allUsers = [];
 
+// Function to group reservations by movie, hall, start time, and reservation time
+// This will help in displaying reservations in a more organized manner 
+// Without duplicating rows for the same reservation with multiple seats
+// Each reservation will show all seats in a single row
 function groupReservations(reservations) {
     const grouped = {};
     reservations.forEach(r => {
@@ -14,6 +19,7 @@ function groupReservations(reservations) {
     return Object.values(grouped);
 }
 
+// Function to format date strings to local time
 function formatToLocal(dateStr) {
     if (!dateStr) return '';
     let d = dateStr.endsWith('Z') ? new Date(dateStr) : new Date(dateStr + 'Z');
@@ -25,6 +31,8 @@ function formatToLocal(dateStr) {
         String(d.getMinutes()).padStart(2, '0');
 }
 
+// Function to fetch all users and render the users table
+// This function will be called when the user management tab is opened
 export async function fetchAndRenderUsers(searchTerm = '') {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -41,6 +49,8 @@ export async function fetchAndRenderUsers(searchTerm = '') {
     }
 }
 
+// Function to render the users table
+// This function will create the HTML structure for the users table
 export function renderUsersTable(searchTerm = '', customList = null) {
     const $tbody = $('#users-table tbody');
     if (!$tbody.length) return;
@@ -80,7 +90,7 @@ export function renderUsersTable(searchTerm = '', customList = null) {
         `);
         $tbody.append($tr);
 
-        // Collapsible reservations row (hidden by default)
+        // Collapsible user reservations row (hidden by default)
         const $resRow = $(`
             <tr class="user-reservations-row" data-user-id="${user.user_id}" style="display:none; background:#222;">
                 <td colspan="4">
@@ -164,6 +174,7 @@ export function renderUsersTable(searchTerm = '', customList = null) {
     });
 }
 
+// Function to change user role
 async function changeUserRole(userId, newRole) {
     const token = localStorage.getItem('token');
     try {
@@ -185,6 +196,7 @@ async function changeUserRole(userId, newRole) {
     }
 }
 
+// Function to delete a user
 async function deleteUser(userId) {
     const token = localStorage.getItem('token');
     try {
@@ -202,6 +214,9 @@ async function deleteUser(userId) {
     }
 }
 
+// Function to initialize user management features
+// This function will be called when the manager page is loaded
+// It sets up event handlers and fetches initial data
 export function initUserManagement() {
     // Attach event handlers for user tab
     $('#user-search-btn').on('click', () => renderUsersTable($('#user-search-input').val()));

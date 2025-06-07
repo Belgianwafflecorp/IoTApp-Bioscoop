@@ -2,6 +2,7 @@ const API_BASE = window.API_BASE || 'http://localhost:3000';
 
 import { renderScreeningChart, setScreeningsData, setHallsData } from '../chartManager.js';
 
+// --- Global Variables ---
 let allScreenings = [];
 let allHalls = [];
 let allMovies = [];
@@ -68,6 +69,7 @@ export async function fetchMoviesForScreenings() {
     }
 }
 
+// Fliter and sort movies for screenings
 function filterAndSortScreeningsMovies() {
     let filtered = allMovies;
     const search = $('#screenings-movie-db-search-input').val().toLowerCase();
@@ -104,6 +106,7 @@ function filterAndSortScreeningsMovies() {
     renderMoviesForScreenings(filtered);
 }
 
+// Render movies for screenings table
 function renderMoviesForScreenings(movies = allMovies) {
     const $tbody = $('#screenings-movies-table tbody');
     if (!$tbody.length) return;
@@ -128,6 +131,8 @@ function renderMoviesForScreenings(movies = allMovies) {
     });
 }
 
+// Show modal to add a new screening
+// This function prompts the user for hall ID and start time, then sends a POST request to create the screening
 async function showAddScreeningModal(movieId) {
     if (!allHalls.length) {
         const token = localStorage.getItem('token');
@@ -343,6 +348,7 @@ export function renderScreeningsTable(screenings = allScreenings) {
     });
 }
 
+// Render the screenings table with the provided screenings data
 function filterAndSortScreenings() {
     let filtered = allScreenings;
     const search = ($('#screenings-table-search-input').val() || '').toLowerCase();
