@@ -1,4 +1,4 @@
-// manager.jsAdd commentMore actions
+
 import * as userTab from './manager.users.js';
 import * as movieTab from './manager.movies.js';
 import * as screeningsTab from './manager.screenings.js';
@@ -12,7 +12,7 @@ movieTab.initMovieManagement();
 screeningsTab.initScreeningsManagement();
 
 
-// Update Navbar for Role (e.g., show/hide Manager tab)
+// Update Navbar for Role (e.g., show/hide Manager btn)
 export async function updateNavbarForRole() {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -53,6 +53,9 @@ function showSection($sectionToShow) {
 
 
 // --- Tab Switching Event Handlers ---
+// This function sets up the click handlers for the manager tabs
+// It ensures that the correct section is displayed when a tab is clicked
+// It also fetches and renders data for the respective sections
 $(document).ready(() => {
     $('#user-management-tab').on('click', () => {
         showSection($('#user-management-section'));
@@ -69,7 +72,7 @@ $(document).ready(() => {
 
         // Pass data to chartManager and render chart
         setScreeningsData(screeningsTab.allScreenings);
-        setHallsData(screeningsTab.allHalls); // Ensure allHalls is populated when this tab is active
+        setHallsData(screeningsTab.allHalls); // Ensure allHalls[] is populated when this tab is active
         await renderScreeningChart();
     });
 });
