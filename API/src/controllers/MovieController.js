@@ -26,6 +26,7 @@ const getMovieById = async (req, res) => {
     }
 };
 
+// POST /movies - nieuwe film toevoegen
 const addMovie = async (req, res) => {
     try {
         const { title, description, duration_minutes, genre } = req.body;
@@ -42,6 +43,7 @@ const addMovie = async (req, res) => {
     }
 }
 
+// PATCH /movies/:id - film bijwerken
 const editMovie = async (req, res) => {
     try {
         const { id } = req.params;
@@ -85,6 +87,7 @@ const editMovie = async (req, res) => {
     }
 }
 
+// DELETE /movies/:id - film verwijderen
 const deleteMovie = async (req, res) => {
     try {
         const { id } = req.params;

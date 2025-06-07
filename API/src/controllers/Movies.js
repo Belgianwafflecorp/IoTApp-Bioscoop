@@ -146,6 +146,7 @@ export const getTMDBGenres = async (req, res) => {
   }
 };
 
+// GET /search/:title - Search movie by title from TMDB
 export const getMovieByTitle = async (req, res) => {
   const titleQuery = req.params.title.toLowerCase();
   try {

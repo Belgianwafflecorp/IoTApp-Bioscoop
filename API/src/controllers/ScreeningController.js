@@ -6,9 +6,9 @@ async function checkOverlap(db, hall_id, startTime, movieDuration, screeningIdTo
 
     const [existingScreenings] = await db.query(
         `SELECT s.screening_id, s.start_time, m.duration_minutes
-         FROM screenings s
-         JOIN movies m ON s.movie_id = m.movie_id
-         WHERE s.hall_id = ?`,
+        FROM screenings s
+        JOIN movies m ON s.movie_id = m.movie_id
+        WHERE s.hall_id = ?`,
         [hall_id]
     );
 
@@ -27,6 +27,7 @@ async function checkOverlap(db, hall_id, startTime, movieDuration, screeningIdTo
     return false; // No overlap
 }
 
+// GET /screenings - Get all screenings with movie and hall details
 const getAllScreenings = async (req, res) => {
     try {
         const [screenings] = await db.execute(`
@@ -48,6 +49,7 @@ const getAllScreenings = async (req, res) => {
     }
 };
 
+// GET /screenings/:id - Get screening by ID with movie details
 const getScreeningById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -86,6 +88,7 @@ const getScreeningById = async (req, res) => {
     }
 };
 
+// POST /screenings - Create a new screening
 const createScreenings = async (req, res) => {
     try {
         const { movie_id, hall_id, start_time } = req.body; // start_time will be 'YYYY-MM-DDTHH:MM:SS.sssZ' (UTC ISO string)
@@ -117,6 +120,7 @@ const createScreenings = async (req, res) => {
     }
 };
 
+// PATCH /screenings/:id - Update an existing screening
 const updateScreenings = async (req, res) => {
     const { id } = req.params;
     const { hall_id, start_time, movie_id } = req.body; // start_time will be 'YYYY-MM-DDTHH:MM:SS.sssZ' (UTC ISO string)
@@ -156,6 +160,7 @@ const updateScreenings = async (req, res) => {
     }
 };
 
+// DELETE /screenings/:id - Delete a screening
 const deleteScreenings = async (req, res) => {
     try {
         const { id } = req.params;
