@@ -1,4 +1,4 @@
-import { updateNavbarForRole } from './manager.js';
+import { updateNavbarForRole } from './manager/manager.js';
 
 let allMovies = []; // Store all fetched movies
 let genreMap = {}; // Store genre ID to name mapping
