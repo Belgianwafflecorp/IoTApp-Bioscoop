@@ -1,6 +1,6 @@
 //script.js
 
-import { updateNavbarForRole } from './manager.js';
+import { updateNavbarForRole } from './manager/manager.js';
 
 // Constants and global variables
 const BASE_API_URL = `http://localhost:3000/api`;
