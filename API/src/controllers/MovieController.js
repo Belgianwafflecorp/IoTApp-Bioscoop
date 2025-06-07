@@ -39,6 +39,7 @@ const getMovieById = async (req, res) => {
     }
 };
 
+// POST /movies - voeg een nieuwe film toe
 const addMovie = async (req, res) => {
     try {
         const { title, description, duration_minutes, genre } = req.body;
@@ -55,6 +56,7 @@ const addMovie = async (req, res) => {
     }
 }
 
+// PATCH /movies/:id - update een film
 const editMovie = async (req, res) => {
     try {
         const { id } = req.params;
@@ -98,6 +100,7 @@ const editMovie = async (req, res) => {
     }
 }
 
+// DELETE /movies/:id - verwijder een film
 const deleteMovie = async (req, res) => {
     try {
         const { id } = req.params;
@@ -268,6 +271,7 @@ const getTMDBGenres = async (req, res) => {
     }
 };
 
+// GET /movies/tmdb/title/:title - Search for a movie by title using TMDB
 const getMovieByTitleTMDB = async (req, res) => {
     const titleQuery = req.params.title.toLowerCase();
     try {
