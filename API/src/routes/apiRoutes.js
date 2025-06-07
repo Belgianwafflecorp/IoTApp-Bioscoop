@@ -6,7 +6,6 @@ import * as MovieController from '../controllers/MovieController.js';
 import * as ScreeningController from '../controllers/ScreeningController.js';
 import { authenticateToken } from '../middleware/validation.js';
 import * as ManagerController from '../controllers/ManagerController.js';
-import * as MovieTMDB from '../controllers/Movies.js';
 import * as ReservationController from '../controllers/ReservationController.js';
 import * as HallController from '../controllers/HallController.js';
 
@@ -287,10 +286,61 @@ router.post('/changeUserRole', ManagerController.changeUserRole);
  *               type: array
  *               items:
  *                 type: object
+ *                 properties:
+ *                   adult:
+ *                     type: boolean
+ *                   backdrop_path:
+ *                     type: string
+ *                   genre_ids:
+ *                     type: array
+ *                     items:
+ *                       type: integer
+ *                   id:
+ *                     type: integer
+ *                   original_language:
+ *                     type: string
+ *                   original_title:
+ *                     type: string
+ *                   overview:
+ *                     type: string
+ *                   popularity:
+ *                     type: number
+ *                   poster_path:
+ *                     type: string
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   title:
+ *                     type: string
+ *                   video:
+ *                     type: boolean
+ *                   vote_average:
+ *                     type: number
+ *                   vote_count:
+ *                     type: integer
+ *                   poster_url:
+ *                     type: string
+ *             example:
+ *               - adult: false
+ *                 backdrop_path: "/7Zx3wDG5bBtcfk8lcnCWDOLM4Y4.jpg"
+ *                 genre_ids: [10751, 35, 878]
+ *                 id: 552524
+ *                 original_language: "en"
+ *                 original_title: "Lilo & Stitch"
+ *                 overview: "The wildly funny and touching story of a lonely Hawaiian girl and the fugitive alien who helps to mend her broken family."
+ *                 popularity: 554.7778
+ *                 poster_path: "/tUae3mefrDVTgm5mRzqWnZK6fOP.jpg"
+ *                 release_date: "2025-05-17"
+ *                 title: "Lilo & Stitch"
+ *                 video: false
+ *                 vote_average: 7.1
+ *                 vote_count: 500
+ *                 poster_url: "https://image.tmdb.org/t/p/w500/tUae3mefrDVTgm5mRzqWnZK6fOP.jpg"
  *       500:
  *         description: Failed to fetch movies from TMDB
  */
-router.get('/movies/tmdb', MovieTMDB.getMovies);
+
+router.get('/movies/tmdb', MovieController.getMoviesTMDB); // Changed from getMovies to getMoviesTMDB
 
 /**
  * @swagger
@@ -315,12 +365,51 @@ router.get('/movies/tmdb', MovieTMDB.getMovies);
  *               type: array
  *               items:
  *                 type: object
+ *                 properties:
+ *                   adult:
+ *                     type: boolean
+ *                   backdrop_path:
+ *                     type: string
+ *                     nullable: true
+ *                   genre_ids:
+ *                     type: array
+ *                     items:
+ *                       type: integer
+ *                   id:
+ *                     type: integer
+ *                   original_language:
+ *                     type: string
+ *                   original_title:
+ *                     type: string
+ *                   overview:
+ *                     type: string
+ *                   popularity:
+ *                     type: number
+ *                     format: float
+ *                   poster_path:
+ *                     type: string
+ *                     nullable: true
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   title:
+ *                     type: string
+ *                   video:
+ *                     type: boolean
+ *                   vote_average:
+ *                     type: number
+ *                     format: float
+ *                   vote_count:
+ *                     type: integer
+ *                   poster_url:
+ *                     type: string
  *       400:
  *         description: Missing or invalid query parameter
  *       500:
  *         description: Failed to search movies from TMDB
  */
-router.get('/movies/tmdb/search', MovieTMDB.searchMovies);
+
+router.get('/movies/tmdb/search', MovieController.searchMoviesTMDB); // Changed from searchMovies to searchMoviesTMDB
 
 /**
  * @swagger
@@ -341,7 +430,7 @@ router.get('/movies/tmdb/search', MovieTMDB.searchMovies);
  *       500:
  *         description: Failed to fetch genres from TMDB
  */
-router.get('/movies/tmdb/genres', MovieTMDB.getTMDBGenres);
+router.get('/movies/tmdb/genres', MovieController.getTMDBGenres);
 
 /**
  * @swagger
@@ -371,7 +460,7 @@ router.get('/movies/tmdb/genres', MovieTMDB.getTMDBGenres);
  *       500:
  *         description: Failed to fetch videos from TMDB
  */
-router.get('/movies/:id/videos', MovieTMDB.getMovieVideos);
+router.get('/movies/tmdb/:id/videos', MovieController.getMovieVideosTMDB); // Changed from getMovieVideos to getMovieVideosTMDB
 
 /**
  * @swagger
@@ -399,7 +488,7 @@ router.get('/movies/:id/videos', MovieTMDB.getMovieVideos);
  *       500:
  *         description: Failed to fetch movie details from TMDB
  */
-router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
+router.get('/movies/tmdb/:id', MovieController.getMovieDetailsTMDB); // Changed from getMovieDetails to getMovieDetailsTMDB
 
 /**
  * @swagger
@@ -427,8 +516,7 @@ router.get('/movies/tmdb/:id', MovieTMDB.getMovieDetails);
  *       500:
  *         description: Failed to fetch movie details from TMDB
  */
-router.get('/movies/details/:title', MovieTMDB.getMovieByTitle);
-
+router.get('/movies/details/:title', MovieController.getMovieByTitleTMDB); // Changed from getMovieByTitle to getMovieByTitleTMDB
 
 /////////////////////////////////////////////////////////////////
 ///////////////////////////// movies ////////////////////////////
