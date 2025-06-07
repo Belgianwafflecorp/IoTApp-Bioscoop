@@ -1,93 +1,138 @@
 import { showLoginStatus } from './scripts.js';
 
+// Initialize the page when DOM is ready
 $(document).ready(async () => {
+  // Display current user login status in the header
   await showLoginStatus();
 
+  // Enable navigation back to home page when clicking the cinema logo
   $('.circle').css('cursor', 'pointer').on('click', () => {
     window.location.href = '../index.html';
   });
 
+  // Load and display all movie screenings from the database
   await fetchAndRenderScreenings();
 });
 
+/**
+ * Retrieves screening data from the API and renders it on the page.
+ * Handles network errors and displays user-friendly error messages.
+ */
 async function fetchAndRenderScreenings() {
   try {
+    // Fetch all screenings from the backend API
     const res = await fetch('http://localhost:3000/api/screenings');
     const screenings = await res.json();
 
+    // Validate API response structure
     if (!Array.isArray(screenings)) {
       throw new Error(screenings.error || 'Invalid screenings data');
     }
 
-    // Sort screenings by start_time ascending to ensure chronological order
+    // Ensure screenings are displayed in chronological order
     screenings.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-    const grouped = groupByMovie(screenings); // Changed to groupByMovie
+    // Organize screenings by movie title, then by date for better UI presentation
+    const grouped = groupByMovie(screenings);
+    
+    // Render the organized data with enhanced movie information from TMDB
     await renderScreeningsWithTmdb(grouped);
   } catch (error) {
     console.error('Failed to fetch screenings:', error);
+    // Display user-friendly error message when screening data cannot be loaded
     $('#screenings-container').html('<p>Failed to load screenings. Please try again later.</p>');
   }
 }
 
 /**
- * Groups screenings by movie title. Within each movie, screenings are further
- * grouped by date.
- * @param {Array} screenings - The array of screening objects.
- * @returns {Object} An object structured as { movie_title: { date_string: [screening, ...] } }.
+ * Organizes screening data into a hierarchical structure for efficient rendering.
+ * Creates a nested object where movies contain dates, and dates contain screening times.
+ * 
+ * @param {Array} screenings - Array of screening objects from the database
+ * @returns {Object} Nested structure: { movie_title: { date_string: [screening_objects] } }
+ * 
+ * Example return structure:
+ * {
+ *   "Avatar": {
+ *     "2025-06-07": [screening1, screening2],
+ *     "2025-06-08": [screening3]
+ *   }
+ * }
  */
-function groupByMovie(screenings) { // Renamed from groupByMovieAndDate
+function groupByMovie(screenings) {
   const grouped = {};
+  
   for (const screening of screenings) {
     const movieTitle = screening.movie_title;
-    const dateString = getDateString(screening.start_time); // YYYY-MM-DD
+    const dateString = getDateString(screening.start_time); // Extract YYYY-MM-DD format
 
+    // Initialize movie entry if it doesn't exist
     if (!grouped[movieTitle]) {
-      grouped[movieTitle] = {}; // Initialize with an object for dates
+      grouped[movieTitle] = {};
     }
+    
+    // Initialize date array for this movie if it doesn't exist
     if (!grouped[movieTitle][dateString]) {
       grouped[movieTitle][dateString] = [];
     }
+    
+    // Add screening to the appropriate movie and date grouping
     grouped[movieTitle][dateString].push(screening);
   }
+  
   return grouped;
 }
 
+/**
+ * Renders movie screening cards with enhanced information from The Movie Database (TMDB).
+ * Each card displays movie poster, description, and organized showtimes by date.
+ * 
+ * @param {Object} grouped - Nested object of movies organized by date and screenings
+ */
 async function renderScreeningsWithTmdb(grouped) {
   const $container = $('#screenings-container').empty();
 
+  // Process each movie and its associated screening dates
   for (const [movieTitle, dates] of Object.entries(grouped)) {
+    // Set default values for movie information
     let poster = '/resources/images/movie-placeholder.jpg';
     let overview = 'No description available.';
-    let displayMovieTitle = movieTitle; // Use a separate variable for TMDB title if available
+    let displayMovieTitle = movieTitle;
 
     try {
+      // Attempt to fetch enhanced movie details from TMDB API
       const tmdbRes = await fetch(`http://localhost:3000/api/movies/details/${encodeURIComponent(movieTitle)}`);
       const tmdbData = await tmdbRes.json();
       console.log(`TMDB data for "${movieTitle}":`, tmdbData);
 
+      // Update movie information with TMDB data if available
       if (tmdbData?.poster_url) {
         poster = tmdbData.poster_url;
       }
       if (tmdbData?.overview?.trim()) {
         overview = tmdbData.overview;
       }
+      // Use TMDB title if it's more descriptive than database title
       if (tmdbData?.title && tmdbData.title.trim().toLowerCase() !== 'undefined') {
         displayMovieTitle = tmdbData.title;
       }
     } catch (err) {
+      // Log TMDB fetch failures but continue with default values
       console.warn(`TMDB fetch failed for "${movieTitle}":`, err);
     }
 
-    // Build the HTML for all dates and their showings for this single movie
+    // Build HTML for all screening dates and times for this movie
     let allDatesShowingsHTML = '';
-    // Sort dates to ensure chronological order within the card
+    
+    // Sort dates chronologically to maintain consistent user experience
     const sortedDates = Object.keys(dates).sort((a, b) => new Date(a) - new Date(b));
 
+    // Generate HTML for each date's screenings
     for (const dateString of sortedDates) {
       const showsOnDate = dates[dateString];
-      const formattedDate = formatDate(dateString); // e.g., "Today", "Tomorrow", "Thursday, June 6, 2025"
+      const formattedDate = formatDate(dateString); // Convert to user-friendly format
 
+      // Create individual screening time badges for each show
       const dailyShowingsHTML = showsOnDate.map(show => `
         <div class="show-item">
           <strong>${show.hall_name}</strong>:
@@ -97,6 +142,7 @@ async function renderScreeningsWithTmdb(grouped) {
         </div>
       `).join('');
 
+      // Group all showings for this date under a date header
       allDatesShowingsHTML += `
         <div class="date-group">
           <h5 class="screening-date">${formattedDate}</h5>
@@ -107,6 +153,7 @@ async function renderScreeningsWithTmdb(grouped) {
       `;
     }
 
+    // Construct the complete movie card with poster, details, and showtimes
     const card = `
       <div class="screening-card">
         <img src="${poster}" alt="${displayMovieTitle}" />
@@ -123,22 +170,27 @@ async function renderScreeningsWithTmdb(grouped) {
         </div>
       </div>
     `;
+    
+    // Add the completed card to the main container
     $container.append(card);
   }
 
-  // Delegate badge click handling after badges are added
+  // Set up click handlers for screening time badges after all cards are rendered
   $container.on('click', '.badge', function () {
     const screeningId = $(this).data('id');
+    // Navigate to booking page with selected screening ID
     window.location.href = `booking.html?screeningId=${screeningId}`;
   });
 
+  // Add visual cursor indication for clickable screening time badges
   $('.badge').css('cursor', 'pointer');
 }
 
 /**
- * Formats a date-time string to display only the time (e.g., "14:00").
- * @param {string} dateTime - The date-time string.
- * @returns {string} The formatted time string.
+ * Converts a full datetime string to display format showing only hours and minutes.
+ * 
+ * @param {string} dateTime - ISO datetime string from database
+ * @returns {string} Time in HH:MM format (e.g., "14:30", "09:15")
  */
 function formatTime(dateTime) {
   const date = new Date(dateTime);
@@ -146,10 +198,11 @@ function formatTime(dateTime) {
 }
 
 /**
- * Formats a date string (YYYY-MM-DD) or a date-time string into a human-readable date.
- * If the date is today or tomorrow, it will display "Today" or "Tomorrow".
- * @param {string} dateString - The date string (YYYY-MM-DD) or full dateTime string.
- * @returns {string} The formatted date string (e.g., "Today", "Tomorrow", "Saturday, June 8, 2025").
+ * Converts date strings into user-friendly display format with relative dates.
+ * Provides contextual labels like "Today" and "Tomorrow" for better UX.
+ * 
+ * @param {string} dateString - Date in YYYY-MM-DD format or full datetime string
+ * @returns {string} Human-readable date (e.g., "Today", "Tomorrow", "Saturday, June 8, 2025")
  */
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -157,17 +210,18 @@ function formatDate(dateString) {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // Normalize dates to just the day part for comparison
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const tm = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+  // Normalize all dates to midnight for accurate day-only comparison
+  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const tomorrowNormalized = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
 
-  if (d.getTime() === t.getTime()) {
+  // Return contextual labels for immediate dates
+  if (targetDate.getTime() === todayNormalized.getTime()) {
     return 'Today';
-  } else if (d.getTime() === tm.getTime()) {
+  } else if (targetDate.getTime() === tomorrowNormalized.getTime()) {
     return 'Tomorrow';
   } else {
-    // For other days, format as "Day, Month Day, Year"
+    // Format future dates as full readable strings
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -177,7 +231,14 @@ function formatDate(dateString) {
   }
 }
 
+/**
+ * Extracts the date portion from a datetime string in YYYY-MM-DD format.
+ * Used for grouping screenings by calendar date regardless of time.
+ * 
+ * @param {string} dateTime - Full datetime string from database
+ * @returns {string} Date string in YYYY-MM-DD format
+ */
 function getDateString(dateTime) {
   const date = new Date(dateTime);
-  return date.toISOString().split('T')[0]; // Gets YYYY-MM-DD
+  return date.toISOString().split('T')[0]; // Extract date part before 'T' separator
 }
