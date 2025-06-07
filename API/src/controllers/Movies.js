@@ -1,3 +1,5 @@
+// Movies.js - Controller for movie-related API endpoints
+
 import fetch from 'node-fetch'; // Add this at the top if not present
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -187,6 +189,13 @@ export const getMovieVideos = async (req, res) => {
     const response = await fetch(
       `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${TMDB_API_KEY}`
     );
+    
+    if (!response.ok) {
+      const error = new Error(`TMDB API error: ${response.statusText}`);
+      error.status = response.status;
+      throw error;
+    }
+
     const data = await response.json();
 
     // Filter for official YouTube trailers
@@ -197,6 +206,35 @@ export const getMovieVideos = async (req, res) => {
     res.json(trailers);
 
   } catch (err) {
+    console.error('Video fetch error:', err);
     res.status(500).json({ error: err.message || 'Failed to fetch trailers' });
+  }
+};
+
+// GET /:id/credits - Fetch cast and crew for a movie
+export const getMovieCredits = async (req, res) => {
+  const { id } = req.params;
+
+  if (!TMDB_API_KEY) {
+    return res.status(500).json({ error: 'TMDB API key not configured on server' });
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${TMDB_API_KEY}`
+    );
+    
+    if (!response.ok) {
+      const error = new Error(`TMDB API error: ${response.statusText}`);
+      error.status = response.status;
+      throw error;
+    }
+
+    const data = await response.json();
+    res.json(data);
+
+  } catch (err) {
+    console.error('Credits fetch error:', err);
+    res.status(500).json({ error: err.message || 'Failed to fetch credits' });
   }
 };
