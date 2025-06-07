@@ -22,6 +22,10 @@ Een complete bioscoopbeheer applicatie met moderne technologieën voor ticketres
 ### Demo van user experience
 https://github.com/user/repo/assets/123456/video-file.mp4
 
+## Demo video
+
+In dezelfde root folder als deze Readme is een mp4 bestand toegevoegd die een demo geeft van de flow die een gewone gebruiker zou kunnen doorlopen op deze website.
+
 ##  Features
 
 - **Real-time zitplaatsreservering** met WebSocket ondersteuning
@@ -196,6 +200,10 @@ Bij het starten van de containers worden automatisch uitgevoerd:
 - `ReservationController` - Reserveringssysteem
 - `ScreeningController` - Voorstellingsbeheer
 - `UserController` - Gebruikersbeheer
+
+#### ERD Diagramma van de database:
+![image](https://github.com/user-attachments/assets/f21a0d32-6e67-41e2-9100-6a72127a13e6)
+
 
 ### Middleware Stack
 - **Authenticatie:** JWT token validatie
