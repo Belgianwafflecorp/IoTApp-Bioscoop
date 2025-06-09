@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: __ENVIRONMENT__-__PROJECT_NAME__
+  namespace: aitenzu-cloud
+  labels:
+    app: __PROJECT_NAME__
+    environment: __ENVIRONMENT__
+    version: __VERSION__
+    git_project: __CI_PROJECT_NAME__
+    git_commit: __CI_BUILD_REF__
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: __PROJECT_NAME__
+      environment: __ENVIRONMENT__
+  template:
+    metadata:
+      labels:
+        app: __PROJECT_NAME__
+        environment: __ENVIRONMENT__
+        version: __VERSION__
+        git_project: __CI_PROJECT_NAME__
+        git_commit: __CI_BUILD_REF__
+    spec:
+      containers:
+        - name: __PROJECT_NAME__
+          image: __CI_REGISTRY__/__CI_PROJECT_NAMESPACE__/__CI_PROJECT_NAME__/__CI_PROJECT_NAME___frontend:__VERSION__
+          resources:
+            limits:
+              cpu: 150m
+              memory: 75Mi
+            requests:
+              cpu: 50m
+              memory: 25Mi
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      imagePullSecrets:
+        - name: aitenzu-cloud-docker-registry-auth
+      volumes:
+        - name: config-volume
+          configMap:
+            name: __ENVIRONMENT__-__PROJECT_NAME__

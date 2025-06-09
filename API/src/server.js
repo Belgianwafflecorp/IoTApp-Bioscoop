@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 // Setup WebSocket
-setupWebSocket(server); // 👈 Initialize WS here
+setupWebSocket(server);  
 
 app.use(express.json());
 app.use(cors({

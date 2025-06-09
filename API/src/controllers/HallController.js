@@ -1,4 +1,4 @@
-import db from '../db.js'; // adjust import if needed
+import db from '../db.js'; 
 
 // Get all halls
 export const getAllHalls = async (req, res) => {

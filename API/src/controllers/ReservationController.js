@@ -202,7 +202,7 @@ const getReservationsForUser = async (req, res) => {
 
     res.json(reservations);
   } catch (error) {
-    console.error('getReservationsForUser error:', error); // <--- Add this for debugging
+    console.error('getReservationsForUser error:', error); // for debugging
     res.status(500).json({ error: error.message });
   }
 };

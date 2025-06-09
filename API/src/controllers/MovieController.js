@@ -4,7 +4,7 @@ import db from '../db.js';
 import fetch from 'node-fetch'; // Required for TMDB API calls
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500'; // You can change size if needed
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500'; 
 
 
 
@@ -39,6 +39,7 @@ const getMovieById = async (req, res) => {
     }
 };
 
+// POST /movies - voeg een nieuwe film toe
 const addMovie = async (req, res) => {
     try {
         const { title, description, duration_minutes, genre } = req.body;
@@ -55,6 +56,7 @@ const addMovie = async (req, res) => {
     }
 }
 
+// PATCH /movies/:id - update een film
 const editMovie = async (req, res) => {
     try {
         const { id } = req.params;
@@ -98,6 +100,7 @@ const editMovie = async (req, res) => {
     }
 }
 
+// DELETE /movies/:id - verwijder een film
 const deleteMovie = async (req, res) => {
     try {
         const { id } = req.params;

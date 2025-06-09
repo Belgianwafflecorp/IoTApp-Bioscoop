@@ -1,0 +1,60 @@
+stages:
+  # - build
+  - package
+  - deploy
+
+# build:
+#   stage: build
+#   image: node:22
+#   script:
+#     - npm ci --no-progress
+#     - npm run build
+#   artifacts:
+#     paths:
+#       - dist
+#   only:
+#     - master
+
+package-frontend:
+  stage: package
+  image: quay.io/buildah/stable:v1.37.0
+  before_script:
+    - buildah login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    # Create docker image
+    - cd Front
+    - mkdir -p ./dist/browser
+    - buildah build -f ./Dockerfile -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CI_PROJECT_NAME:${CI_COMMIT_SHA} ./dist/browser
+    - buildah push --all $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CI_PROJECT_NAME:${CI_COMMIT_SHA}
+
+  only:
+    - Deploytest
+
+production:
+  stage: deploy
+  script:
+    - echo "Deploy to TICH-CLOUD development environment"
+    - PROJECT_NAME=$CI_PROJECT_NAME
+    - PROJECT_NAMESPACE=${CI_PROJECT_NAMESPACE//\//\\/}
+    - ENVIRONMENT_DOMAIN=poob.video
+    - echo "Deploying to ${ENVIRONMENT_DOMAIN}"
+
+    - cd manifests
+    - sed -i "s/__CI_REGISTRY__/${CI_REGISTRY}/g" *.yaml
+    - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/g" *.yaml
+    - sed -i "s/__PROJECT_NAME__/${PROJECT_NAME}/g" *.yaml
+    - sed -i "s/__CI_PROJECT_NAMESPACE__/${PROJECT_NAMESPACE}/g" *.yaml
+    - sed -i "s/__CI_BUILD_REF__/${CI_BUILD_REF}/g" *.yaml
+    - sed -i "s/__ENVIRONMENT__/${CI_ENVIRONMENT_NAME}/g" *.yaml
+    - sed -i "s/__ENVIRONMENT_DOMAIN__/${ENVIRONMENT_DOMAIN}/g" *.yaml
+    - sed -i "s/__VERSION__/${CI_COMMIT_SHA}/g" *.yaml
+
+    - kubectl apply -f config-map-frontend.yaml
+    - kubectl apply -f service-frontend.yaml
+    - kubectl apply -f deployment-frontend.yaml
+    - kubectl apply -f ingress.yaml
+  environment:
+    name: production
+  only:
+    - Deploytest
+  when: manual
