@@ -27,6 +27,51 @@ spec:
       containers:
         - name: __PROJECT_NAME__
           image: __CI_REGISTRY__/__CI_PROJECT_NAMESPACE__/__CI_PROJECT_NAME__/__CI_PROJECT_NAME___frontend:__VERSION__
+        - name: API_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: API_HOST
+              name: env
+        - name: DB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+             key: DB_DATABASE
+             name: env
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+            key: DB_PASSWORD
+            name: env
+        - name: DB_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+            key: DB_ROOT_PASSWORD
+            name: env
+        - name: DB_USER
+          valueFrom:
+           configMapKeyRef:
+              key: DB_USER
+              name: env
+        - name: FRONT_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: FRONT_HOST
+              name: env
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_SECRET_KEY
+              name: env
+        - name: TMDB_API_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: TMDB_API_KEY
+              name: env
+        - name: TMDB_FULL_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: TMDB_FULL_KEY
+              name: env
           resources:
             limits:
               cpu: 150m
