@@ -1,4 +1,5 @@
 import { showLoginStatus } from './scripts.js';
+import { API_URL } from '../apiConfig.js';
 
 $(document).ready(async () => {
   await showLoginStatus();
@@ -12,7 +13,7 @@ $(document).ready(async () => {
 
 async function fetchAndRenderScreenings() {
   try {
-    const res = await fetch('http://localhost:3000/api/screenings');
+    const res = await fetch(`${API_URL}/screenings`);
     const screenings = await res.json();
 
     if (!Array.isArray(screenings)) {
@@ -62,7 +63,7 @@ async function renderScreeningsWithTmdb(grouped) {
     let displayMovieTitle = movieTitle; // Use a separate variable for TMDB title if available
 
     try {
-      const tmdbRes = await fetch(`http://localhost:3000/api/movies/details/${encodeURIComponent(movieTitle)}`);
+      const tmdbRes = await fetch(`${API_URL}/movies/details/${encodeURIComponent(movieTitle)}`);
       const tmdbData = await tmdbRes.json();
       console.log(`TMDB data for "${movieTitle}":`, tmdbData);
 
