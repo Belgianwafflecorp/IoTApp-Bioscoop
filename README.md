@@ -39,9 +39,8 @@ In dezelfde root folder als deze Readme is een mp4 bestand toegevoegd die een de
 ##  Stack
 
 ### Frontend
-- **React.js** - UI framework
+- **Javascript.js** - UI zonder framework
 - **WebSockets** - Real-time updates
-- **Responsive CSS** - Mobile-first design
 
 ### Backend  
 - **Node.js** - Server runtime
@@ -181,7 +180,6 @@ Volledige API documentatie is beschikbaar via Swagger UI op:
 #### Voorstellingsbeheer
 - **Gantt Diagram:** Visuele voorstellingsplanner
 - **Conflict detectie:** Voorkomt overlappende voorstellingen
-- **Bulk operaties:** Meerdere voorstellingen tegelijk beheren
 - **Dynamische validatie:** Real-time schema controle
 
 ## Backend Overzicht
@@ -221,7 +219,7 @@ Bij het starten van de containers worden automatisch uitgevoerd:
 services:
   api:        # Backend API (Port 3000)
   db:         # MySQL Database (Port 3306)  
-  front:      # React Frontend (Port 5000)
+  front:      # Frontend (Port 5000)
 ```
 
 ### Environment Configuratie
