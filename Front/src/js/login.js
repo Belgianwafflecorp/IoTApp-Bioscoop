@@ -1,3 +1,5 @@
+import { API_URL } from "../apiConfig";
+
 $(document).ready(function () {
   const $form = $('#login-form');
   const $toggleBtn = $('#toggle-btn');
@@ -41,7 +43,7 @@ $(document).ready(function () {
       const usernameOrEmail = $form.find('[name="usernameOrEmail"]').val();
 
       $.ajax({
-        url: 'http://localhost:3000/api/login',
+        url: `${API_URL}/login`,
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ usernameOrEmail, password }),
@@ -61,7 +63,7 @@ $(document).ready(function () {
       const email = $form.find('[name="email"]').val();
 
       $.ajax({
-        url: 'http://localhost:3000/api/register',
+        url: `${API_URL}/register`,
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ username, email, password }),
