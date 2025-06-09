@@ -79,7 +79,7 @@ $(document).ready(async () => {
         }
 
         try {
-            const res = await fetch(`${API_BASE}/reserve`, {
+            const res = await fetch(`${API_URL}/reserve`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

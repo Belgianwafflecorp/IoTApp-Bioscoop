@@ -1,4 +1,4 @@
-const API_BASE = window.API_BASE || 'http://localhost:3000';
+import { API_URL } from '../../apiConfig.js';
 
 let allUsers = [];
 
@@ -29,7 +29,7 @@ export async function fetchAndRenderUsers(searchTerm = '') {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-        const res = await fetch(`${API_BASE}/api/getAllUsers`, {
+        const res = await fetch(`${API_URL}/getAllUsers`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error(`Failed to fetch users: ${res.status} ${res.statusText}`);
@@ -125,7 +125,7 @@ export function renderUsersTable(searchTerm = '', customList = null) {
         $content.text('Loading...');
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/users/${userId}/reservations`, {
+            const res = await fetch(`${API_URL}/users/${userId}/reservations`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const reservations = await res.json();
@@ -167,7 +167,7 @@ export function renderUsersTable(searchTerm = '', customList = null) {
 async function changeUserRole(userId, newRole) {
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${API_BASE}/api/changeUserRole`, {
+        const res = await fetch(`${API_URL}/changeUserRole`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ async function changeUserRole(userId, newRole) {
 async function deleteUser(userId) {
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${API_BASE}/api/deleteUser/${userId}`, {
+        const res = await fetch(`${API_URL}/deleteUser/${userId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });

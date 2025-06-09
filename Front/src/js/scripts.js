@@ -2,7 +2,6 @@
 
 import { API_URL } from '../apiConfig.js';
 import { updateNavbarForRole } from './manager/manager.js';
-import { API_URL } from '../apiConfig.js';
 
 
 let allMovies = []; // Store all fetched movies
