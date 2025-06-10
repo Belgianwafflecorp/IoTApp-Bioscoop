@@ -49,7 +49,7 @@ services:
     depends_on: 
       - api
 
-  mosquitto: # <--- ADD THIS ENTIRE SERVICE BLOCK
+  mosquitto: 
     image: eclipse-mosquitto:2.0.15
     ports:
       - "1883:1883" # Standard MQTT port
@@ -60,6 +60,6 @@ services:
       - mosquitto_log:/mosquitto/log   # Optional: for logs
     command: mosquitto -c /mosquitto/config/mosquitto.conf
 
-volumes: # <--- ADD THIS VOLUMES BLOCK IF NOT ALREADY PRESENT
+volumes: 
   mosquitto_data:
   mosquitto_log:

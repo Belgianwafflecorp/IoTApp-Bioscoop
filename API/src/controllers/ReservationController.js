@@ -40,12 +40,12 @@ const reserveTickets = async (req, res) => {
       isTaken: takenSeatIds.has(seat.seat_id)
     }));
 
-    // --- MQTT Update ---
+  
     // Define the MQTT topic for seat updates for this specific screening
     const topic = `screenings/${screening_id}/seat_updates`;
     // Publish the updated seat data to the MQTT topic
     publishMqttMessage(topic, { type: 'update', data: updatedSeatData });
-    // --- End MQTT Update ---
+    
 
 
     // Get latest reservation_id
