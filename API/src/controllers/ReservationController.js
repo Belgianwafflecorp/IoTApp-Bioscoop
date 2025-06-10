@@ -1,8 +1,11 @@
 import db from '../db.js';
-import setupWebSocket from '../middleware/websocket.js';
+//import setupWebSocket from '../middleware/websocket.js';
+import { publishSeatUpdate } from '../middleware/mqtt.js';
 import { sendReservationEmail } from '../middleware/mail.js';
 import QRCode from 'qrcode';
 
+
+const siteBaseUrl = process.env.SITE_BASE_URL || 'http://localhost:5000';
 
 // POST /reserve - reserve seats
 const reserveTickets = async (req, res) => {
@@ -21,7 +24,7 @@ const reserveTickets = async (req, res) => {
       [values]
     );
 
-    // WebSocket update
+    // After updating seats in DB, fetch seat data
     const [allSeats] = await db.execute(`
       SELECT s.seat_id, s.seat_row, s.seat_number, s.seat_type
       FROM screenings sc
@@ -40,7 +43,8 @@ const reserveTickets = async (req, res) => {
       isTaken: takenSeatIds.has(seat.seat_id)
     }));
 
-    setupWebSocket.broadcastUpdate(screening_id, updatedSeatData);
+    // MQTT update (replace WebSocket)
+    publishSeatUpdate(screening_id, updatedSeatData);
 
     // Get latest reservation_id
     const [newReservations] = await db.execute(`
@@ -91,14 +95,19 @@ const reserveTickets = async (req, res) => {
       seats: formattedSeats
     };
 
-    const qrPayload = JSON.stringify(reservationDetails);
-    const qrCodeDataUrl = await QRCode.toDataURL(qrPayload);
+    // For movie page:
+    const movieUrl = `${siteBaseUrl}/pages/movie.html?title=${encodeURIComponent(screeningInfo.movie)}`;
+    const bookingUrl = `${siteBaseUrl}/pages/booking.html?screeningId=${screening_id}`;
+
+    // Use one of these URLs for the QR code:
+    const qrCodeDataUrl = await QRCode.toDataURL(movieUrl); // or reservationUrl
 
     // Send email (if user has email)
     if (userEmail) {
       await sendReservationEmail(userEmail, {
         ...reservationDetails,
-        qrCodeDataUrl
+        qrCodeDataUrl,
+        bookingUrl
       });
     } else {
       console.warn('User email not found, skipping email send.');

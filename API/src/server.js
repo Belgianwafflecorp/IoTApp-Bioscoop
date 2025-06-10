@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import http from 'http';
 import apiRoutes from './routes/apiRoutes.js';
 import swaggerDocs from './swagger/swagger.js';
-import setupWebSocket from './middleware/websocket.js';
+//import setupWebSocket from './middleware/websocket.js';
 
 dotenv.config();
 
@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 // Setup WebSocket
-setupWebSocket(server); // 👈 Initialize WS here
+//setupWebSocket(server); // 👈 Initialize WS here
 
 app.use(express.json());
 app.use(cors({

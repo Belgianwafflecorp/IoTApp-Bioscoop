@@ -1,5 +1,9 @@
 import { showLoginStatus } from './scripts.js';
 
+
+const MQTT_BROKER_URL = 'ws://localhost:9001'; // Use WebSocket port for browser MQTT
+const client = mqtt.connect(MQTT_BROKER_URL);
+
 let socket;
 let screeningId;
 let selectedSeatIds = [];
@@ -19,6 +23,7 @@ $(document).ready(async () => {
     if (!screeningId) return alert('No screening selected');
 
     setupWebSocket(screeningId);
+    subscribeToSeatUpdates(screeningId); // Subscribe to seat updates via MQTT
 
     try {
         const [screeningRes, seatsRes] = await Promise.all([
@@ -133,6 +138,22 @@ function setupWebSocket(screeningId) {
     socket.addEventListener('error', (err) => console.error('WebSocket error:', err));
 }
 
+function subscribeToSeatUpdates(screeningId) {
+    const topic = `screening/${screeningId}/seats`;
+    client.subscribe(topic);
+
+    client.on('message', (topic, message) => {
+        if (topic === `screening/${screeningId}/seats`) {
+            const data = JSON.parse(message.toString());
+            // Update your seat display logic here
+            updateSeatsDisplay(data);
+        }
+    });
+}
+
+// Call this when you know the screeningId
+subscribeToSeatUpdates(screeningId);
+
 function formatTime(dateTime) {
     const date = new Date(dateTime);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -170,7 +191,13 @@ function formatDate(dateString) {
     }
 }
 
-function updateSeatsDisplay() {
+function updateSeatsDisplay(data) {
+    if (data) {
+        // Update available and taken seats from the received data
+        window.availableSeats = data.filter(s => !s.isTaken);
+        window.takenSeats = data.filter(s => s.isTaken);
+    }
+
     $('#seats-reduced').text(window.availableSeats.filter(s => s.seat_type === 'reduced').length);
     $('#seats-normal').text(window.availableSeats.filter(s => s.seat_type === 'normal').length);
     $('#seats-premium').text(window.availableSeats.filter(s => s.seat_type === 'premium').length);

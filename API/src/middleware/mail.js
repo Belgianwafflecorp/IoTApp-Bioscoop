@@ -2,19 +2,18 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 587,
+  service: 'gmail',
   auth: {
-    user: process.env.MAILTRAP_USER,
-    pass: process.env.MAILTRAP_PASS,
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
   }
 });
 
 export async function sendReservationEmail(toEmail, reservationDetails) {
-  const { movie, datetime, hall, seats, qrCodeDataUrl } = reservationDetails;
+  const { movie, datetime, hall, seats, qrCodeDataUrl, bookingUrl } = reservationDetails;
 
   const mailOptions = {
-    from: '"Cinema Booking" <no-reply@cinema.com>',
+    from: `"Cinema Booking" <${process.env.GMAIL_USER}>`,
     to: toEmail,
     subject: 'Your Reservation Confirmation',
     html: `
@@ -28,6 +27,7 @@ export async function sendReservationEmail(toEmail, reservationDetails) {
       </ul>
       <p>Please present this QR code at the entrance:</p>
       <img src="${qrCodeDataUrl}" alt="QR Code" />
+      <p>Or <a href="${bookingUrl}">click here to view your reservation online</a>.</p>
     `
   };
 
