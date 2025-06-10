@@ -1,5 +1,5 @@
 import db from '../db.js';
-import setupWebSocket from '../middleware/websocket.js';
+import setupMQTT, { broadcastUpdate } from '../middleware/mqtt.js';
 import { sendReservationEmail } from '../middleware/mail.js';
 import QRCode from 'qrcode';
 
@@ -40,7 +40,7 @@ const reserveTickets = async (req, res) => {
       isTaken: takenSeatIds.has(seat.seat_id)
     }));
 
-    setupWebSocket.broadcastUpdate(screening_id, updatedSeatData);
+    broadcastUpdate(screening_id, updatedSeatData);
 
     // Get latest reservation_id
     const [newReservations] = await db.execute(`
