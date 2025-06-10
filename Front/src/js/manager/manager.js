@@ -3,8 +3,8 @@ import * as userTab from './manager.users.js';
 import * as movieTab from './manager.movies.js';
 import * as screeningsTab from './manager.screenings.js';
 import { renderScreeningChart, setScreeningsData, setHallsData } from '../chartManager.js';
+import { API_URL } from '../../apiConfig.js';
 
-const API_BASE = window.API_BASE || 'http://localhost:3000';
 
 // Call initialization functions for each tab
 userTab.initUserManagement();
@@ -18,7 +18,7 @@ export async function updateNavbarForRole() {
     if (!token) return;
 
     try {
-        const res = await fetch(`${API_BASE}/api/me`, {
+        const res = await fetch(`${API_URL}/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) {

@@ -1,4 +1,5 @@
 import { showLoginStatus } from './scripts.js';
+import { API_URL } from '../apiConfig.js';
 
 // Initialize the page when DOM is ready
 $(document).ready(async () => {
@@ -20,8 +21,7 @@ $(document).ready(async () => {
  */
 async function fetchAndRenderScreenings() {
   try {
-    // Fetch all screenings from the backend API
-    const res = await fetch('http://localhost:3000/api/screenings');
+    const res = await fetch(`${API_URL}/screenings`);
     const screenings = await res.json();
 
     // Validate API response structure
@@ -100,8 +100,7 @@ async function renderScreeningsWithTmdb(grouped) {
     let displayMovieTitle = movieTitle;
 
     try {
-      // Attempt to fetch enhanced movie details from TMDB API
-      const tmdbRes = await fetch(`http://localhost:3000/api/movies/details/${encodeURIComponent(movieTitle)}`);
+      const tmdbRes = await fetch(`${API_URL}/movies/details/${encodeURIComponent(movieTitle)}`);
       const tmdbData = await tmdbRes.json();
       console.log(`TMDB data for "${movieTitle}":`, tmdbData);
 

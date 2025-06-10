@@ -1,4 +1,4 @@
-## Doelstelling
+## Doelstellingen
 
 - [ ] Ontwerp en bouw een uitbreidbare hybride applicatie voor een bioscoop die:
   - [x] Filmdata ophaalt via **The Movie Database (TMDB)** API
@@ -86,8 +86,8 @@
 | [x] POST    | `/screenings`                 | Nieuwe voorstelling aanmaken              | Manager  |
 | [x] PUT     | `/screenings/:id`             | Voorstelling aanpassen                    | Manager  |
 | [x] DELETE  | `/screenings/:id`             | Voorstelling verwijderen                  | Manager  |
-| [ ] POST    | `/reserve`                    | Ticket reserveren                         | Gebruiker|
-| [ ] GET     | `/screenings/:id/tickets`     | Beschikbare tickets ophalen               | Nee      |
+| [x] POST    | `/reserve`                    | Ticket reserveren                         | Gebruiker|
+| [x] GET     | `/screenings/:id/tickets`     | Beschikbare tickets ophalen               | Nee      |
 | [x] POST    | `/register` / `/login`        | Registratie / Login                       | Nee      |
 | [x] GET     | `/me`                         | JWT-profielinformatie ophalen             | Ja       |
 

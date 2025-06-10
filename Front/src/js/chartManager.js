@@ -1,5 +1,5 @@
 // chartManager.js
-const API_BASE = 'http://localhost:3000'; // Keep API_BASE if needed for chart-specific fetches
+import { API_URL } from '../apiConfig.js';
 
 // These variables are used by the chart rendering and need to be accessible.
 // They will be populated by manager.js and passed to the chart rendering function.
@@ -82,7 +82,7 @@ export async function renderScreeningChart() {
     if (!allHalls.length) {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE}/api/halls`, {
+            const res = await fetch(`${API_URL}/halls`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             allHalls = await res.json();

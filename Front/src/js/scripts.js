@@ -1,5 +1,6 @@
 //script.js
 
+import { API_URL } from '../apiConfig.js';
 import { updateNavbarForRole } from './manager/manager.js';
 
 // ============================================================================
@@ -25,7 +26,7 @@ let genreMap = {};
  */
 async function checkApiStatus() {
   try {
-    const res = await fetch(`${BASE_API_URL}/movies`);
+    const res = await fetch(`${API_URL}/movies`);
     return res.ok;
   } catch (error) {
     console.error('API connection failed:', error);
@@ -76,8 +77,7 @@ async function renderMovies(moviesToRender) {
   for (const movie of moviesToRender) {
     if (!movie.title) continue; // Skip movies without titles
 
-    // Fetch enriched movie data from TMDB API
-    const tmdbRes = await fetch(`${BASE_API_URL}/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
+    const tmdbRes = await fetch(`${API_URL}/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
     const tmdbData = await tmdbRes.json();
 
     // Skip if no TMDB data available
@@ -216,8 +216,8 @@ $(async function() {
     // Wait for API to be available before proceeding
     await waitForApi();
 
-    // Load and populate genre filter dropdown
-    const genresRes = await fetch(`${BASE_API_URL}/movies/tmdb/genres`);
+    // Fetch genre list and populate filter
+    const genresRes = await fetch(`${API_URL}/movies/tmdb/genres`);
     const genresJson = await genresRes.json();
     
     if (Array.isArray(genresJson)) {
@@ -230,15 +230,14 @@ $(async function() {
       });
     }
 
-    // Load initial movie data from our API
-    const res = await fetch(`${BASE_API_URL}/movies`);
+    // Fetch movie data and store it
+    const res = await fetch(`${API_URL}/movies`);
     const data = await res.json();
 
     // Enrich each movie with TMDB data for display
     const moviePromises = data.map(async movie => {
-      if (!movie.title) return null; // Skip movies without titles
-      
-      const tmdbRes = await fetch(`${BASE_API_URL}/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
+      if (!movie.title) return null;
+      const tmdbRes = await fetch(`${API_URL}/movies/tmdb/search?title=${encodeURIComponent(movie.title)}`);
       const tmdbData = await tmdbRes.json();
       
       // Combine local movie data with TMDB enrichment
@@ -294,7 +293,7 @@ async function expandMovieCard($card, tmdbId, title, posterUrl, genreText, relea
   // Attempt to load movie trailer from TMDB
   let trailerEmbedHTML = '';
   try {
-    const trailerRes = await fetch(`${BASE_API_URL}/movies/tmdb/${tmdbId}/videos`);
+    const trailerRes = await fetch(`${API_URL}/movies/tmdb/${tmdbId}/videos`);
     if (trailerRes.ok) {
       const trailers = await trailerRes.json();
       
@@ -321,7 +320,7 @@ async function expandMovieCard($card, tmdbId, title, posterUrl, genreText, relea
   // Attempt to load cast information from TMDB
   let castHTML = '';
   try {
-    const castRes = await fetch(`${BASE_API_URL}/movies/tmdb/${tmdbId}/credits`);
+    const castRes = await fetch(`${API_URL}/movies/tmdb/${tmdbId}/credits`);
     if (castRes.ok) {
       const credits = await castRes.json();
       
@@ -390,8 +389,7 @@ export async function showLoginStatus() {
   const token = localStorage.getItem('token');
   if (token) {
     try {
-      // Verify token and get user information
-      const res = await fetch(`${BASE_API_URL}/me`, {
+      const res = await fetch(`${API_URL}/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

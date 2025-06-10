@@ -1,4 +1,4 @@
-const API_BASE = window.API_BASE || 'http://localhost:3000';
+import { API_URL } from '../../apiConfig.js';
 
 let allMoviesDb = [];
 
@@ -23,7 +23,7 @@ let tmdbGenres = {}; // Store TMDB genres globally
 
 async function fetchTMDBGenres() {
     try {
-        const res = await fetch(`${API_BASE}/api/movies/tmdb/genres`);
+        const res = await fetch(`${API_URL}/movies/tmdb/genres`);
         if (!res.ok) {
             console.error('Failed to fetch TMDB genres:', res.status, res.statusText);
             return;
@@ -40,7 +40,7 @@ async function fetchTMDBGenres() {
 
 async function fetchTMDBRuntime(movieId) {
     try {
-        const res = await fetch(`${API_BASE}/api/movies/tmdb/details/${movieId}`);
+        const res = await fetch(`${API_URL}/movies/tmdb/details/${movieId}`);
         if (!res.ok) {
             console.warn(`Failed to fetch TMDB details for movie ID ${movieId}: ${res.status} ${res.statusText}`);
             return null;
@@ -118,7 +118,7 @@ $(document).ready(() => {
         }
 
         try {
-            const res = await fetch(`${API_BASE}/api/movies/tmdb/search?title=${encodeURIComponent(query)}`);
+            const res = await fetch(`${API_URL}/movies/tmdb/search?title=${encodeURIComponent(query)}`);
             if (!res.ok) {
                 throw new Error(`TMDB search failed: ${res.status} ${res.statusText}`);
             }
@@ -148,7 +148,7 @@ $(document).ready(() => {
         };
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE}/api/movies`, {
+            const res = await fetch(`${API_URL}/movies`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ $(document).ready(() => {
 export async function fetchAndRenderMovies() {
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${API_BASE}/api/movies`, {
+        const res = await fetch(`${API_URL}/movies`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error(`Failed to fetch movies: ${res.status} ${res.statusText}`);
@@ -215,7 +215,7 @@ export function renderMoviesTable(movies) {
             if (confirm('Are you sure you want to delete this movie? This will also delete associated screenings!')) {
                 const token = localStorage.getItem('token');
                 try {
-                    const res = await fetch(`${API_BASE}/api/movies/${id}`, {
+                    const res = await fetch(`${API_URL}/movies/${id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -256,7 +256,7 @@ export function renderMoviesTable(movies) {
 
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`${API_BASE}/api/movies/${id}`, {
+                const res = await fetch(`${API_URL}/movies/${id}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',

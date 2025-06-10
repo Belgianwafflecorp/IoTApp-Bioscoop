@@ -1,4 +1,5 @@
 import { showLoginStatus } from './scripts.js';
+import { HOST_BASE, API_BASE, API_URL } from '../apiConfig.js';
 
 let socket;
 let screeningId;
@@ -22,8 +23,8 @@ $(document).ready(async () => {
 
     try {
         const [screeningRes, seatsRes] = await Promise.all([
-            fetch(`http://localhost:3000/api/screenings/${screeningId}`),
-            fetch(`http://localhost:3000/api/screenings/${screeningId}/tickets`)
+            fetch(`${API_URL}/screenings/${screeningId}`),
+            fetch(`${API_URL}/screenings/${screeningId}/tickets`)
         ]);
 
         if (!screeningRes.ok || !seatsRes.ok) throw new Error('Failed to load data');
@@ -32,7 +33,7 @@ $(document).ready(async () => {
         const movieTitle = screeningData.movie.title;
 
         try {
-            const tmdbRes = await fetch(`http://localhost:3000/api/movies/details/${encodeURIComponent(movieTitle)}`);
+            const tmdbRes = await fetch(`${API_URL}/movies/details/${encodeURIComponent(movieTitle)}`);
             const tmdbData = await tmdbRes.json();
             $('#movie-poster').attr('src', tmdbData?.poster_url || '/resources/images/movie-placeholder.jpg');
         } catch {
@@ -78,7 +79,7 @@ $(document).ready(async () => {
         }
 
         try {
-            const res = await fetch('http://localhost:3000/api/reserve', {
+            const res = await fetch(`${API_URL}/reserve`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,7 +115,7 @@ $(document).ready(async () => {
 });
 
 function setupWebSocket(screeningId) {
-    socket = new WebSocket('ws://localhost:3000');
+    socket = new WebSocket(`ws://${HOST_BASE}`);
 
     socket.addEventListener('open', () => {
         socket.send(JSON.stringify({ type: 'subscribe', screeningId }));

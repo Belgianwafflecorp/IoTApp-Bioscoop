@@ -1,4 +1,4 @@
-const API_BASE = window.API_BASE || 'http://localhost:3000';
+import { API_URL } from '../../apiConfig.js';
 
 import { renderScreeningChart, setScreeningsData, setHallsData } from '../chartManager.js';
 
@@ -57,7 +57,7 @@ export function initScreeningsManagement() {
 export async function fetchMoviesForScreenings() {
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${API_BASE}/api/movies`, {
+        const res = await fetch(`${API_URL}/movies`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error(`Failed to fetch movies for screenings: ${res.status} ${res.statusText}`);
@@ -137,7 +137,7 @@ async function showAddScreeningModal(movieId) {
     if (!allHalls.length) {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE}/api/halls`, {
+            const res = await fetch(`${API_URL}/halls`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) throw new Error('Failed to fetch halls');
@@ -162,7 +162,7 @@ async function showAddScreeningModal(movieId) {
 
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${API_BASE}/api/screenings`, {
+        const res = await fetch(`${API_URL}/screenings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ movie_id: movieId, hall_id: parseInt(hallId), start_time: startTimeUTC })
@@ -194,14 +194,14 @@ function getCurrentDateTimeLocal() {
 export async function fetchAndRenderScreenings() {
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${API_BASE}/api/screenings`, {
+        const res = await fetch(`${API_URL}/screenings`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error(`Failed to fetch screenings: ${res.status} ${res.statusText}`);
         allScreenings = await res.json();
 
         if (!allHalls.length) {
-            const hallRes = await fetch(`${API_BASE}/api/halls`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const hallRes = await fetch(`${API_URL}/halls`, { headers: { 'Authorization': `Bearer ${token}` } });
             if (!hallRes.ok) throw new Error('Failed to fetch halls for screenings');
             allHalls = await hallRes.json();
         }
@@ -255,7 +255,7 @@ export function renderScreeningsTable(screenings = allScreenings) {
             if (confirm('Delete this screening?')) {
                 const token = localStorage.getItem('token');
                 try {
-                    const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+                    const res = await fetch(`${API_URL}/screenings/${id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -287,7 +287,7 @@ export function renderScreeningsTable(screenings = allScreenings) {
             if (!allHalls.length) {
                 const token = localStorage.getItem('token');
                 try {
-                    const res = await fetch(`${API_BASE}/api/halls`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const res = await fetch(`${API_URL}/halls`, { headers: { 'Authorization': `Bearer ${token}` } });
                     if (!res.ok) throw new Error('Failed to fetch halls for edit prompt');
                     allHalls = await res.json();
                 } catch (error) {
@@ -321,7 +321,7 @@ export function renderScreeningsTable(screenings = allScreenings) {
 
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`${API_BASE}/api/screenings/${id}`, {
+                const res = await fetch(`${API_URL}/screenings/${id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
