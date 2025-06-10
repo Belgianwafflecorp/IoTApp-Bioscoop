@@ -1,4 +1,4 @@
-import { API_URL } from "../apiConfig";
+import { API_URL } from "../apiConfig.js";
 
 $(document).ready(function () {
   const $form = $('#login-form');

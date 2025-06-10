@@ -2,19 +2,21 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 587,
+  service: 'gmail',
   auth: {
-    user: process.env.MAILTRAP_USER,
-    pass: process.env.MAILTRAP_PASS,
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
   }
 });
 
 export async function sendReservationEmail(toEmail, reservationDetails) {
   const { movie, datetime, hall, seats, qrCodeDataUrl } = reservationDetails;
 
+  // Define a unique content ID for the QR code image
+  const qrCodeCid = 'qrcode@cinema.com'; // Use any unique string you like
+
   const mailOptions = {
-    from: '"Cinema Booking" <no-reply@cinema.com>',
+    from: '"Cinema Booking" <olivierwesterman@gmail.com>',
     to: toEmail,
     subject: 'Your Reservation Confirmation',
     html: `
@@ -27,8 +29,17 @@ export async function sendReservationEmail(toEmail, reservationDetails) {
         <li><strong>Seats:</strong> ${seats.join(', ')}</li>
       </ul>
       <p>Please present this QR code at the entrance:</p>
-      <img src="${qrCodeDataUrl}" alt="QR Code" />
-    `
+      <img src="cid:${qrCodeCid}" alt="QR Code" width="200" height="200"/>
+    `, // IMPORTANT: src="cid:..."
+    attachments: [
+      {
+        filename: 'qrcode.png', // The name of the file
+        content: qrCodeDataUrl.split('base64,')[1], // Extract base64 data without the 'data:image/png;base64,' part
+        encoding: 'base64', // Specify that the content is base64 encoded
+        cid: qrCodeCid, // Link this attachment to the img tag in HTML using its cid
+        contentType: 'image/png' // Specify the content type
+      }
+    ]
   };
 
   try {
