@@ -1,5 +1,5 @@
 import db from '../db.js';
-import setupWebSocket from '../middleware/websocket.js';
+import { publishMqttMessage } from '../middleware/mqttService.js';
 import { sendReservationEmail } from '../middleware/mail.js';
 import QRCode from 'qrcode';
 
@@ -21,7 +21,7 @@ const reserveTickets = async (req, res) => {
       [values]
     );
 
-    // WebSocket update
+    // Fetch updated seat data for the screening
     const [allSeats] = await db.execute(`
       SELECT s.seat_id, s.seat_row, s.seat_number, s.seat_type
       FROM screenings sc
@@ -40,7 +40,13 @@ const reserveTickets = async (req, res) => {
       isTaken: takenSeatIds.has(seat.seat_id)
     }));
 
-    setupWebSocket.broadcastUpdate(screening_id, updatedSeatData);
+    // --- MQTT Update ---
+    // Define the MQTT topic for seat updates for this specific screening
+    const topic = `screenings/${screening_id}/seat_updates`;
+    // Publish the updated seat data to the MQTT topic
+    publishMqttMessage(topic, { type: 'update', data: updatedSeatData });
+    // --- End MQTT Update ---
+
 
     // Get latest reservation_id
     const [newReservations] = await db.execute(`
@@ -61,8 +67,8 @@ const reserveTickets = async (req, res) => {
 
     // Fetch screening info
     const [[screeningInfo]] = await db.execute(`
-      SELECT 
-        m.title AS movie, 
+      SELECT
+        m.title AS movie,
         sc.start_time AS datetime,
         h.name AS hall
       FROM screenings sc

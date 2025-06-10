@@ -19,7 +19,7 @@ services:
       context: ./api
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: .env # Still load other variables from .env
     ports:
       - 3000:3000
     environment:
@@ -29,20 +29,37 @@ services:
       - DB_DATABASE=${DB_DATABASE}
       - DB_PORT=3306
       - FRONT_HOST=${FRONT_HOST}
+      - MQTT_BROKER_URL=mqtt://mosquitto:1883 # <--- ADD THIS LINE HERE
     depends_on:
       - db
+      - mosquitto # <--- Ensure 'mosquitto' is listed as a dependency
 
   front:
-     container_name: front
-     build:
-       context: ./front
-       dockerfile: Dockerfile
-       args:
-         FRONT_APP_API_HOST: ${API_HOST}
-     restart: unless-stopped
-     working_dir: /app
-     env_file: .env
-     ports:
-       - 5000:80
-     depends_on: 
-       - api
+    container_name: front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        FRONT_APP_API_HOST: ${API_HOST}
+    restart: unless-stopped
+    working_dir: /app
+    env_file: .env
+    ports:
+      - 5000:80
+    depends_on: 
+      - api
+
+  mosquitto: # <--- ADD THIS ENTIRE SERVICE BLOCK
+    image: eclipse-mosquitto:2.0.15
+    ports:
+      - "1883:1883" # Standard MQTT port
+      - "8083:8083" # MQTT over WebSockets port
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data # Optional: for persistent data
+      - mosquitto_log:/mosquitto/log   # Optional: for logs
+    command: mosquitto -c /mosquitto/config/mosquitto.conf
+
+volumes: # <--- ADD THIS VOLUMES BLOCK IF NOT ALREADY PRESENT
+  mosquitto_data:
+  mosquitto_log:

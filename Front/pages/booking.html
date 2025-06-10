@@ -1,69 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="../src/assets/yellow-circle.png">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Absolute - Booking</title>
-  <link rel="stylesheet" href="../src/css/styles.css" />
+    <link rel="icon" type="image/png" href="../src/assets/yellow-circle.png">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Absolute - Booking</title>
+    <link rel="stylesheet" href="../src/css/styles.css" />
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">
-      <div class="circle"></div>
-      <span class="brand">BOOKING</span>
-    </div>
-    <nav class="nav-links">
-      <a href="../index.html">Movies</a>
-      <a href="screenings.html">Screenings</a>
-      <button class="login-btn">Login</button>
-    </nav>
-  </header>
+    <header class="navbar">
+        <div class="logo">
+            <div class="circle"></div>
+            <span class="brand">BOOKING</span>
+        </div>
+        <nav class="nav-links">
+            <a href="../index.html">Movies</a>
+            <a href="screenings.html">Screenings</a>
+            <button class="login-btn">Login</button>
+        </nav>
+    </header>
 
-  <main class="booking-container">
-    <div class="movie-section">
-      <img id="movie-poster" src="../src/resources/images/movie-placeholder.jpg" alt="Movie Image" />
-      <div class="movie-info">
-        <h3 id="movie-title">MOVIE TITLE</h3>
-        <span class="screening-date" id="screening-date"></span>
-        <span class="screening-time" id="start-time">12:30</span>
-        <p class="movie-meta">Genre: <span id="genre"></span></p>
-        <p class="movie-meta">Duration: <span id="duration"></span> min</p>
-        <p class="movie-meta">Release date: <span id="release"></span></p>
-        <p class="movie-meta">Score: <span class="stars">⭐️⭐️⭐️</span></p>
-      </div>
-    </div>
+    <main class="booking-container">
+        <div class="movie-section">
+            <img id="movie-poster" src="../src/resources/images/movie-placeholder.jpg" alt="Movie Image" />
+            <div class="movie-info">
+                <h3 id="movie-title">MOVIE TITLE</h3>
+                <span class="screening-date" id="screening-date"></span>
+                <span class="screening-time" id="start-time">12:30</span>
+                <p class="movie-meta">Genre: <span id="genre"></span></p>
+                <p class="movie-meta">Duration: <span id="duration"></span> min</p>
+                <p class="movie-meta">Release date: <span id="release"></span></p>
+                <p class="movie-meta">Score: <span class="stars">⭐️⭐️⭐️</span></p>
+            </div>
+        </div>
 
-    <div class="booking-panel">
-      <div class="ticket-selection">
-        <h4>TICKET SELECTION</h4>
-        <label>Reduced <input type="number" min="0" value="0" id="reduced" /> $12.50</label><br />
-        <label>Normal <input type="number" min="0" value="0" id="normal" /> $14.50</label><br />
-        <label>Premium <input type="number" min="0" value="0" id="premium" /> $16.50</label>
-      </div>
+        <div class="booking-panel">
+            <div class="ticket-selection">
+                <h4>TICKET SELECTION</h4>
+                <label>Reduced <input type="number" min="0" value="0" id="reduced" /> $12.50</label><br />
+                <label>Normal <input type="number" min="0" value="0" id="normal" /> $14.50</label><br />
+                <label>Premium <input type="number" min="0" value="0" id="premium" /> $16.50</label>
+            </div>
 
-      <div class="seats-left">
-        <h4>SEATS LEFT</h4>
-        <p>Reduced: <span id="seats-reduced">15</span></p>
-        <p>Normal: <span id="seats-normal">32</span></p>
-        <p>Premium: <span id="seats-premium">14</span></p>
-      </div>
+            <div class="seats-left">
+                <h4>SEATS LEFT</h4>
+                <p>Reduced: <span id="seats-reduced">15</span></p>
+                <p>Normal: <span id="seats-normal">32</span></p>
+                <p>Premium: <span id="seats-premium">14</span></p>
+            </div>
 
-      <div class="booking-footer">
-        <input type="text" disabled value="Don't wait, tickets are limited!" />
-        <button id="confirm-btn">CONFIRM SELECTION</button>
-      </div>
-    </div>
+            <div class="booking-footer">
+                <input type="text" disabled value="Don't wait, tickets are limited!" />
+                <button id="confirm-btn">CONFIRM SELECTION</button>
+            </div>
+        </div>
 
-    <div class="seat-map">
-      <h4>SELECT YOUR SEATS</h4>
-      <div id="seat-grid"></div>
-    </div>
-  </main>
+        <div class="seat-map">
+            <h4>SELECT YOUR SEATS</h4>
+            <div id="seat-grid"></div>
+        </div>
+    </main>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="../src/js/booking.js" type="module"></script>
-  <script src="../src/js/scripts.js" type="module"></script>
-  <script src="../src/js/manager/manager.js" type="module"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js" type="text/javascript"></script>
+
+    <script type="module" src="../src/apiConfig.js"></script>
+    <script type="module" src="../src/js/scripts.js"></script>
+    <script type="module" src="../src/js/booking.js"></script>
+    <script type="module" src="../src/js/manager/manager.js"></script> 
 </body>
 </html>
